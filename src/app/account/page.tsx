@@ -19,7 +19,7 @@ export default async function AccountPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-white p-8 rounded-sm shadow-sm border border-gray-100">
             <h2 className="text-xl font-medium tracking-tight mb-4">Order History</h2>
-            <p className="text-gray-500 mb-6">You haven't placed any orders yet.</p>
+            <p className="text-gray-500 mb-6">You haven&apos;t placed any orders yet.</p>
             <button className="text-sm font-medium underline underline-offset-4 hover:text-[#3d7b32] transition-colors">
               Continue Shopping
             </button>

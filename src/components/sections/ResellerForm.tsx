@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
+import { motion } from "motion/react";
 
 export function ResellerForm() {
   const containerRef = useRef<HTMLDivElement>(null);

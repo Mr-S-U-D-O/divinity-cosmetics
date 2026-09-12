@@ -4,10 +4,11 @@ import React, { useState } from "react";
 import { useCart } from "@/lib/context/CartContext";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
-  const { items, cartTotal } = useCart();
+  const { items, cartTotal, clearCart } = useCart();
+  const router = useRouter();
   const { user, isLoaded } = useUser();
   
   const [formData, setFormData] = useState({
@@ -74,7 +75,8 @@ export default function CheckoutPage() {
     };
 
     console.log("ORDER PAYLOAD:", JSON.stringify(orderPayload, null, 2));
-    alert("Order payload logged to console! (Check DevTools)");
+    clearCart();
+    router.push("/checkout/success");
   };
 
   if (!isLoaded) return <div className="min-h-screen pt-40 text-center">Loading secure checkout...</div>;

@@ -282,7 +282,7 @@ export default function ShopPage() {
             <div className="text-center py-32 bg-white border border-gray-100 rounded-3xl shadow-sm">
               <h3 className="text-xl font-bold tracking-tight mb-3">No formulations found.</h3>
               <p className="text-gray-500 max-w-sm mx-auto text-sm mb-6">
-                We couldn't find any products matching your current filters. Try adjusting your criteria.
+                We couldn&apos;t find any products matching your current filters. Try adjusting your criteria.
               </p>
               <button 
                 onClick={handleReset}
