@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import "./tailwind.css";
-import "./globals.css";
-
 import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/lib/context/CartContext";
-import { CartDrawer } from "@/components/ui/CartDrawer";
+import "./tailwind.css";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Divinity Cosmetics",
@@ -23,10 +19,7 @@ export default function RootLayout({
       <html lang="en">
         <body className="antialiased font-sans">
           <CartProvider>
-            <Header />
             {children}
-            <Footer />
-            <CartDrawer />
           </CartProvider>
         </body>
       </html>
