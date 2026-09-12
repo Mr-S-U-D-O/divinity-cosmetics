@@ -42,6 +42,22 @@ export function Collection() {
           reviewCount={16}
         />
       </div>
+
+      <div className="collection-footer">
+        <div className="pagination">
+          <button className="page-nav" disabled>&lt;</button>
+          <button className="page-number active">1</button>
+          <button className="page-number">2</button>
+          <button className="page-number">3</button>
+          <span className="page-ellipsis">...</span>
+          <button className="page-number">8</button>
+          <button className="page-nav">&gt;</button>
+        </div>
+        
+        <button className="shop-more-btn">
+          Shop More Products
+        </button>
+      </div>
     </section>
   );
 }
