@@ -14,7 +14,7 @@ export function Hero() {
 
   return (
     <section className="hero">
-      {/* Background video — centered, transparent bg, plays once */}
+      {/* Background video f — centered, transparent bg, plays once */}
       <video
         ref={videoRef}
         className="hero-video"
