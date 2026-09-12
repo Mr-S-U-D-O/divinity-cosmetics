@@ -1,6 +1,7 @@
 import React from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import { ProductCard } from "@/components/ui/ProductCard";
+import { mockProducts } from "@/lib/domain/products/mock-data";
 
 export function Collection() {
   return (
@@ -25,22 +26,9 @@ export function Collection() {
       </div>
 
       <div className="collection-grid">
-        <ProductCard
-          title="Body Lotion A"
-          imageSrc="/images/body-lotion-a.jpg"
-          description="Infused with African botanicals and cold-pressed marula oil. Deeply replenishes moisture barriers while soothing sensitive skin. Fast-absorbing, velvet finish."
-          price={200}
-          rating={5}
-          reviewCount={48}
-        />
-        <ProductCard
-          title="Body Lotion B"
-          imageSrc="/images/body-lotion-b.jpg"
-          description="Formulated with nourishing neroli, frankincense, and calming chamomile extract. Restores elasticity and revitalizes natural tone throughout the day. Ultra-hydrating and gentle."
-          price={45}
-          rating={5}
-          reviewCount={16}
-        />
+        {mockProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
       </div>
 
       <div className="collection-footer">

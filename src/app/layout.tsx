@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import "./tailwind.css";
 import "./globals.css";
+
+import { CartProvider } from "@/lib/context/CartContext";
+import { CartDrawer } from "@/components/ui/CartDrawer";
 
 export const metadata: Metadata = {
   title: "Divinity Cosmetics",
@@ -17,9 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased font-sans">
-        <Header />
-        {children}
-        <Footer />
+        <CartProvider>
+          <Header />
+          {children}
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { MagnifyingGlass, ShoppingCart } from "@phosphor-icons/react";
+import { useCart } from "@/lib/context/CartContext";
 
 const SAFlag = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="14" height="10" style={{ borderRadius: '2px', overflow: 'hidden' }}>
@@ -20,6 +21,7 @@ const SAFlag = () => (
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { cartCount, openCart } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,9 +82,9 @@ export function Header() {
           <button className="icon-btn" aria-label="Search">
             <MagnifyingGlass size={20} weight="regular" />
           </button>
-          <button className="icon-btn" aria-label="Cart">
+          <button className="icon-btn" aria-label="Cart" onClick={openCart}>
             <ShoppingCart size={20} weight="regular" />
-            <span className="cart-badge">2</span>
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
           <button className="btn-login">
             Login
