@@ -838,7 +838,7 @@ a {
   width: 100%;
   display: grid;
   grid-template-columns: 1.5fr 0.7fr; /* Extreme asymmetrical split */
-  gap: 6rem;
+  
   align-items: center;
 }
 
@@ -882,6 +882,7 @@ a {
 /* Right Side: Form (Editorial / Terminal feel) */
 .reseller-form-wrapper {
   width: 100%;
+  right: 50px;
   max-width: 420px; /* Constrain the width so it looks much smaller */
   margin-right: auto; /* Push it to the left within its column */
 }
@@ -976,3 +977,196 @@ a {
     font-size: 1.5rem;
   }
 }
+
+/* ========================================
+   FOOTER SECTION (LUXURY MINIMAL)
+   ======================================== */
+
+.footer-container {
+  background-color: #f5f5f5; /* Off-white luxury background */
+  color: #111;
+  position: relative;
+  overflow: hidden;
+  padding-top: 8rem;
+  padding-left: 4rem;
+  padding-right: 4rem;
+  padding-bottom: 0; /* Removed to allow text clipping */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Explicit Layout (Fallback for Tailwind Watcher Issues) */
+.footer-nav-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .footer-nav-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    padding-top: 0;
+  }
+}
+
+.footer-copyright-text {
+  font-size: 0.875rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.footer-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.social-separator {
+  color: #ccc;
+  font-size: 0.875rem;
+}
+
+/* Editorial Input (Unboxed) */
+.editorial-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  transition: border-color 0.3s ease;
+}
+
+.editorial-input-wrapper:focus-within {
+  border-bottom-color: #111;
+}
+
+.editorial-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1rem 0;
+  font-size: 1.125rem;
+  color: #111;
+  outline: none;
+}
+
+.editorial-input::placeholder {
+  color: #888;
+  font-style: italic;
+}
+
+.editorial-submit {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: #111;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editorial-submit:hover {
+  transform: translateX(5px);
+}
+
+/* Minimalist Links */
+.footer-link-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-link-heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.footer-link {
+  font-size: 1.125rem;
+  color: #111;
+  text-decoration: none;
+  position: relative;
+  width: max-content;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #111;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Social Bar */
+.footer-social-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 3rem;
+  margin-top: 5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+  .footer-social-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.social-icon-link {
+  color: #111;
+  font-size: 1rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.social-icon-link:hover {
+  opacity: 0.6;
+}
+
+/* Massive Typography Anchor */
+.footer-massive-text-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 4rem; /* Increased top margin for breathing room */
+  pointer-events: none;
+  user-select: none;
+}
+
+.footer-massive-text {
+  font-size: clamp(4rem, 18vw, 20rem);
+  font-weight: 900;
+  line-height: 0.75;
+  letter-spacing: -0.06em;
+  color: #111;
+  text-transform: uppercase;
+  margin: 0;
+  margin-bottom: -0.22em; /* Cuts off slightly below the middle of the text */
+  white-space: nowrap;
+}
+/* EOF */
