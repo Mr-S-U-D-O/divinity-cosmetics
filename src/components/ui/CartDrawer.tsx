@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { X, Plus, Minus, Trash } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "@/lib/context/CartContext";
@@ -136,18 +137,18 @@ export function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="border-t border-gray-100 p-6 bg-gray-50/50">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="text-lg font-medium text-gray-900">{formatPrice(cartTotal)}</span>
+              <div className="p-6 border-t border-gray-100 bg-white">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="font-medium text-gray-900">Subtotal</span>
+                  <span className="font-medium text-gray-900 text-lg">R {cartTotal.toFixed(2)}</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-6 text-center">Shipping & taxes calculated at checkout</p>
-                <button
-                  onClick={() => alert("Checkout routing coming soon")}
-                  className="w-full bg-black text-white py-4 rounded-full font-medium hover:bg-gray-900 transition-colors flex items-center justify-center gap-2"
+                <Link
+                  href="/checkout"
+                  onClick={closeCart}
+                  className="w-full block text-center bg-black text-white py-4 font-medium uppercase tracking-wider text-sm hover:bg-[#3d7b32] transition-colors"
                 >
                   Proceed to Checkout
-                </button>
+                </Link>
               </div>
             )}
           </motion.div>

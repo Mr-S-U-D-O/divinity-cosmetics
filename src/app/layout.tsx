@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import "./tailwind.css";
 import "./globals.css";
 
+import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/lib/context/CartContext";
 import { CartDrawer } from "@/components/ui/CartDrawer";
 
@@ -19,15 +20,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased font-sans">
-        <CartProvider>
-          <Header />
-          {children}
-          <Footer />
-          <CartDrawer />
-        </CartProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className="antialiased font-sans">
+          <CartProvider>
+            <Header />
+            {children}
+            <Footer />
+            <CartDrawer />
+          </CartProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
