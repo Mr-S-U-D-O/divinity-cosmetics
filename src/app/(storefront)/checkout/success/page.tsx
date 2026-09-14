@@ -17,6 +17,13 @@ function SuccessContent() {
 
   const firstName = user?.firstName || "there";
 
+  if (isLoaded && !user) {
+    // If not logged in, they shouldn't be on the success page, maybe redirect to home
+    // But actually, guest checkout is possible, so we shouldn't force redirect if we plan to support it.
+    // However, our current checkout page redirects to "/" if not user.
+    // Let's just allow it or redirect. For now, since user is optional, we'll let it render.
+  }
+
   return (
     <div className="max-w-2xl w-full flex flex-col items-center text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       
