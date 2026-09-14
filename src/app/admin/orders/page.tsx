@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { getAllOrders } from "@/lib/domain/orders/service";
 
@@ -93,9 +94,9 @@ export default async function AdminOrdersPage() {
                       {getFulfillmentBadge(order.status)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-gray-400 hover:text-[#111] transition-colors p-1">
+                      <Link href={`/admin/orders/${order.id}`} className="inline-block text-gray-400 hover:text-[#111] transition-colors p-1">
                         <CaretRight size={20} />
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

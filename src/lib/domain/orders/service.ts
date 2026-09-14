@@ -110,3 +110,10 @@ export async function getAllOrders() {
     },
   })
 }
+
+export async function updateOrderStatus(id: string, status: string) {
+  return prisma.order.update({
+    where: { id },
+    data: { status },
+  })
+}

@@ -1,6 +1,7 @@
 "use server"
 
-import { createOrder } from "./service"
+import { revalidatePath } from "next/cache";
+import { createOrder, updateOrderStatus } from "./service";
 
 export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) {
   try {
@@ -9,5 +10,17 @@ export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) 
   } catch (error) {
     console.error("Error creating order:", error);
     return { success: false, error: "Failed to place order. Please try again." };
+  }
+}
+
+export async function updateOrderStatusAction(id: string, status: string) {
+  try {
+    await updateOrderStatus(id, status);
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${id}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return { success: false, error: "Failed to update status." };
   }
 }
