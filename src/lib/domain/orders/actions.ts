@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createOrder, updateOrderStatus } from "./service";
+import { OrderStatus } from "@prisma/client";
 
 export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) {
   try {
@@ -13,7 +14,7 @@ export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) 
   }
 }
 
-export async function updateOrderStatusAction(id: string, status: string) {
+export async function updateOrderStatusAction(id: string, status: OrderStatus) {
   try {
     await updateOrderStatus(id, status);
     revalidatePath("/admin/orders");

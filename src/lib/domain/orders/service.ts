@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { Prisma } from "@prisma/client"
+import { Prisma, OrderStatus } from "@prisma/client"
 
 export async function createOrder(data: {
   userId?: string | null
@@ -111,7 +111,7 @@ export async function getAllOrders() {
   })
 }
 
-export async function updateOrderStatus(id: string, status: string) {
+export async function updateOrderStatus(id: string, status: OrderStatus) {
   return prisma.order.update({
     where: { id },
     data: { status },

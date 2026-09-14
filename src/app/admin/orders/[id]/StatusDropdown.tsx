@@ -3,13 +3,14 @@
 import { useTransition } from "react";
 import { updateOrderStatusAction } from "@/lib/domain/orders/actions";
 import { useRouter } from "next/navigation";
+import { OrderStatus } from "@prisma/client";
 
 export default function StatusDropdown({ orderId, currentStatus }: { orderId: string, currentStatus: string }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = e.target.value;
+    const newStatus = e.target.value as OrderStatus;
     startTransition(async () => {
       await updateOrderStatusAction(orderId, newStatus);
       router.refresh();
