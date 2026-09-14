@@ -68,7 +68,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <h2 className="font-semibold text-[#111]">Order Items</h2>
             </div>
             <div className="divide-y divide-gray-100">
-              {order.items.map((item) => (
+              {order.items.map((item: any) => (
                 <div key={item.id} className="p-6 flex items-center gap-4">
                   <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-md flex items-center justify-center shrink-0">
                     <span className="text-gray-400 font-medium text-xs text-center">No<br/>Image</span>
