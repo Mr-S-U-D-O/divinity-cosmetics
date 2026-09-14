@@ -1,19 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { CheckCircle } from "@phosphor-icons/react";
+import { useSearchParams } from "next/navigation";
 
-export default function CheckoutSuccessPage() {
+function SuccessContent() {
   const { user, isLoaded } = useUser();
-  const [orderNumber, setOrderNumber] = useState<string>("");
-
-  useEffect(() => {
-    // Generate a random order number once on mount to avoid hydration mismatch
-    const randomNum = Math.floor(10000 + Math.random() * 90000);
-    setOrderNumber(`DIV-${randomNum}`);
-  }, []);
+  const searchParams = useSearchParams();
+  const orderNumber = searchParams.get("order") || "";
 
   if (!isLoaded) {
     return <div className="min-h-screen pt-40 flex justify-center text-gray-500">Processing...</div>;
@@ -22,42 +18,50 @@ export default function CheckoutSuccessPage() {
   const firstName = user?.firstName || "there";
 
   return (
-    <main className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-6 md:px-12 font-sans text-[#1a1a1a]">
-      <div className="max-w-2xl w-full flex flex-col items-center text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-        
-        {/* Success Icon */}
-        <div className="text-[#3d7b32] mb-4">
-          <CheckCircle size={80} weight="fill" />
-        </div>
-
-        {/* Heading (2-Line Iron Rule) */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tighter leading-tight max-w-xl mx-auto">
-          Thank you, {firstName}. <br className="hidden md:block" /> Your order is confirmed.
-        </h1>
-
-        {/* Details */}
-        <div className="space-y-2 text-gray-500 max-w-md mx-auto">
-          <p className="text-lg">
-            We've received your order and are preparing it for shipment.
-          </p>
-          {orderNumber && (
-            <p className="text-sm tracking-wider uppercase font-medium text-gray-400 mt-6">
-              Order Number: <span className="text-gray-900">{orderNumber}</span>
-            </p>
-          )}
-        </div>
-
-        {/* Action */}
-        <div className="pt-12 w-full flex justify-center">
-          <Link 
-            href="/shop" 
-            className="inline-block bg-black text-white px-10 py-4 font-medium uppercase tracking-wider text-sm hover:bg-[#3d7b32] transition-colors"
-          >
-            Continue Shopping
-          </Link>
-        </div>
-        
+    <div className="max-w-2xl w-full flex flex-col items-center text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+      
+      {/* Success Icon */}
+      <div className="text-[#3d7b32] mb-4">
+        <CheckCircle size={80} weight="fill" />
       </div>
+
+      {/* Heading (2-Line Iron Rule) */}
+      <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tighter leading-tight max-w-xl mx-auto">
+        Thank you, {firstName}. <br className="hidden md:block" /> Your order is confirmed.
+      </h1>
+
+      {/* Details */}
+      <div className="space-y-2 text-gray-500 max-w-md mx-auto">
+        <p className="text-lg">
+          We've received your order and are preparing it for shipment.
+        </p>
+        {orderNumber && (
+          <p className="text-sm tracking-wider uppercase font-medium text-gray-400 mt-6">
+            Order Number: <span className="text-gray-900">{orderNumber}</span>
+          </p>
+        )}
+      </div>
+
+      {/* Action */}
+      <div className="pt-12 w-full flex justify-center">
+        <Link 
+          href="/shop" 
+          className="inline-block bg-black text-white px-10 py-4 font-medium uppercase tracking-wider text-sm hover:bg-[#3d7b32] transition-colors"
+        >
+          Continue Shopping
+        </Link>
+      </div>
+      
+    </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <main className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-6 md:px-12 font-sans text-[#1a1a1a]">
+      <Suspense fallback={<div className="min-h-screen pt-40 flex justify-center text-gray-500">Processing...</div>}>
+        <SuccessContent />
+      </Suspense>
     </main>
   );
 }

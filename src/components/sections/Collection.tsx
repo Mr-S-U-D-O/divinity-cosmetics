@@ -1,9 +1,11 @@
 import React from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { mockProducts } from "@/lib/domain/products/mock-data";
+import { getAllProducts } from "@/lib/domain/products/service";
 
-export function Collection() {
+export async function Collection() {
+  const products = await getAllProducts({ onlyActive: true });
+
   return (
     <section className="collection-section">
       <div className="collection-header">
@@ -26,7 +28,7 @@ export function Collection() {
       </div>
 
       <div className="collection-grid">
-        {mockProducts.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

@@ -1,29 +1,21 @@
-"use client";
-
-import React, { use } from "react";
+import React from "react";
 import { notFound } from "next/navigation";
-import { getProductBySlug } from "@/lib/domain/products/mock-data";
+import { getProductBySlug } from "@/lib/domain/products/service";
 import Image from "next/image";
 
-import { useCart } from "@/lib/context/CartContext";
+import { AddToCart } from "./AddToCart";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default function ProductPage(props: PageProps) {
-  const { slug } = use(props.params);
-  const product = getProductBySlug(slug);
-  const { addItem, openCart } = useCart();
+export default async function ProductPage(props: PageProps) {
+  const { slug } = await props.params;
+  const product = await getProductBySlug(slug);
 
-  if (!product) {
+  if (!product || product.status !== "ACTIVE") {
     notFound();
   }
-
-  const handleAddToCart = () => {
-    addItem(product);
-    openCart();
-  };
 
   return (
     <main className="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] pt-32 pb-48 w-full max-w-full overflow-x-hidden">
@@ -35,14 +27,16 @@ export default function ProductPage(props: PageProps) {
           {/* Left: Cinematic Product Image (Sticky) */}
           <div className="lg:col-span-7 w-full rounded-sm group sticky top-32">
             <div className="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
-              <Image 
-                src={product.images[0]} 
-                alt={product.name} 
-                fill 
-                className="object-cover object-center transform transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-                priority
-                sizes="(max-width: 1024px) 100vw, 60vw"
-              />
+              {product.images[0] && (
+                <Image 
+                  src={product.images[0]} 
+                  alt={product.name} 
+                  fill 
+                  className="object-cover object-center transform transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                />
+              )}
               {/* Subtle overlay for depth */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
             </div>
@@ -59,22 +53,17 @@ export default function ProductPage(props: PageProps) {
             </p>
 
             <div className="flex items-center gap-8 mb-16">
-              <span className="text-4xl font-medium tracking-tight">R{product.basePrice}</span>
+              <span className="text-4xl font-medium tracking-tight">R{product.basePrice.toFixed(2)}</span>
               <div className="flex items-center gap-2 text-sm uppercase tracking-widest text-[#3d7b32] font-bold">
                 <span className="text-lg">★</span>
-                <span>{product.rating?.toFixed(1) || "5.0"}</span>
-                <span className="text-[#1a1a1a]/40 ml-2 font-medium">({product.reviewCount} reviews)</span>
+                <span>5.0</span>
+                <span className="text-[#1a1a1a]/40 ml-2 font-medium">(0 reviews)</span>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-4 w-full max-w-md mb-32">
-              <button 
-                onClick={handleAddToCart}
-                className="w-full bg-[#1a1a1a] text-[#f5f5f5] py-6 rounded-full uppercase tracking-[0.2em] text-sm font-bold hover:bg-[#3d7b32] transition-colors duration-500"
-              >
-                Add to Cart
-              </button>
+              <AddToCart product={product} />
             </div>
             
             {/* Gapless Bento Grid for Details */}

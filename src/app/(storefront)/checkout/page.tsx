@@ -5,6 +5,7 @@ import { useCart } from "@/lib/context/CartContext";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { redirect, useRouter } from "next/navigation";
+import { placeOrderAction } from "@/lib/domain/orders/actions";
 
 export default function CheckoutPage() {
   const { items, cartTotal, clearCart } = useCart();
@@ -21,6 +22,9 @@ export default function CheckoutPage() {
     province: "",
     postalCode: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   // Since useUser is async-like, update state when it loads
   React.useEffect(() => {
@@ -45,14 +49,16 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError("");
+
     const orderPayload = {
-      customer: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-      },
+      userId: user?.id || null,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
       shippingAddress: {
         streetAddress: formData.streetAddress,
         suburb: formData.suburb,
@@ -60,23 +66,26 @@ export default function CheckoutPage() {
         province: formData.province,
         postalCode: formData.postalCode,
       },
-      cart: items.map(item => ({
-        id: item.product.id,
-        slug: item.product.slug,
+      items: items.map(item => ({
+        productId: item.product.id,
         name: item.product.name,
         price: item.product.basePrice,
         quantity: item.quantity
       })),
-      totals: {
-        subtotal: cartTotal,
-        shipping: shippingCost,
-        finalTotal: finalTotal
-      }
+      shippingCost: shippingCost,
+      subtotal: cartTotal,
+      total: finalTotal
     };
 
-    console.log("ORDER PAYLOAD:", JSON.stringify(orderPayload, null, 2));
-    clearCart();
-    router.push("/checkout/success");
+    const result = await placeOrderAction(orderPayload);
+
+    if (result.success) {
+      clearCart();
+      router.push(`/checkout/success?order=${result.orderNumber}`);
+    } else {
+      setError(result.error || "An error occurred");
+      setIsSubmitting(false);
+    }
   };
 
   if (!isLoaded) return <div className="min-h-screen pt-40 text-center">Loading secure checkout...</div>;
@@ -169,12 +178,14 @@ export default function CheckoutPage() {
                   items.map((item) => (
                     <div key={item.product.id} className="flex items-center gap-4">
                       <div className="w-20 h-24 relative bg-gray-50 rounded-sm overflow-hidden flex-shrink-0 border border-gray-100">
-                        <Image
-                          src={item.product.images[0]}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover"
-                        />
+                        {item.product.images[0] && (
+                          <Image
+                            src={item.product.images[0]}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                         <div className="absolute top-0 right-0 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center z-10">
                           {item.quantity}
                         </div>
@@ -207,13 +218,19 @@ export default function CheckoutPage() {
                 <span className="text-2xl font-medium text-gray-900">R {finalTotal.toFixed(2)}</span>
               </div>
 
+              {error && (
+                <div className="mb-4 p-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-sm">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
                 form="checkout-form"
-                disabled={items.length === 0}
+                disabled={items.length === 0 || isSubmitting}
                 className="w-full block text-center bg-black text-white py-4 font-medium uppercase tracking-wider text-sm hover:bg-[#3d7b32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black"
               >
-                Proceed to Payment
+                {isSubmitting ? "Processing..." : "Place Order"}
               </button>
             </div>
           </div>
