@@ -102,27 +102,30 @@ export function Header() {
             Shop
           </Link>
           <Link 
-            href="#"
+            href="/rituals"
             onMouseEnter={() => handleMouseEnter('ingredients')}
+            onClick={() => setActiveMenu(null)}
           >
-            Ingredients
+            Ingredients & Rituals
           </Link>
           <Link 
-            href="#story"
+            href="/about"
             onMouseEnter={() => handleMouseEnter(null)}
+            onClick={() => setActiveMenu(null)}
           >
             Our Story
           </Link>
           <Link 
             href="/reseller"
             onMouseEnter={() => handleMouseEnter(null)}
+            onClick={() => setActiveMenu(null)}
           >
             Resellers
           </Link>
         </div>
 
         {/* Centered Logo */}
-        <div className="nav-logo-container">
+        <Link href="/" className="nav-logo-container" aria-label="Divinity Cosmetics Home">
           <Image
             src="/images/divinity-logo.png"
             alt="Divinity Cosmetics"
@@ -131,7 +134,7 @@ export function Header() {
             className="nav-logo-img"
             priority
           />
-        </div>
+        </Link>
         
         {/* Right Utils */}
         <div className="nav-utils">

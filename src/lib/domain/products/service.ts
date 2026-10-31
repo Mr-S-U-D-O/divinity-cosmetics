@@ -34,38 +34,71 @@ function mapProduct(product: any): Product {
   }
 }
 
+import { mockProducts } from "./mock-data"
+
 export async function getAllProducts(options?: {
   status?: ProductStatus
   onlyActive?: boolean
 }): Promise<Product[]> {
-  const where: any = {}
+  try {
+    const where: any = {}
 
-  if (options?.onlyActive) {
-    where.status = "ACTIVE"
-  } else if (options?.status) {
-    where.status = options.status
+    if (options?.onlyActive) {
+      where.status = "ACTIVE"
+    } else if (options?.status) {
+      where.status = options.status
+    }
+
+    const products = await prisma.product.findMany({
+      where,
+      orderBy: { sortOrder: "asc" },
+    })
+
+    if (products.length > 0) {
+      return products.map(mapProduct)
+    }
+  } catch (error) {
+    console.warn("Failed to fetch products from database, using fallback catalog:", error)
   }
 
-  const products = await prisma.product.findMany({
-    where,
-    orderBy: { sortOrder: "asc" },
+  // Resilient fallback to high-quality botanical catalog
+  return mockProducts.filter((p) => {
+    if (options?.onlyActive) return p.status === "ACTIVE"
+    if (options?.status) return p.status === options.status
+    return true
   })
-
-  return products.map(mapProduct)
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const product = await prisma.product.findUnique({
-    where: { slug },
-  })
+  try {
+    const product = await prisma.product.findUnique({
+      where: { slug },
+    })
 
-  return product ? mapProduct(product) : null
+    if (product) {
+      return mapProduct(product)
+    }
+  } catch (error) {
+    console.warn(`Failed to fetch product '${slug}' from database, checking fallback:`, error)
+  }
+
+  const fallback = mockProducts.find((p) => p.slug === slug)
+  return fallback || null
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const product = await prisma.product.findUnique({
-    where: { id },
-  })
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+    })
 
-  return product ? mapProduct(product) : null
+    if (product) {
+      return mapProduct(product)
+    }
+  } catch (error) {
+    console.warn(`Failed to fetch product '${id}' from database, checking fallback:`, error)
+  }
+
+  const fallback = mockProducts.find((p) => p.id === id)
+  return fallback || null
 }

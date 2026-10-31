@@ -145,10 +145,13 @@ export function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={closeCart}
-                  className="btn-primary w-full justify-center py-4 text-sm tracking-wider uppercase"
+                  className="btn-primary w-full justify-center py-4 text-sm tracking-wider uppercase gap-2 flex items-center shadow-sm"
                 >
-                  Proceed to Checkout
+                  <span>Order via WhatsApp Concierge</span>
                 </Link>
+                <p className="text-[11px] text-gray-500 text-center mt-2.5">
+                  Instant cart checkout · Direct priority delivery across South Africa
+                </p>
               </div>
             )}
           </motion.div>

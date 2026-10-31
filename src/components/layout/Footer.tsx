@@ -74,15 +74,22 @@ export function Footer() {
 
         {/* Social & Copyright Bar */}
         <motion.div className="footer-social-bar" variants={itemVariants}>
-          <p className="footer-copyright-text">
-            © {currentYear} Divinity Cosmetics. Handcrafted in ZA.
-          </p>
+          <div className="space-y-1">
+            <p className="footer-copyright-text">
+              © {currentYear} Divinity Cosmetics (Pty) Ltd. Handcrafted in South Africa.
+            </p>
+            <p className="text-xs text-gray-400">
+              Official Store: <span className="text-gray-600 font-medium">shopdivinitycosmetics.co.za</span> · Support: <a href="mailto:support@shopdivinitycosmetics.co.za" className="text-gray-600 hover:text-black transition-colors underline underline-offset-2">support@shopdivinitycosmetics.co.za</a>
+            </p>
+          </div>
           <div className="footer-social-links">
-            <a href="#" className="social-icon-link">Instagram</a>
+            <a href="https://instagram.com/divinitycosmetics" target="_blank" rel="noopener noreferrer" className="social-icon-link">Instagram</a>
             <span className="social-separator">/</span>
-            <a href="#" className="social-icon-link">Facebook</a>
+            <a href="https://facebook.com/divinitycosmetics" target="_blank" rel="noopener noreferrer" className="social-icon-link">Facebook</a>
             <span className="social-separator">/</span>
-            <a href="#" className="social-icon-link">TikTok</a>
+            <a href="https://tiktok.com/@divinitycosmetics" target="_blank" rel="noopener noreferrer" className="social-icon-link">TikTok</a>
+            <span className="social-separator">/</span>
+            <Link href="/checkout" className="social-icon-link font-semibold text-[#3d7b32]">WhatsApp Concierge</Link>
           </div>
         </motion.div>
 
