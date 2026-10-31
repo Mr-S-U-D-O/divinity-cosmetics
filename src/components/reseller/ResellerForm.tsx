@@ -206,7 +206,7 @@ export function ResellerForm() {
         <button 
           type="submit" 
           disabled={isSubmitting}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#111] text-white px-10 py-4 rounded-full font-bold text-sm uppercase tracking-wider hover:bg-[#3d7b32] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          className="btn-primary w-full sm:w-auto px-10 py-4 text-sm tracking-wider uppercase disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting..." : (
             <>Submit Application <ArrowRight weight="bold" /></>

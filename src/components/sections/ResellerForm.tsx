@@ -67,8 +67,8 @@ export function ResellerForm() {
             <motion.div className="form-submit-wrapper" variants={itemVariants}>
               <motion.button 
                 type="submit" 
-                className="form-submit-btn-creative"
-                whileHover={{ scale: 1.05 }}
+                className="btn-primary"
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >

@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MagnifyingGlass, ShoppingCart, ArrowRight } from "@phosphor-icons/react";
+import { MagnifyingGlass, ShoppingCart, ArrowRight, X, User } from "@phosphor-icons/react";
 import { useCart } from "@/lib/context/CartContext";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 const SAFlag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="14" height="10" style={{ borderRadius: '2px', overflow: 'hidden' }}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="16" height="11" style={{ borderRadius: '2px', overflow: 'hidden' }}>
     <rect width="900" height="600" fill="#001489" />
     <polygon points="0,0 900,0 900,200 300,200" fill="#E03C31" />
     <polygon points="0,600 900,600 900,400 300,400" fill="#001489" />
@@ -24,6 +24,8 @@ const SAFlag = () => (
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { cartCount, openCart } = useCart();
   const { isSignedIn } = useAuth();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -35,6 +37,23 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  // Close search on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && searchOpen) {
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [searchOpen]);
 
   const handleMouseEnter = (menu: string | null) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -59,15 +78,15 @@ export function Header() {
         <div className="top-bar-left">
           <div className="top-pill">
             <SAFlag />
-            <span>South African</span>
+            <span>Proudly South African</span>
           </div>
           <div className="top-pill">
-            <span>Free shipping on orders over R500</span>
+            <span>Cruelty-Free Botanicals</span>
           </div>
         </div>
         <div className="top-bar-right">
-          <div className="top-pill">
-            <span>Free shipping on orders over R500</span>
+          <div className="top-pill-highlight">
+            <span>Orders over R500 ship free</span>
           </div>
         </div>
       </div>
@@ -84,15 +103,21 @@ export function Header() {
           </Link>
           <Link 
             href="#"
-            onMouseEnter={() => handleMouseEnter('rituals')}
+            onMouseEnter={() => handleMouseEnter('ingredients')}
           >
-            Rituals
+            Ingredients
           </Link>
           <Link 
-            href="#"
-            onMouseEnter={() => handleMouseEnter('about')}
+            href="#story"
+            onMouseEnter={() => handleMouseEnter(null)}
           >
-            About Us
+            Our Story
+          </Link>
+          <Link 
+            href="/reseller"
+            onMouseEnter={() => handleMouseEnter(null)}
+          >
+            Resellers
           </Link>
         </div>
 
@@ -110,9 +135,29 @@ export function Header() {
         
         {/* Right Utils */}
         <div className="nav-utils">
-          <button className="icon-btn" aria-label="Search">
-            <MagnifyingGlass size={20} weight="regular" />
-          </button>
+          <div className="relative flex items-center">
+            <AnimatePresence>
+              {searchOpen && (
+                <motion.input
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 200, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search..."
+                  className="absolute right-8 h-8 px-3 text-sm bg-white border border-gray-200 rounded-full outline-none text-[#1a1a1a] placeholder:text-gray-400 font-medium"
+                />
+              )}
+            </AnimatePresence>
+            <button 
+              className="icon-btn z-10" 
+              aria-label="Search"
+              onClick={() => setSearchOpen(!searchOpen)}
+            >
+              {searchOpen ? <X size={20} weight="regular" /> : <MagnifyingGlass size={20} weight="regular" />}
+            </button>
+          </div>
           <button className="icon-btn" aria-label="Cart" onClick={openCart}>
             <ShoppingCart size={20} weight="regular" />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
@@ -123,13 +168,15 @@ export function Header() {
             </div>
           ) : (
             <SignInButton mode="modal">
-              <button className="btn-login">
-                Login
+              <button className="btn-ghost">
+                <User size={16} weight="regular" />
+                Sign In
               </button>
             </SignInButton>
           )}
         </div>
       </nav>
+
 
       {/* Mega Menu Dropdowns */}
       <AnimatePresence>

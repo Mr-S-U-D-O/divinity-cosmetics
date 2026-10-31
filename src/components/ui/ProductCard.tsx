@@ -75,9 +75,10 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           <button 
             onClick={handleAddToCart}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[11px] font-bold tracking-wide transition-all ${
-              added ? "bg-black text-white" : "bg-[#3d7b32] text-white hover:bg-[#2c5a24]"
+            className={`btn-primary-sm ${
+              added ? "!bg-transparent !text-[#1a1a1a] !border-[#1a1a1a] !border-solid" : ""
             }`}
+            style={added ? { border: '1.5px solid #1a1a1a' } : undefined}
           >
             {added ? <Check size={14} weight="bold" /> : <ShoppingCart size={14} weight="bold" />}
             <span>{added ? "Added!" : "Add to Cart"}</span>

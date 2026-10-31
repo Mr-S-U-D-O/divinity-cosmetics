@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export function Story() {
   return (
-    <section className="story-section">
+    <section id="story" className="story-section">
       <div className="story-content-creative">
         <h2 className="story-title-creative">
           <span className="story-title-line line-1">Rooted in</span>
@@ -14,8 +14,8 @@ export function Story() {
           <p className="story-subtext-creative">
             We source the purest indigenous botanicals. Handcrafted with reverence for the earth and formulated for profound skin restoration.
           </p>
-          <Link href="/about" className="story-btn-creative">
-            discover our story
+          <Link href="/about" className="btn-primary">
+            Discover Our Story
           </Link>
         </div>
       </div>

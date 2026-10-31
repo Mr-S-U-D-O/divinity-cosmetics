@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import Link from "next/link";
 
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -14,7 +15,7 @@ export function Hero() {
 
   return (
     <section className="hero">
-      {/* Background video f — centered, transparent bg, plays once */}
+      {/* Background video — centered, transparent bg, plays once */}
       <video
         ref={videoRef}
         className="hero-video"
@@ -38,8 +39,8 @@ export function Hero() {
 
       {/* CTA buttons — bottom left */}
       <div className="hero-actions">
-        <button className="hero-btn" type="button">Explore</button>
-        <button className="hero-btn" type="button">Rituals</button>
+        <Link href="/shop" className="btn-primary">Explore Collection</Link>
+        <Link href="#story" className="btn-secondary">Our Rituals</Link>
       </div>
     </section>
   );

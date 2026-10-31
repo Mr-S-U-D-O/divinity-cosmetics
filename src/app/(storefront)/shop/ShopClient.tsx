@@ -82,7 +82,7 @@ export function ShopClient({ products }: { products: Product[] }) {
     return result;
   }, [searchQuery, selectedCategories, selectedConcerns, selectedIngredients, selectedPrice, sortOrder, products]);
 
-  const topCategories = ["ALL FORMULATIONS", "BODY CARE", "FACE CARE", "OILS & SERUMS", "BUNDLES"];
+  const topCategories = ["All Formulations", "Body Care", "Face Care", "Oils & Serums", "Bundles"];
 
   return (
     <main className="min-h-screen bg-[#fafafa] pt-32 pb-32 font-sans text-[#1a1a1a]">
@@ -103,10 +103,10 @@ export function ShopClient({ products }: { products: Product[] }) {
               <button
                 key={cat}
                 onClick={handleTopPill}
-                className={`px-5 py-2.5 rounded-full whitespace-nowrap text-[10px] font-bold tracking-widest transition-colors ${
+                className={`px-6 py-3 rounded-lg whitespace-nowrap text-sm font-semibold tracking-wide transition-all ${
                   isActive 
-                    ? "bg-[#3d7b32] text-white" 
-                    : "bg-white text-gray-500 border border-gray-200 hover:border-[#3d7b32] hover:text-[#3d7b32]"
+                    ? "bg-[#1a1a1a] text-white" 
+                    : "bg-white text-gray-500 border border-gray-200 hover:border-[#1a1a1a] hover:text-[#1a1a1a]"
                 }`}
               >
                 {cat} {idx !== 0 && `(${products.filter(p => p.category === CATEGORIES[idx - 1]).length})`}
@@ -128,13 +128,13 @@ export function ShopClient({ products }: { products: Product[] }) {
         </button>
 
         {/* Sidebar Filters */}
-        <aside className={`w-full lg:w-72 flex-shrink-0 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm ${isMobileFiltersOpen ? 'block' : 'hidden lg:block'} h-fit lg:sticky lg:top-24`}>
+        <aside className={`w-full lg:w-72 flex-shrink-0 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm ${isMobileFiltersOpen ? 'block' : 'hidden lg:block'} h-fit lg:sticky lg:top-24`}>
           <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-2 text-[#3d7b32]">
+            <div className="flex items-center gap-2 text-[#1a1a1a]">
               <FunnelSimple size={18} weight="bold" />
               <h2 className="text-xs font-bold tracking-widest uppercase">Refine Catalog</h2>
             </div>
-            <button onClick={handleReset} className="text-[10px] font-bold text-gray-400 hover:text-black transition-colors uppercase">Reset</button>
+            <button onClick={handleReset} className="text-xs font-semibold text-gray-400 hover:text-black transition-colors">Reset</button>
           </div>
 
           {/* Categories */}
@@ -144,7 +144,7 @@ export function ShopClient({ products }: { products: Product[] }) {
               {CATEGORIES.map(cat => (
                 <label key={cat} className="flex items-center justify-between group cursor-pointer">
                   <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCategories.includes(cat) ? 'bg-[#3d7b32] border-[#3d7b32]' : 'border-gray-300 group-hover:border-[#3d7b32]'}`}>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCategories.includes(cat) ? 'bg-[#1a1a1a] border-[#1a1a1a]' : 'border-gray-300 group-hover:border-[#1a1a1a]'}`}>
                       {selectedCategories.includes(cat) && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                     </div>
                     <span className="text-[13px] text-gray-600 group-hover:text-black">{cat}</span>
@@ -162,7 +162,7 @@ export function ShopClient({ products }: { products: Product[] }) {
             <div className="space-y-3">
               {CONCERNS.map(concern => (
                 <label key={concern} className="flex items-center gap-3 group cursor-pointer">
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedConcerns.includes(concern) ? 'bg-[#3d7b32] border-[#3d7b32]' : 'border-gray-300 group-hover:border-[#3d7b32]'}`}>
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedConcerns.includes(concern) ? 'bg-[#1a1a1a] border-[#1a1a1a]' : 'border-gray-300 group-hover:border-[#1a1a1a]'}`}>
                     {selectedConcerns.includes(concern) && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                   </div>
                   <span className="text-[13px] text-gray-600 group-hover:text-black">{concern}</span>
@@ -178,7 +178,7 @@ export function ShopClient({ products }: { products: Product[] }) {
             <div className="space-y-3">
               {INGREDIENTS.map(ing => (
                 <label key={ing} className="flex items-center gap-3 group cursor-pointer">
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedIngredients.includes(ing) ? 'bg-[#3d7b32] border-[#3d7b32]' : 'border-gray-300 group-hover:border-[#3d7b32]'}`}>
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedIngredients.includes(ing) ? 'bg-[#1a1a1a] border-[#1a1a1a]' : 'border-gray-300 group-hover:border-[#1a1a1a]'}`}>
                     {selectedIngredients.includes(ing) && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                   </div>
                   <span className="text-[13px] text-gray-600 group-hover:text-black">{ing}</span>
@@ -195,26 +195,26 @@ export function ShopClient({ products }: { products: Product[] }) {
               <span className="text-gray-400 font-normal tracking-normal text-[10px]">ZAR - RAND</span>
             </h3>
             {/* Fake Slider visual */}
-            <div className="h-1.5 w-full bg-[#3d7b32] rounded-full mb-6 relative">
-              <div className="absolute top-1/2 -translate-y-1/2 left-[20%] w-3 h-3 bg-white border-2 border-[#3d7b32] rounded-full"></div>
-              <div className="absolute top-1/2 -translate-y-1/2 right-[20%] w-3 h-3 bg-white border-2 border-[#3d7b32] rounded-full"></div>
+            <div className="h-1.5 w-full bg-[#1a1a1a] rounded-full mb-6 relative">
+              <div className="absolute top-1/2 -translate-y-1/2 left-[20%] w-3 h-3 bg-white border-2 border-[#1a1a1a] rounded-full"></div>
+              <div className="absolute top-1/2 -translate-y-1/2 right-[20%] w-3 h-3 bg-white border-2 border-[#1a1a1a] rounded-full"></div>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => setSelectedPrice(selectedPrice === 'under-200' ? null : 'under-200')}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-full border transition-colors ${selectedPrice === 'under-200' ? 'bg-[#3d7b32] text-white border-[#3d7b32]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#3d7b32]'}`}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors ${selectedPrice === 'under-200' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#1a1a1a]'}`}
               >
                 Under R200
               </button>
               <button 
                 onClick={() => setSelectedPrice(selectedPrice === '200-500' ? null : '200-500')}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-full border transition-colors ${selectedPrice === '200-500' ? 'bg-[#3d7b32] text-white border-[#3d7b32]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#3d7b32]'}`}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors ${selectedPrice === '200-500' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#1a1a1a]'}`}
               >
                 R200 - R500
               </button>
               <button 
                 onClick={() => setSelectedPrice(selectedPrice === '500-plus' ? null : '500-plus')}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-full border transition-colors ${selectedPrice === '500-plus' ? 'bg-[#3d7b32] text-white border-[#3d7b32]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#3d7b32]'}`}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg border transition-colors ${selectedPrice === '500-plus' ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#1a1a1a]'}`}
               >
                 R500+
               </button>
@@ -271,7 +271,7 @@ export function ShopClient({ products }: { products: Product[] }) {
                 <span>Showing 1 - {filteredAndSortedProducts.length} of {products.length} botanical creations</span>
                 <div className="flex items-center gap-2">
                   <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-300 cursor-not-allowed">&lt;</button>
-                  <button className="w-8 h-8 rounded-full bg-[#3d7b32] text-white flex items-center justify-center font-bold">1</button>
+                  <button className="w-8 h-8 rounded-lg bg-[#1a1a1a] text-white flex items-center justify-center font-bold">1</button>
                   <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:border-black hover:text-black transition-colors">2</button>
                   <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:border-black hover:text-black transition-colors">3</button>
                   <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:border-black hover:text-black transition-colors">&gt;</button>
@@ -286,7 +286,7 @@ export function ShopClient({ products }: { products: Product[] }) {
               </p>
               <button 
                 onClick={handleReset}
-                className="px-6 py-2.5 bg-black text-white rounded-full font-bold uppercase tracking-wider text-[10px] hover:bg-[#3d7b32] transition-colors"
+                className="btn-secondary"
               >
                 Reset Filters
               </button>

@@ -4,12 +4,12 @@ import React, { useState } from "react";
 import { useCart } from "@/lib/context/CartContext";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
-import { redirect, useRouter } from "next/navigation";
-import { placeOrderAction } from "@/lib/domain/orders/actions";
+import { redirect } from "next/navigation";
+import { initiateCheckoutWithPaystackAction } from "@/lib/domain/orders/actions";
+import { ShieldCheck } from "@phosphor-icons/react";
 
 export default function CheckoutPage() {
-  const { items, cartTotal, clearCart } = useCart();
-  const router = useRouter();
+  const { items, cartTotal } = useCart();
   const { user, isLoaded } = useUser();
   
   const [formData, setFormData] = useState({
@@ -68,22 +68,17 @@ export default function CheckoutPage() {
       },
       items: items.map(item => ({
         productId: item.product.id,
-        name: item.product.name,
-        price: item.product.basePrice,
-        quantity: item.quantity
+        quantity: item.quantity,
       })),
-      shippingCost: shippingCost,
-      subtotal: cartTotal,
-      total: finalTotal
     };
 
-    const result = await placeOrderAction(orderPayload);
+    const result = await initiateCheckoutWithPaystackAction(orderPayload);
 
-    if (result.success) {
-      clearCart();
-      router.push(`/checkout/success?order=${result.orderNumber}`);
+    if (result.success && result.authorizationUrl) {
+      // Redirect seamlessly to Paystack secure checkout
+      window.location.href = result.authorizationUrl;
     } else {
-      setError(result.error || "An error occurred");
+      setError(result.error || "Unable to initialize payment with Paystack. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -220,7 +215,7 @@ export default function CheckoutPage() {
               </div>
 
               {error && (
-                <div className="mb-4 p-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-sm">
+                <div className="mb-6 p-4 text-sm text-red-800 bg-red-50 border border-red-200 rounded-sm">
                   {error}
                 </div>
               )}
@@ -229,10 +224,27 @@ export default function CheckoutPage() {
                 type="submit"
                 form="checkout-form"
                 disabled={items.length === 0 || isSubmitting}
-                className="w-full block text-center bg-black text-white py-4 font-medium uppercase tracking-wider text-sm hover:bg-[#3d7b32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black"
+                className="w-full flex items-center justify-center gap-2 text-center bg-black text-white py-4 font-medium uppercase tracking-wider text-sm hover:bg-[#3d7b32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black cursor-pointer shadow-sm"
               >
-                {isSubmitting ? "Processing..." : "Place Order"}
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    Connecting to Paystack...
+                  </span>
+                ) : (
+                  <span>Pay R {finalTotal.toFixed(2)} with Paystack</span>
+                )}
               </button>
+
+              <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">
+                <div className="flex items-center justify-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <ShieldCheck size={16} className="text-[#3d7b32]" weight="bold" />
+                  <span>Secured by Paystack</span>
+                </div>
+                <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+                  Supports Visa, Mastercard, Instant EFT (all SA banks), SnapScan, and Apple Pay.
+                </p>
+              </div>
             </div>
           </div>
           

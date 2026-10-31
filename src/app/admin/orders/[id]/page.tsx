@@ -111,6 +111,25 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <span className="font-semibold text-[#111]">Total</span>
                 <span className="font-bold text-xl text-[#111]">R {Number(order.total).toFixed(2)}</span>
               </div>
+
+              <div className="pt-4 border-t border-gray-100 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Method</span>
+                  <span className="font-medium text-gray-900">{order.paymentMethod || "Paystack"}</span>
+                </div>
+                {order.paymentId && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Transaction Ref</span>
+                    <span className="font-mono text-[11px] text-gray-700 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                      {order.paymentId}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Payment Status</span>
+                  <div>{getPaymentBadge(order.paymentStatus)}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
