@@ -56,6 +56,13 @@ export function Header() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [searchOpen]);
 
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
   const handleMouseEnter = (menu: string | null) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setActiveMenu(menu);

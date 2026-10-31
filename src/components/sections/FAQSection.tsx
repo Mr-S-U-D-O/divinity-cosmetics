@@ -32,7 +32,7 @@ export function FAQSection() {
             <span>A little clarity</span>
           </div>
           <h2 id="faq-heading" className="faq-heading">
-            Your ritual,
+            Your questions,
             <br />
             <em>answered.</em>
           </h2>
