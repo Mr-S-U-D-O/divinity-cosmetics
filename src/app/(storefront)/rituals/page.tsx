@@ -45,7 +45,7 @@ export default function RitualsPage() {
               </div>
               <div className="border-l-2 border-[#3d7b32] pl-4 space-y-1">
                 <p className="font-semibold text-gray-900">Step 2: Hydrate</p>
-                <p>Apply Body Lotion A with cold-pressed marula oil immediately onto damp skin to lock in 24-hour hydration.</p>
+                <p>Apply your chosen body moisturiser immediately onto damp skin to help lock in lasting hydration.</p>
               </div>
               <div className="border-l-2 border-[#3d7b32] pl-4 space-y-1">
                 <p className="font-semibold text-gray-900">Step 3: Shield</p>

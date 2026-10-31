@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { Product, ProductStatus } from "./types"
-import { Prisma } from "@prisma/client"
+import { Prisma, Product as PrismaProduct } from "@prisma/client"
 
 // Helper to convert Prisma Decimal to number
 function toNumber(value: Prisma.Decimal | number | null | undefined): number {
@@ -9,7 +9,7 @@ function toNumber(value: Prisma.Decimal | number | null | undefined): number {
 }
 
 // Convert Prisma product to our frontend Product type
-function mapProduct(product: any): Product {
+function mapProduct(product: PrismaProduct): Product {
   return {
     id: product.id,
     name: product.name,
@@ -34,71 +34,38 @@ function mapProduct(product: any): Product {
   }
 }
 
-import { mockProducts } from "./mock-data"
-
 export async function getAllProducts(options?: {
   status?: ProductStatus
   onlyActive?: boolean
 }): Promise<Product[]> {
-  try {
-    const where: any = {}
+  const where: Prisma.ProductWhereInput = {}
 
-    if (options?.onlyActive) {
-      where.status = "ACTIVE"
-    } else if (options?.status) {
-      where.status = options.status
-    }
-
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: { sortOrder: "asc" },
-    })
-
-    if (products.length > 0) {
-      return products.map(mapProduct)
-    }
-  } catch (error) {
-    console.warn("Failed to fetch products from database, using fallback catalog:", error)
+  if (options?.onlyActive) {
+    where.status = "ACTIVE"
+  } else if (options?.status) {
+    where.status = options.status
   }
 
-  // Resilient fallback to high-quality botanical catalog
-  return mockProducts.filter((p) => {
-    if (options?.onlyActive) return p.status === "ACTIVE"
-    if (options?.status) return p.status === options.status
-    return true
+  const products = await prisma.product.findMany({
+    where,
+    orderBy: { sortOrder: "asc" },
   })
+
+  return products.map(mapProduct)
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  try {
-    const product = await prisma.product.findUnique({
-      where: { slug },
-    })
+  const product = await prisma.product.findUnique({
+    where: { slug },
+  })
 
-    if (product) {
-      return mapProduct(product)
-    }
-  } catch (error) {
-    console.warn(`Failed to fetch product '${slug}' from database, checking fallback:`, error)
-  }
-
-  const fallback = mockProducts.find((p) => p.slug === slug)
-  return fallback || null
+  return product ? mapProduct(product) : null
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  try {
-    const product = await prisma.product.findUnique({
-      where: { id },
-    })
+  const product = await prisma.product.findUnique({
+    where: { id },
+  })
 
-    if (product) {
-      return mapProduct(product)
-    }
-  } catch (error) {
-    console.warn(`Failed to fetch product '${id}' from database, checking fallback:`, error)
-  }
-
-  const fallback = mockProducts.find((p) => p.id === id)
-  return fallback || null
+  return product ? mapProduct(product) : null
 }
