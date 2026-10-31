@@ -25,7 +25,7 @@ async function main() {
       badge: "SIGNATURE FORMULATION",
       concerns: ["Deep Hydration", "Soothing & Sensitive"],
       ingredients: ["Marula", "Baobab"],
-      stock: 0,
+      stock: 10,
       trackInventory: true,
       sortOrder: 1,
       metaTitle: "Marula & Baobab Body Lotion | Divinity Cosmetics",

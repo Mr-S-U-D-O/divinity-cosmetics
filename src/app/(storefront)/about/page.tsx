@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkle, ShieldCheck, Heart, Leaf, ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { siteConfig } from "@/lib/config/site";
+import { ShieldCheck, Heart, Leaf, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
   title: "Our Story | Divinity Cosmetics",
@@ -11,61 +10,75 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-white pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-[#1a1a1a]">
-      <div className="max-w-5xl mx-auto space-y-20">
+    <main className="min-h-screen bg-white px-6 pb-24 pt-32 font-sans text-[#1a1a1a] md:px-12 md:pt-40 lg:px-24">
+      <div className="mx-auto max-w-6xl space-y-24">
         
         {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#e8efe7] text-[#3d7b32] rounded-full text-[11px] font-bold tracking-widest uppercase mb-2">
+        <div className="grid items-end gap-8 border-b border-[#1a1a1a]/10 pb-12 md:grid-cols-[1.1fr_0.9fr] md:gap-16">
+          <div>
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e8efe7] px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#3d7b32]">
             <Leaf size={14} weight="fill" />
             <span>Rooted in African Soil</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-gray-900 leading-tight">
-            Pure Botanicals, Conscious Craftsmanship.
+          <h1 className="max-w-3xl text-5xl font-medium leading-[0.95] tracking-[-0.06em] text-gray-900 md:text-7xl">
+            Skincare with a sense of place.
           </h1>
-          <p className="text-base md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+          </div>
+          <p className="max-w-md text-base leading-relaxed text-gray-600 md:text-lg">
             Divinity Cosmetics was born from a profound respect for South Africa's indigenous botanicals—formulated to nourish, protect, and restore your skin's natural radiance.
           </p>
         </div>
 
         {/* Narrative Split */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-sm bg-gray-100">
+        <div className="grid grid-cols-1 items-stretch gap-10 md:grid-cols-[0.95fr_1.05fr] md:gap-16">
+          <div className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-[#0f3d2c] shadow-sm md:min-h-0">
             <Image
-              src="https://images.unsplash.com/photo-1608248597359-0056973e738c?auto=format&fit=crop&q=80&w=1000"
-              alt="Natural botanicals harvesting"
+              src="/images/divinity-our-story.jpg"
+              alt="Hands holding Divinity Cosmetics Marula and Baobab Body Lotion"
               fill
-              className="object-cover"
+              className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
+            <div className="absolute inset-x-5 bottom-5 rounded-2xl bg-white/90 p-5 backdrop-blur-md">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#3d7b32]">Made for every body</p>
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#1a1a1a]/75">
+                A shared ritual, made with botanicals that belong to home.
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-6 text-gray-700 leading-relaxed">
-            <h2 className="text-2xl md:text-3xl font-medium text-gray-900 tracking-tight">
-              An Everyday Ritual of Restoration
+          <div className="flex flex-col justify-center text-gray-700">
+            <p className="mb-5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#3d7b32]">Our story</p>
+            <h2 className="max-w-xl text-3xl font-medium leading-tight tracking-tight text-gray-900 md:text-5xl">
+              An everyday ritual of restoration.
             </h2>
-            <p>
+            <div className="mt-7 max-w-xl space-y-5 leading-relaxed">
+              <p>
               South Africa is home to some of the planet's most resilient and nutrient-dense flora. From the vitamin-rich marula groves of Limpopo to wild baobab trees that withstand the harshest droughts, our active botanicals are biologically tuned to protect against moisture loss and environmental stress.
-            </p>
-            <p>
+              </p>
+              <p>
               We craft each small batch with zero compromise on ingredient purity. No synthetic parabens, no harsh drying sulfates, and no artificial dyes—only cold-pressed seed oils, indigenous extracts, and soothing plant hydrosols.
-            </p>
-            <div className="pt-2">
+              </p>
+            </div>
+            <div className="mt-9 flex flex-wrap gap-3">
               <Link
                 href="/shop"
-                className="inline-flex items-center gap-2 bg-[#3d7b32] text-white py-3 px-6 rounded-xl font-medium text-sm hover:bg-[#2c5a24] transition-colors"
+                className="inline-flex items-center gap-3 rounded-full bg-[#1a1a1a] px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#3d7b32]"
               >
-                <span>Explore Formulations</span>
+                <span>Shop our signature lotion</span>
                 <ArrowRight size={16} weight="bold" />
+              </Link>
+              <Link href="/contact" className="inline-flex items-center rounded-full border border-[#1a1a1a]/20 px-6 py-3.5 text-sm font-bold text-[#1a1a1a] transition-colors hover:border-[#1a1a1a]">
+                Talk to us
               </Link>
             </div>
           </div>
         </div>
 
         {/* Pillar Values */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-sm space-y-3">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[2rem] border border-[#1a1a1a]/10 bg-[#1a1a1a]/10 md:grid-cols-3">
+          <div className="space-y-3 bg-[#f7f8f4] p-8 md:p-10">
             <div className="w-10 h-10 rounded-lg bg-[#e8efe7] text-[#3d7b32] flex items-center justify-center">
               <Leaf size={22} weight="bold" />
             </div>
@@ -75,7 +88,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-sm space-y-3">
+          <div className="space-y-3 bg-[#f7f8f4] p-8 md:p-10">
             <div className="w-10 h-10 rounded-lg bg-[#e8efe7] text-[#3d7b32] flex items-center justify-center">
               <ShieldCheck size={22} weight="bold" />
             </div>
@@ -85,7 +98,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-sm space-y-3">
+          <div className="space-y-3 bg-[#f7f8f4] p-8 md:p-10">
             <div className="w-10 h-10 rounded-lg bg-[#e8efe7] text-[#3d7b32] flex items-center justify-center">
               <Heart size={22} weight="bold" />
             </div>
