@@ -44,16 +44,16 @@ export default async function ProductPage(props: PageProps) {
 
           {/* Right: Product Details & Bento Grid */}
           <div className="lg:col-span-5 flex flex-col pt-8 lg:pt-16">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.85] font-medium mb-10 w-full uppercase">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.9] font-medium mb-6 md:mb-10 w-full uppercase break-words">
               {product.name}
             </h1>
             
-            <p className="text-xl md:text-2xl leading-relaxed text-[#1a1a1a]/80 mb-16 max-w-xl">
+            <p className="text-base sm:text-lg md:text-2xl leading-relaxed text-[#1a1a1a]/80 mb-10 md:mb-16 max-w-xl">
               {product.description}
             </p>
 
-            <div className="flex items-center gap-8 mb-16">
-              <span className="text-4xl font-medium tracking-tight">R{product.basePrice.toFixed(2)}</span>
+            <div className="flex flex-wrap items-center gap-4 sm:gap-8 mb-10 md:mb-16">
+              <span className="text-3xl sm:text-4xl font-medium tracking-tight">R{product.basePrice.toFixed(2)}</span>
               <div className="flex items-center gap-2 text-sm uppercase tracking-widest text-[#3d7b32] font-bold">
                 <span className="text-lg">★</span>
                 <span>5.0</span>
@@ -62,7 +62,7 @@ export default async function ProductPage(props: PageProps) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-4 w-full max-w-md mb-32">
+            <div className="flex flex-col gap-4 w-full max-w-md mb-16 md:mb-32">
               <AddToCart product={product} />
             </div>
             

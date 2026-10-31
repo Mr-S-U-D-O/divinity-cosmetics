@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MagnifyingGlass, ShoppingCart, ArrowRight, X, User } from "@phosphor-icons/react";
+import { MagnifyingGlass, ShoppingCart, ArrowRight, X, User, List } from "@phosphor-icons/react";
 import { useCart } from "@/lib/context/CartContext";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "motion/react";
@@ -25,6 +25,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { cartCount, openCart } = useCart();
   const { isSignedIn } = useAuth();
@@ -93,6 +94,14 @@ export function Header() {
 
       {/* Main Nav */}
       <nav className="nav-bar">
+        <button
+          className="mobile-menu-button"
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          {mobileMenuOpen ? <X size={22} /> : <List size={22} />}
+        </button>
         <div className="nav-links">
           <Link 
             href="/shop"
@@ -179,6 +188,33 @@ export function Header() {
           )}
         </div>
       </nav>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mobile-navigation"
+          >
+            {[
+              ["/shop", "Shop"],
+              ["/rituals", "Ingredients & Rituals"],
+              ["/about", "Our Story"],
+              ["/reseller", "Resellers"],
+            ].map(([href, label]) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {label}
+                <ArrowRight size={16} />
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       {/* Mega Menu Dropdowns */}

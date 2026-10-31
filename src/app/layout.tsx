@@ -7,10 +7,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://shopdivinitycosmetics.co.za"),
   title: {
-    default: "Divinity Cosmetics | South African Botanical Skincare",
+    default: "Divinity Cosmetics | Botanical Skincare from South Africa",
     template: "%s | Divinity Cosmetics",
   },
-  description: "Handcrafted in South Africa with indigenous botanicals. Sustainably harvested cold-pressed Marula, wild Baobab, and Cape Chamomile for everyday rituals.",
+  description: "Shop Divinity Cosmetics: thoughtfully crafted South African skincare powered by indigenous Marula, Baobab and Cape Chamomile botanicals for nourished, restored skin.",
   keywords: [
     "Divinity Cosmetics",
     "African botanicals",
@@ -22,17 +22,26 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Divinity Cosmetics" }],
   openGraph: {
-    title: "Divinity Cosmetics | Handcrafted African Botanicals",
-    description: "Sustainably harvested botanical essences for daily skin restoration. Handcrafted in South Africa.",
+    title: "Divinity Cosmetics | Botanical Skincare from South Africa",
+    description: "Thoughtfully crafted skincare powered by South African botanicals for nourished, restored skin.",
     url: "https://shopdivinitycosmetics.co.za",
     siteName: "Divinity Cosmetics",
     locale: "en_ZA",
     type: "website",
   },
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
-    apple: "/favicon.png",
+    icon: [
+      { url: "/favicon.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: [{ url: "/favicon.png", type: "image/png" }],
+    apple: [{ url: "/favicon.png", type: "image/png", sizes: "180x180" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "Divinity Cosmetics | Botanical Skincare from South Africa",
+    description: "Thoughtfully crafted skincare powered by South African botanicals for nourished, restored skin.",
+    images: ["/favicon.png"],
   },
 };
 
