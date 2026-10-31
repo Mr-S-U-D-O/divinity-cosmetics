@@ -19,6 +19,22 @@ body {
   overflow-x: hidden;
 }
 
+.admin-input {
+  display: block;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 0.7rem 0.8rem;
+  color: #111;
+  font: inherit;
+}
+
+.admin-input:focus {
+  outline: 2px solid rgba(61, 123, 50, 0.25);
+  border-color: #3d7b32;
+}
+
 a {
   text-decoration: none;
   color: inherit;

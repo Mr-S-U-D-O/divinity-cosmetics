@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { 
   SquaresFour, 
   Package, 
@@ -14,12 +14,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Enforce authentication on the server-side
-  const { userId, redirectToSignIn } = await auth();
-  
-  if (!userId) {
-    return redirectToSignIn();
-  }
+  await requireAdmin();
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden text-[#111]">

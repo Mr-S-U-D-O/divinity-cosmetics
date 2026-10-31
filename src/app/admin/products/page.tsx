@@ -12,7 +12,7 @@ export default async function AdminProductsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold tracking-tight text-[#111]">Products</h1>
         <Link 
-          href="#"
+          href="/admin/products/new"
           className="inline-flex items-center gap-2 bg-[#111] text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#3d7b32] transition-colors"
         >
           <Plus size={16} weight="bold" />
@@ -30,7 +30,7 @@ export default async function AdminProductsPage() {
             You haven't created any products yet. Add your first botanical creation to get started.
           </p>
           <Link 
-            href="#"
+            href="/admin/products/new"
             className="inline-flex items-center gap-2 bg-[#111] text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#3d7b32] transition-colors"
           >
             <Plus size={16} weight="bold" />
@@ -102,7 +102,7 @@ export default async function AdminProductsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Link href="#" className="inline-block text-gray-400 hover:text-[#111] transition-colors p-1">
+                        <Link href={`/admin/products/${product.id}/edit`} className="inline-block text-gray-400 hover:text-[#111] transition-colors p-1" aria-label={`Edit ${product.name}`}>
                           <CaretRight size={20} />
                         </Link>
                       </td>

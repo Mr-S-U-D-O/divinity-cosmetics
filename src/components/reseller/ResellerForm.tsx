@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { motion } from "motion/react";
 import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
+import { submitResellerApplicationAction } from "@/lib/domain/resellers/actions";
 
 export function ResellerForm() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -49,22 +50,13 @@ export function ResellerForm() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Build the payload
-    const payload = {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.primaryEmailAddress?.emailAddress,
-      ...formData
-    };
-
-    // Console log the complete payload as requested
-    console.log("RESELLER APPLICATION PAYLOAD:", payload);
-
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+    const result = await submitResellerApplicationAction(formData);
     setIsSubmitting(false);
-    setIsSuccess(true);
+    if (result.success) {
+      setIsSuccess(true);
+    } else {
+      window.alert(result.error);
+    }
   };
 
   if (isSuccess) {
