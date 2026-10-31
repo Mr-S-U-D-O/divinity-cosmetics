@@ -598,13 +598,48 @@ a {
     margin-bottom: 2rem;
   }
 
+  .footer-main-grid {
+    gap: 3.5rem;
+  }
+
+  .footer-nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    padding-top: 0;
+  }
+
+  .footer-link-group {
+    gap: 0.75rem;
+  }
+
+  .footer-link {
+    width: auto;
+    font-size: 0.95rem;
+  }
+
+  .footer-copyright-text {
+    font-size: 0.68rem;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+  }
+
+  .footer-contact-line {
+    line-height: 1.7;
+  }
+
+  .footer-contact-separator {
+    margin: 0 0.25rem;
+  }
+
   .footer-social-links {
     gap: 0.75rem 1rem;
+    font-size: 0.8rem;
   }
 
   .footer-massive-text {
     font-size: 28vw;
   }
+
 }
 
 @media (min-width: 769px) and (max-width: 1100px) {
@@ -1204,6 +1239,177 @@ a {
   padding-right: 4rem;
   padding-bottom: 0; /* Removed to allow text clipping */
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ========================================
+   FAQ SECTION
+   ======================================== */
+
+.faq-section {
+  position: relative;
+  padding: 9rem 3rem;
+  background: #e8efe7;
+  overflow: hidden;
+}
+
+.faq-section::before {
+  content: "FAQ";
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
+  color: rgba(61, 123, 50, 0.1);
+  font-size: clamp(8rem, 22vw, 20rem);
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 0.8;
+  pointer-events: none;
+}
+
+.faq-section-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 7rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.faq-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-green);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.faq-heading {
+  margin: 1.5rem 0 1.5rem;
+  color: #111;
+  font-size: clamp(3.2rem, 7vw, 6.5rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.faq-heading em {
+  color: var(--color-green);
+  font-family: Georgia, serif;
+  font-weight: 300;
+  text-transform: lowercase;
+}
+
+.faq-intro-copy {
+  max-width: 32ch;
+  color: #445143;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.faq-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+  color: #111;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #111;
+  padding-bottom: 0.4rem;
+}
+
+.faq-list {
+  border-top: 1px solid rgba(17, 17, 17, 0.2);
+}
+
+.faq-item {
+  border-bottom: 1px solid rgba(17, 17, 17, 0.2);
+}
+
+.faq-item summary {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 5.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-number {
+  color: var(--color-green);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.faq-question {
+  color: #111;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 600;
+}
+
+.faq-chevron {
+  color: var(--color-green);
+  transition: transform 0.25s ease;
+}
+
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-item p {
+  max-width: 65ch;
+  margin: -0.5rem 2rem 1.5rem 3rem;
+  color: #536052;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .faq-section {
+    padding: 5.5rem 1rem;
+  }
+
+  .faq-section::before {
+    top: 2rem;
+    right: -0.5rem;
+    font-size: 9rem;
+  }
+
+  .faq-section-inner {
+    display: block;
+  }
+
+  .faq-intro {
+    margin-bottom: 3rem;
+  }
+
+  .faq-heading {
+    font-size: clamp(3rem, 16vw, 5rem);
+  }
+
+  .faq-item summary {
+    grid-template-columns: 1.5rem 1fr auto;
+    gap: 0.65rem;
+    min-height: 4.75rem;
+  }
+
+  .faq-item p {
+    margin-left: 2.15rem;
+    margin-right: 1rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* Explicit Layout (Fallback for Tailwind Watcher Issues) */

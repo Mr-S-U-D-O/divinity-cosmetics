@@ -33,7 +33,7 @@ export function Footer() {
       >
         
         {/* Tier 1 & 2: Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8">
+        <div className="footer-main-grid grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8">
           
           {/* Tier 1: The Hook (Newsletter) */}
           <motion.div className="lg:col-span-7 flex flex-col justify-center" variants={itemVariants}>
@@ -78,8 +78,10 @@ export function Footer() {
             <p className="footer-copyright-text">
               © {currentYear} Divinity Cosmetics (Pty) Ltd. Handcrafted in South Africa.
             </p>
-            <p className="text-xs text-gray-400">
-              Official Store: <span className="text-gray-600 font-medium">shopdivinitycosmetics.co.za</span> · Support: <a href="mailto:support@shopdivinitycosmetics.co.za" className="text-gray-600 hover:text-black transition-colors underline underline-offset-2">support@shopdivinitycosmetics.co.za</a>
+            <p className="footer-contact-line text-xs text-gray-400">
+              Official Store: <span className="text-gray-600 font-medium">shopdivinitycosmetics.co.za</span>
+              <span className="footer-contact-separator">·</span>
+              Support: <a href="mailto:support@shopdivinitycosmetics.co.za" className="text-gray-600 hover:text-black transition-colors underline underline-offset-2">support@shopdivinitycosmetics.co.za</a>
             </p>
           </div>
           <div className="footer-social-links">
