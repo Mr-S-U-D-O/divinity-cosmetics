@@ -13,7 +13,7 @@ import {
 
 export default function ResellerLandingPage() {
   return (
-    <main className="overflow-x-hidden w-full max-w-full bg-[#f5f5f5] text-[#1a1a1a]">
+    <main className="overflow-x-hidden w-full max-w-full bg-white text-[#1a1a1a]">
       {/* 
         ========================================
         HERO SECTION 
@@ -168,7 +168,7 @@ export default function ResellerLandingPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-                className="flex items-start gap-4 p-6 bg-[#f5f5f5] rounded-2xl"
+                className="flex items-start gap-4 p-6 bg-white rounded-2xl"
               >
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm text-[#3d7b32]">
                   <Percent weight="bold" size={20} />
@@ -184,7 +184,7 @@ export default function ResellerLandingPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="flex items-start gap-4 p-6 bg-[#f5f5f5] rounded-2xl"
+                className="flex items-start gap-4 p-6 bg-white rounded-2xl"
               >
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm text-[#3d7b32]">
                   <TrendUp weight="bold" size={20} />
@@ -215,7 +215,7 @@ export default function ResellerLandingPage() {
         FINAL CTA
         ========================================
       */}
-      <section className="py-32 px-6 text-center bg-[#f5f5f5]">
+      <section className="py-32 px-6 text-center bg-white">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}

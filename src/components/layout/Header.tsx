@@ -143,10 +143,10 @@ export function Header() {
         {/* Centered Logo */}
         <Link href="/" className="nav-logo-container" aria-label="Divinity Cosmetics Home">
           <Image
-            src="/images/divinity-logo.png"
+            src="/images/divinity-logo.jpg"
             alt="Divinity Cosmetics"
-            width={90}
-            height={90}
+            width={160}
+            height={100}
             className="nav-logo-img"
             priority
           />

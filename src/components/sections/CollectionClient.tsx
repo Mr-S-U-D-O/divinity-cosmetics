@@ -19,18 +19,6 @@ export function CollectionClient({ products }: { products: Product[] }) {
           >
             Body Lotion
           </button>
-          <button 
-            className={`filter-pill ${activeTab === "Hair Care" ? "active" : ""}`}
-            onClick={() => setActiveTab("Hair Care")}
-          >
-            Hair Care
-          </button>
-          <button 
-            className={`filter-pill ${activeTab === "Oral Care" ? "active" : ""}`}
-            onClick={() => setActiveTab("Oral Care")}
-          >
-            Oral Care
-          </button>
         </div>
         <div className="search-box">
           <MagnifyingGlass size={16} className="search-icon" weight="bold" />
@@ -60,15 +48,10 @@ export function CollectionClient({ products }: { products: Product[] }) {
           <div className="pagination">
             <button className="page-nav" disabled>&lt;</button>
             <button className="page-number active">1</button>
-            <button className="page-number">2</button>
-            <button className="page-number">3</button>
-            <span className="page-ellipsis">...</span>
-            <button className="page-number">8</button>
-            <button className="page-nav">&gt;</button>
           </div>
           
           <Link href="/shop" className="btn-primary">
-            Shop More Products
+            View Product Details
           </Link>
         </div>
       )}

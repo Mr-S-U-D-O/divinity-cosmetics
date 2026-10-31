@@ -10,7 +10,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] pt-40 pb-24 px-6 md:px-12 lg:px-24">
+    <main className="min-h-screen bg-white text-[#1a1a1a] pt-40 pb-24 px-6 md:px-12 lg:px-24">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-5xl tracking-tighter font-medium mb-12">
           Welcome back, {user.firstName || "Guest"}.

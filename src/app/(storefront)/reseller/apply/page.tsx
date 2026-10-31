@@ -11,7 +11,7 @@ export default async function ResellerApplyPage() {
   }
 
   return (
-    <main className="w-full min-h-[100dvh] bg-[#f5f5f5] pt-32 pb-24 px-6 flex items-center justify-center relative overflow-hidden">
+    <main className="w-full min-h-[100dvh] bg-white pt-32 pb-24 px-6 flex items-center justify-center relative overflow-hidden">
       {/* Decorative background blob */}
       <div className="absolute top-[-10%] right-[-5%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-[#3d7b32]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
       <div className="absolute bottom-[-10%] left-[-5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none z-0"></div>

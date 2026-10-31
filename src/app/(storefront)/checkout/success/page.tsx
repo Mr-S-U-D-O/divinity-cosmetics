@@ -65,7 +65,7 @@ function SuccessContent() {
 
 export default function CheckoutSuccessPage() {
   return (
-    <main className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-6 md:px-12 font-sans text-[#1a1a1a]">
+    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 font-sans text-[#1a1a1a]">
       <Suspense fallback={<div className="min-h-screen pt-40 flex justify-center text-gray-500">Processing...</div>}>
         <SuccessContent />
       </Suspense>

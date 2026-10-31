@@ -5,9 +5,9 @@ import { MagnifyingGlass, CaretDown, FunnelSimple } from "@phosphor-icons/react"
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Product } from "@/lib/domain/products/types";
 
-const CATEGORIES = ["Body Care", "Face Care", "Oils & Serums", "Bundles"];
-const CONCERNS = ["Deep Hydration", "Barrier Repair", "Soothing & Sensitive", "Glow & Radiance"];
-const INGREDIENTS = ["Cold-Pressed Marula", "Wild Baobab Oil", "Cape Chamomile", "Neroli & Frankincense"];
+const CATEGORIES = ["Body Care"];
+const CONCERNS = ["Deep Hydration", "Soothing & Sensitive"];
+const INGREDIENTS = ["Marula", "Baobab"];
 
 export function ShopClient({ products }: { products: Product[] }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,10 +82,10 @@ export function ShopClient({ products }: { products: Product[] }) {
     return result;
   }, [searchQuery, selectedCategories, selectedConcerns, selectedIngredients, selectedPrice, sortOrder, products]);
 
-  const topCategories = ["All Formulations", "Body Care", "Face Care", "Oils & Serums", "Bundles"];
+  const topCategories = ["All Formulations", "Body Care"];
 
   return (
-    <main className="min-h-screen bg-[#fafafa] pt-32 pb-32 font-sans text-[#1a1a1a]">
+    <main className="min-h-screen bg-white pt-32 pb-32 font-sans text-[#1a1a1a]">
       
       {/* Top Pills Section (Matches Mockup) */}
       <section className="px-6 md:px-12 lg:px-16 mb-8 border-b border-gray-200 pb-4">
