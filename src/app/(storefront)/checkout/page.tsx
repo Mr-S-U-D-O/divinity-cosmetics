@@ -6,17 +6,22 @@ import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
 import { useUser } from "@clerk/nextjs";
 import { 
-  WhatsappLogo, 
   ShieldCheck, 
   Truck, 
+  Clock,
   Sparkle, 
   ArrowLeft, 
-  Copy, 
+  LockSimple, 
+  Spinner, 
+  WarningCircle, 
+  CreditCard, 
+  WhatsappLogo, 
   Check, 
-  EnvelopeSimple, 
-  Clock 
+  Copy 
 } from "@phosphor-icons/react";
 import { siteConfig } from "@/lib/config/site";
+import { initiateCheckoutWithPaystackAction, getShippingRatesAction } from "@/lib/domain/orders/actions";
+import { ShippingRateOption } from "@/lib/domain/shipping/rates";
 
 export default function CheckoutPage() {
   const { items, cartTotal } = useCart();
@@ -35,8 +40,53 @@ export default function CheckoutPage() {
     notes: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showWhatsAppFallback, setShowWhatsAppFallback] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [orderSent, setOrderSent] = useState(false);
+
+  // Live The Courier Guy Shipping Options via Shiplogic Rates API
+  const [shippingRates, setShippingRates] = useState<ShippingRateOption[]>([
+    {
+      code: "ECO",
+      name: "Economy Delivery",
+      description: "The Courier Guy Road Freight (2–4 Business Days)",
+      rate: 142.0,
+      currency: "ZAR",
+      estimatedDelivery: "2–4 Business Days",
+      isCheapest: true,
+    },
+    {
+      code: "ONX",
+      name: "Premium Overnight Express",
+      description: "Priority Air Freight Dispatch (Next Business Day)",
+      rate: 210.0,
+      currency: "ZAR",
+      estimatedDelivery: "1–2 Business Days",
+      isCheapest: false,
+    },
+    {
+      code: "SDX",
+      name: "Same Day Local Express",
+      description: "Direct Local Courier from Wright Crossing Hub (Gauteng Only)",
+      rate: 295.0,
+      currency: "ZAR",
+      estimatedDelivery: "Same Day (Orders before 11:00)",
+      isCheapest: false,
+    },
+  ]);
+  const [selectedRateCode, setSelectedRateCode] = useState<string>("ECO");
+  const [isChangingShipping, setIsChangingShipping] = useState<boolean>(false);
+  const [isLoadingRates, setIsLoadingRates] = useState<boolean>(false);
+
+  // Selected option & dynamic price calculation
+  const selectedOption =
+    shippingRates.find((r) => r.code === selectedRateCode) ||
+    shippingRates.find((r) => r.isCheapest) ||
+    shippingRates[0];
+
+  const shippingCost = selectedOption ? selectedOption.rate : 142.0;
+  const finalTotal = cartTotal + shippingCost;
 
   // Auto-fill customer details from Clerk if signed in
   useEffect(() => {
@@ -51,8 +101,57 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  const shippingCost = cartTotal >= siteConfig.freeShippingThreshold ? 0.0 : siteConfig.standardShippingCost;
-  const finalTotal = cartTotal + shippingCost;
+  // Fetch live rates from Shiplogic when delivery location is input
+  useEffect(() => {
+    if (!formData.suburb.trim() && !formData.postalCode.trim()) return;
+
+    const timer = setTimeout(async () => {
+      setIsLoadingRates(true);
+      console.log(
+        "%c[🚚 COURIER RATES]%c Fetching rates for:",
+        "background: #047857; color: #fff; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
+        "color: #047857; font-weight: bold;",
+        {
+          suburb: formData.suburb.trim(),
+          city: formData.city.trim(),
+          province: formData.province,
+          postalCode: formData.postalCode.trim(),
+          weight: "1.0kg",
+        }
+      );
+
+      try {
+        const res = await getShippingRatesAction({
+          suburb: formData.suburb.trim(),
+          postalCode: formData.postalCode.trim(),
+          city: formData.city.trim(),
+          province: formData.province,
+          weightInKg: 1.0, // Parcel weight of 1kg as per spec
+        });
+
+        if (res.success && res.rates && res.rates.length > 0) {
+          console.log(
+            "%c[🚚 COURIER RATES]%c Live options loaded:",
+            "background: #047857; color: #fff; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
+            "color: #047857;",
+            res.rates
+          );
+          setShippingRates(res.rates);
+          const stillExists = res.rates.some((r) => r.code === selectedRateCode);
+          if (!stillExists) {
+            const cheapest = res.rates.find((r) => r.isCheapest) || res.rates[0];
+            setSelectedRateCode(cheapest.code);
+          }
+        }
+      } catch (err) {
+        console.warn("[🚚 COURIER RATES ERROR]:", err);
+      } finally {
+        setIsLoadingRates(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.suburb, formData.postalCode, formData.city, formData.province, selectedRateCode]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -60,6 +159,81 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Primary Paystack Checkout Handler
+  const handlePaystackCheckout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (items.length === 0) return;
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const orderData = {
+        userId: user?.id || null,
+        email: formData.email.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        phone: formData.phone.trim(),
+        shippingAddress: {
+          streetAddress: formData.streetAddress.trim(),
+          suburb: formData.suburb.trim(),
+          city: formData.city.trim(),
+          province: formData.province,
+          postalCode: formData.postalCode.trim(),
+          country: "South Africa",
+        },
+        shippingMethod: `${selectedOption.name} (${selectedOption.code})`,
+        shippingCost,
+        subtotal: cartTotal,
+        total: finalTotal,
+        customerNotes: formData.notes.trim() || undefined,
+        items: items.map((item) => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          name: item.product.name,
+          price: item.product.basePrice,
+        })),
+      };
+
+      console.log(
+        "%c[💳 PAYSTACK CHECKOUT]%c Submitting order with selected courier:",
+        "background: #2563eb; color: #fff; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
+        "color: #2563eb; font-weight: bold;",
+        {
+          method: `${selectedOption.name} (${selectedOption.code})`,
+          shippingCost: `R ${shippingCost.toFixed(2)}`,
+          cartSubtotal: `R ${cartTotal.toFixed(2)}`,
+          finalTotal: `R ${finalTotal.toFixed(2)}`,
+          orderData,
+        }
+      );
+
+      const origin = typeof window !== "undefined" ? window.location.origin : undefined;
+      const result = await initiateCheckoutWithPaystackAction(orderData, origin);
+
+      if (result.success && result.authorizationUrl) {
+        console.log(
+          "%c[💳 PAYSTACK REDIRECT]%c Authorization URL ready. Redirecting customer:",
+          "background: #2563eb; color: #fff; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
+          "color: inherit;",
+          result.authorizationUrl
+        );
+        // Redirect directly to the Paystack secure checkout page
+        window.location.href = result.authorizationUrl;
+      } else {
+        setErrorMessage(result.error || "Unable to initiate payment with Paystack. Please try again.");
+        setIsSubmitting(false);
+      }
+    } catch (err: unknown) {
+      console.error("Checkout submission failed:", err);
+      setErrorMessage(
+        err instanceof Error ? err.message : "An unexpected error occurred during checkout."
+      );
+      setIsSubmitting(false);
+    }
+  };
+
+  // Optional WhatsApp Backup Message
   const generateWhatsAppMessage = () => {
     const itemsList = items
       .map(
@@ -73,16 +247,16 @@ export default function CheckoutPage() {
     const shippingText =
       shippingCost === 0 ? "FREE (Orders over R500)" : `R${shippingCost.toFixed(2)}`;
 
-    return `🌿 *NEW ORDER - DIVINITY COSMETICS*
+    return `🌿 *MANUAL ORDER REQUEST - DIVINITY COSMETICS*
 🌐 Website: ${siteConfig.domain}
 
 *CUSTOMER DETAILS:*
 • Name: ${formData.firstName} ${formData.lastName}
-• WhatsApp/Phone: ${formData.phone || "Provided in chat"}
+• Phone: ${formData.phone || "Not provided"}
 • Email: ${formData.email || "Not specified"}
 
 *DELIVERY ADDRESS:*
-• Address: ${formData.streetAddress || "To be confirmed in chat"}
+• Address: ${formData.streetAddress || "-"}
 • Suburb: ${formData.suburb || "-"}
 • City: ${formData.city || "-"}
 • Province: ${formData.province}
@@ -91,23 +265,11 @@ export default function CheckoutPage() {
 *ORDER SUMMARY:*
 ${itemsList}
 
---------------------------------
 • *Subtotal:* R${cartTotal.toFixed(2)}
 • *Shipping:* ${shippingText}
 • *TOTAL DUE:* R${finalTotal.toFixed(2)}
---------------------------------
-${formData.notes ? `*Special Notes:* ${formData.notes}\n` : ""}
-Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Please confirm stock availability and send payment / EFT instructions. Thank you!`;
-  };
 
-  const handleWhatsAppCheckout = (e: React.FormEvent) => {
-    e.preventDefault();
-    const rawMessage = generateWhatsAppMessage();
-    const encodedMessage = encodeURIComponent(rawMessage);
-    const whatsappUrl = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodedMessage}`;
-
-    setOrderSent(true);
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+Hi Divinity Team! I would like to complete this order via EFT or direct assistance. Thank you!`;
   };
 
   const handleCopyOrder = () => {
@@ -118,86 +280,92 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
   };
 
   return (
-    <main className="min-h-screen bg-white pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-[#1a1a1a]">
+    <main className="min-h-screen bg-[#faf9f6]/40 pt-32 md:pt-36 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
       <div className="max-w-7xl mx-auto">
         
         {/* Navigation Breadcrumb */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gray-500 hover:text-black transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-green transition-colors"
           >
             <ArrowLeft size={14} weight="bold" />
-            <span>Back to Botanicals</span>
+            <span>Back to Shop</span>
           </Link>
         </div>
 
-        {/* Pre-launch Concierge Announcement Banner */}
-        <div className="mb-12 bg-white border border-[#3d7b32]/20 rounded-2xl p-6 md:p-8 shadow-[0_4px_25px_-10px_rgba(61,123,50,0.1)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#3d7b32]/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#e8efe7] text-[#3d7b32] rounded-full text-[11px] font-bold tracking-widest uppercase">
-                <Sparkle size={14} weight="fill" />
-                <span>Pre-Launch VIP Concierge · shopdivinitycosmetics.co.za</span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-gray-900 leading-snug">
-                Priority Ordering via Personal WhatsApp Concierge
-              </h1>
-              <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                Direct automated card checkout is undergoing final South African banking security verification for our official launch. In the meantime, we are fulfilling all priority orders personally via our verified <strong>Divinity WhatsApp Concierge</strong> with immediate dispatch.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-2 w-full md:w-auto shrink-0">
-              <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-                <Clock size={16} className="text-[#3d7b32]" weight="bold" />
-                <span>Fast response (Within 15 minutes)</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-                <Truck size={16} className="text-[#3d7b32]" weight="bold" />
-                <span>Courier delivery across all 9 provinces</span>
-              </div>
-            </div>
+        {/* Page Header */}
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-black">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 tracking-tight">
+              Order Checkout
+            </h1>
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
+              Enter your delivery details and complete your order with secure South African payment.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-semibold text-stone-700 bg-white border border-black px-3.5 py-2 rounded-full shadow-sm w-fit">
+            <ShieldCheck size={16} weight="bold" className="text-green" />
+            <span>256-Bit Bank Level Encryption</span>
           </div>
         </div>
 
+        {/* Error Alert */}
+        {errorMessage && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-500 rounded-2xl flex items-center justify-between gap-3 text-red-900 text-sm">
+            <div className="flex items-center gap-3">
+              <WarningCircle size={22} weight="fill" className="text-red-500 shrink-0" />
+              <p className="font-medium">{errorMessage}</p>
+            </div>
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="text-xs font-bold text-red-700 underline shrink-0 hover:text-red-900"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {items.length === 0 ? (
           /* Empty Cart State */
-          <div className="bg-white border border-gray-100 rounded-2xl p-16 text-center max-w-2xl mx-auto shadow-sm">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+          <div className="bg-white border border-black rounded-3xl p-16 text-center max-w-2xl mx-auto shadow-sm">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400 border border-black">
               <Sparkle size={32} weight="light" />
             </div>
-            <h2 className="text-2xl font-medium text-gray-900 mb-3">Your Cart is Currently Empty</h2>
-            <p className="text-gray-500 text-sm md:text-base max-w-md mx-auto mb-8 leading-relaxed">
-              Discover our botanical formulations, add your preferred items, and return here to complete your priority order.
+            <h2 className="text-2xl font-serif font-bold text-gray-900 mb-2">Your Cart is Currently Empty</h2>
+            <p className="text-gray-500 text-xs md:text-sm max-w-md mx-auto mb-8 leading-relaxed">
+              Discover our botanical formulations, add your preferred items, and return here to complete your checkout.
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center gap-2 bg-[#3d7b32] text-white px-8 py-4 rounded-xl font-medium text-sm uppercase tracking-wider hover:bg-[#2c5a24] transition-colors shadow-sm"
+              className="btn-primary"
             >
-              Explore Collection
+              Explore Formulations
             </Link>
           </div>
         ) : (
           /* Active Checkout Flow */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
             {/* Left Column: Delivery & Contact Form */}
-            <div className="lg:col-span-7 space-y-8">
-              <form id="concierge-checkout-form" onSubmit={handleWhatsAppCheckout} className="space-y-8">
+            <div className="lg:col-span-7 space-y-6">
+              <form id="paystack-checkout-form" onSubmit={handlePaystackCheckout} className="space-y-6">
                 
-                {/* Contact Information */}
-                <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h2 className="text-xl font-medium tracking-tight text-gray-900">1. Contact Information</h2>
-                    <p className="text-xs text-gray-500 mt-1">We will message you on WhatsApp to confirm order availability and dispatch tracking.</p>
+                {/* 1. Customer Details */}
+                <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-black shadow-sm space-y-5">
+                  <div className="border-b-2 border-black pb-3 flex justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <h2 className="text-base font-bold tracking-tight text-gray-900">1. Customer Contact</h2>
+                      <p className="text-xs text-gray-500 mt-0.5">Paystack payment receipts and order status will be sent here.</p>
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-[10px] sm:text-xs font-bold text-green uppercase tracking-wider bg-green/10 px-2.5 py-1 rounded-full border-2 border-black">
+                      Step 1 of 2
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         First Name <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -207,12 +375,12 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         onChange={handleChange}
                         type="text"
                         placeholder="e.g. Naledi"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         Last Name <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -222,13 +390,28 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         onChange={handleChange}
                         type="text"
                         placeholder="e.g. Dlamini"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
-                        WhatsApp Number <span className="text-red-500">*</span>
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
+                        Email Address <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        required
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        type="email"
+                        placeholder="e.g. naledi@example.com"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
+                        Phone Number <span className="text-red-500">*</span>
                       </label>
                       <input
                         required
@@ -237,36 +420,27 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         onChange={handleChange}
                         type="tel"
                         placeholder="e.g. 082 123 4567"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
-                        Email Address
-                      </label>
-                      <input
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        type="email"
-                        placeholder="e.g. naledi@example.com"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Delivery Address */}
-                <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h2 className="text-xl font-medium tracking-tight text-gray-900">2. Delivery Address</h2>
-                    <p className="text-xs text-gray-500 mt-1">Direct courier delivery straight to your doorstep.</p>
+                {/* 2. Delivery Address */}
+                <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-black shadow-sm space-y-5">
+                  <div className="border-b-2 border-black pb-3 flex justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <h2 className="text-base font-bold tracking-tight text-gray-900">2. Delivery Address</h2>
+                      <p className="text-xs text-gray-500 mt-0.5">Reliable door-to-door courier delivery across South Africa.</p>
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-[10px] sm:text-xs font-bold text-green uppercase tracking-wider bg-green/10 px-2.5 py-1 rounded-full border-2 border-black">
+                      Step 2 of 2
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2 flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         Street Address <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -275,13 +449,13 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         value={formData.streetAddress}
                         onChange={handleChange}
                         type="text"
-                        placeholder="House / Unit number, Complex or Building, Street name"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        placeholder="Building / Complex, Unit Number, Street Name"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         Suburb <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -290,13 +464,13 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         value={formData.suburb}
                         onChange={handleChange}
                         type="text"
-                        placeholder="e.g. Sandton / Claremont"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        placeholder="e.g. Sandton / Rosebank"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         City / Town <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -305,13 +479,13 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         value={formData.city}
                         onChange={handleChange}
                         type="text"
-                        placeholder="e.g. Johannesburg / Cape Town"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        placeholder="e.g. Johannesburg / Durban"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         Province <span className="text-red-500">*</span>
                       </label>
                       <select
@@ -319,7 +493,7 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         name="province"
                         value={formData.province}
                         onChange={handleChange}
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all appearance-none cursor-pointer"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all cursor-pointer"
                       >
                         <option value="Eastern Cape">Eastern Cape</option>
                         <option value="Free State">Free State</option>
@@ -334,7 +508,7 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
                         Postal Code <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -344,44 +518,212 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                         onChange={handleChange}
                         type="text"
                         placeholder="e.g. 2196"
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
 
                     <div className="md:col-span-2 flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold tracking-wider uppercase text-gray-600">
-                        Special Instructions or Gift Notes (Optional)
+                      <label className="text-[11px] font-bold tracking-wider uppercase text-gray-700">
+                        Delivery Notes or Special Instructions (Optional)
                       </label>
                       <textarea
                         name="notes"
                         rows={2}
                         value={formData.notes}
                         onChange={handleChange}
-                        placeholder="Any gate access code, delivery instructions, or gift packaging notes..."
-                        className="w-full border border-gray-200 p-3.5 rounded-lg bg-gray-50/50 text-sm focus:outline-none focus:border-[#3d7b32] focus:bg-white transition-all"
+                        placeholder="Gate code, reception drop-off instructions, or custom requests..."
+                        className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
                       />
                     </div>
                   </div>
+
+                  {/* Dynamic The Courier Guy Shipping Options from Shiplogic Rates API */}
+                  <div className="mt-5 pt-5 border-t-2 border-black">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} weight="bold" className="text-black" />
+                        <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                          Estimated Delivery Time
+                        </span>
+                        {isLoadingRates && (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 font-normal">
+                            <Spinner size={12} className="animate-spin text-green" />
+                            <span>Checking live rates...</span>
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest hidden sm:inline">
+                        Door-to-Door Courier
+                      </span>
+                    </div>
+
+                    {/* Default Initial Display: Selected option + Highlighted 'Change this' link */}
+                    <div className="bg-[#FAF8F5] border-2 border-black p-4 rounded-2xl flex flex-col gap-3 shadow-xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-start sm:items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center shrink-0 text-black">
+                            <Truck size={16} weight="bold" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs sm:text-sm font-bold text-gray-900 tracking-tight">
+                                {selectedOption.name} ({selectedOption.estimatedDelivery})
+                              </span>
+                              <span className="text-xs font-bold text-green bg-green/10 px-2.5 py-0.5 rounded-full border-2 border-black">
+                                R {selectedOption.rate.toFixed(2)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-500 mt-0.5">
+                              {selectedOption.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsChangingShipping((prev) => !prev)}
+                          className="text-xs font-bold text-black underline underline-offset-4 hover:text-green transition-colors self-start sm:self-auto cursor-pointer shrink-0"
+                        >
+                          {isChangingShipping ? "Done" : "Change this"}
+                        </button>
+                      </div>
+
+                      {/* Centered 'Powered by The Courier Guy' with official brand logo */}
+                      <div className="pt-2.5 border-t-2 border-black/10 flex items-center justify-center gap-2 text-center">
+                        <span className="text-[10px] sm:text-[11px] font-medium text-gray-500 tracking-wide">
+                          Powered by
+                        </span>
+                        <Image
+                          src="/images/the-courier-guy-logo.png"
+                          alt="The Courier Guy"
+                          width={92}
+                          height={26}
+                          className="h-4 sm:h-4.5 w-auto object-contain"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Expandable radio-button list showing other live options */}
+                    {isChangingShipping && (
+                      <div className="mt-3 p-3 bg-white border-2 border-black rounded-2xl space-y-2 shadow-sm animate-in fade-in duration-200">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 px-2 pt-1">
+                          Select Available Delivery Speed:
+                        </div>
+                        {shippingRates.map((option) => {
+                          const isSelected = option.code === selectedRateCode;
+                          return (
+                            <label
+                              key={option.code}
+                              onClick={() => {
+                                setSelectedRateCode(option.code);
+                                console.log(
+                                  `%c[🚚 SHIPPING SELECTED]%c ${option.name} (${option.code}) - R${option.rate.toFixed(2)} | Recalculated Total: R${(cartTotal + option.rate).toFixed(2)}`,
+                                  "background: #047857; color: #fff; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
+                                  "color: #047857; font-weight: bold;"
+                                );
+                              }}
+                              className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                                isSelected
+                                  ? "border-black bg-stone-50/90 shadow-xs ring-1 ring-black"
+                                  : "border-black/20 hover:border-black/50 hover:bg-gray-50/50"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="radio"
+                                  name="shippingSpeedOption"
+                                  checked={isSelected}
+                                  onChange={() => setSelectedRateCode(option.code)}
+                                  className="w-4 h-4 accent-black text-black cursor-pointer"
+                                />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-gray-900">
+                                      {option.name}
+                                    </span>
+                                    {option.isCheapest && (
+                                      <span className="text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-full bg-black text-white">
+                                        Best Value
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-gray-500">
+                                    {option.description}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0 pl-3">
+                                <span className="text-xs sm:text-sm font-bold text-gray-900 block">
+                                  R {option.rate.toFixed(2)}
+                                </span>
+                                <span className="text-[10px] text-gray-500">
+                                  {option.estimatedDelivery}
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* How It Works Explainer */}
-                <div className="bg-[#e8efe7]/40 border border-[#3d7b32]/20 rounded-2xl p-6 space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#3d7b32] flex items-center gap-2">
-                    <ShieldCheck size={18} weight="bold" />
-                    <span>How Your Priority Order Works</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-700">
-                    <div className="space-y-1">
-                      <p className="font-bold text-gray-900">1. Instant Connection</p>
-                      <p>Clicking the button will open WhatsApp with your full order & delivery address pre-filled.</p>
+                {/* Accepted Payment Methods Showcase */}
+                <div className="bg-white/95 p-5 md:p-6 rounded-3xl border-2 border-black shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-700 shrink-0 border-2 border-black">
+                      <LockSimple size={20} weight="bold" />
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-bold text-gray-900">2. Simple Payment</p>
-                      <p>We provide instant EFT, Capitec Pay, or bank details directly in chat for immediate confirmation.</p>
+                    <div>
+                      <div className="text-xs font-bold text-gray-900 tracking-tight">Accepted South African Payment Methods</div>
+                      <div className="text-[11px] text-gray-500 mt-0.5">Zero surcharge • PCI-DSS Level 1 certified gateway</div>
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-bold text-gray-900">3. Priority Dispatch</p>
-                      <p>Your items are packed in our signature packaging and shipped via registered courier with tracking.</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
+                    <div className="h-9 px-3 rounded-xl bg-[#faf9f6] border-2 border-black flex items-center justify-center hover:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)]" title="Visa">
+                      <Image
+                        src="/images/payments/visa.svg"
+                        alt="Visa"
+                        width={42}
+                        height={14}
+                        className="h-3.5 w-auto object-contain"
+                      />
+                    </div>
+                    <div className="h-9 px-3 rounded-xl bg-[#faf9f6] border-2 border-black flex items-center justify-center hover:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)]" title="Mastercard">
+                      <Image
+                        src="/images/payments/mastercard.svg"
+                        alt="Mastercard"
+                        width={28}
+                        height={18}
+                        className="h-4.5 w-auto object-contain"
+                      />
+                    </div>
+                    <div className="h-9 px-3 rounded-xl bg-[#faf9f6] border-2 border-black flex items-center justify-center hover:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)]" title="Capitec Pay">
+                      <Image
+                        src="/images/payments/capitec-pay.svg"
+                        alt="Capitec Pay"
+                        width={68}
+                        height={14}
+                        className="h-3 w-auto object-contain"
+                      />
+                    </div>
+                    <div className="h-9 px-3 rounded-xl bg-[#faf9f6] border-2 border-black flex items-center justify-center hover:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)]" title="Ozow Instant EFT">
+                      <Image
+                        src="/images/payments/ozow.png"
+                        alt="Ozow Instant EFT"
+                        width={52}
+                        height={15}
+                        className="h-3.5 w-auto object-contain"
+                      />
+                    </div>
+                    <div className="h-9 px-3 rounded-xl bg-[#faf9f6] border-2 border-black flex items-center justify-center hover:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.03)]" title="Apple Pay">
+                      <Image
+                        src="/images/payments/apple-pay.svg"
+                        alt="Apple Pay"
+                        width={38}
+                        height={16}
+                        className="h-3.5 w-auto object-contain"
+                      />
                     </div>
                   </div>
                 </div>
@@ -389,40 +731,38 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
               </form>
             </div>
 
-            {/* Right Column: Order Summary & WhatsApp CTA */}
+            {/* Right Column: Order Summary & Paystack Action */}
             <div className="lg:col-span-5">
-              <div className="bg-white border border-gray-200/80 p-6 md:p-8 rounded-2xl shadow-lg shadow-black/[0.03] sticky top-32 space-y-6">
+              <div className="bg-white border-2 border-black p-6 md:p-8 rounded-3xl shadow-lg shadow-black/[0.03] sticky top-36 space-y-5">
                 
-                <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                  <h2 className="text-xl font-medium tracking-tight text-gray-900">Order Summary</h2>
-                  <span className="text-xs font-semibold bg-[#e8efe7] text-[#3d7b32] px-2.5 py-1 rounded-full">
+                <div className="flex justify-between items-center border-b-2 border-black pb-3">
+                  <h2 className="text-lg font-bold tracking-tight text-gray-900">Order Summary</h2>
+                  <span className="text-xs font-bold bg-green/10 text-green px-2.5 py-0.5 rounded-full border-2 border-black">
                     {items.length} {items.length === 1 ? "Item" : "Items"}
                   </span>
                 </div>
 
                 {/* Items List */}
-                <div className="space-y-4 max-h-[320px] overflow-y-auto pr-1">
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex items-center gap-4 py-2 border-b border-gray-50 last:border-0">
-                      <div className="w-16 h-20 relative bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100">
-                        {item.product.images[0] && (
-                          <Image
-                            src={item.product.images[0]}
-                            alt={item.product.name}
-                            fill
-                            sizes="64px"
-                            className="object-cover"
-                          />
-                        )}
-                        <span className="absolute top-1 right-1 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                    <div key={item.product.id} className="flex items-center gap-3.5 py-2 border-b-2 border-black/10 last:border-0">
+                      <div className="w-14 h-16 relative bg-gray-50 rounded-lg overflow-hidden shrink-0 border-2 border-black">
+                        <Image
+                          src={item.product.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg"}
+                          alt={item.product.name}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                        <span className="absolute top-1 right-1 bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                           {item.quantity}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm text-gray-900 truncate">{item.product.name}</h3>
-                        <p className="text-xs text-gray-500">R {item.product.basePrice.toFixed(2)} each</p>
+                        <h3 className="font-bold text-xs text-gray-900 truncate">{item.product.name}</h3>
+                        <p className="text-[11px] text-gray-500">R {item.product.basePrice.toFixed(2)} each</p>
                       </div>
-                      <div className="font-semibold text-sm text-gray-900">
+                      <div className="font-bold text-xs text-gray-900">
                         R {(item.product.basePrice * item.quantity).toFixed(2)}
                       </div>
                     </div>
@@ -430,82 +770,103 @@ Hi Divinity Team! I'm placing this priority order via ${siteConfig.domain}. Plea
                 </div>
 
                 {/* Subtotals & Shipping */}
-                <div className="space-y-3 border-t border-gray-100 pt-5 text-sm">
+                <div className="space-y-2.5 border-t-2 border-black pt-4 text-xs">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>R {cartTotal.toFixed(2)}</span>
+                    <span className="font-semibold text-gray-900">R {cartTotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Door-to-Door Shipping</span>
-                    {shippingCost === 0 ? (
-                      <span className="text-[#3d7b32] font-semibold">FREE (Over R500)</span>
-                    ) : (
-                      <span>R {shippingCost.toFixed(2)}</span>
-                    )}
+                  <div className="flex justify-between items-start text-gray-600">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-900">{selectedOption.name}</span>
+                      <span className="text-[10px] text-gray-500">The Courier Guy • {selectedOption.estimatedDelivery}</span>
+                    </div>
+                    <span className="font-semibold text-gray-900">R {shippingCost.toFixed(2)}</span>
                   </div>
-                  {shippingCost > 0 && (
-                    <p className="text-[11px] text-[#3d7b32] bg-[#e8efe7]/60 p-2 rounded-md">
-                      Tip: Add R{(siteConfig.freeShippingThreshold - cartTotal).toFixed(2)} more to qualify for Free Shipping!
-                    </p>
-                  )}
                 </div>
 
-                {/* Grand Total */}
-                <div className="flex justify-between items-center border-t border-gray-100 pt-5">
+                {/* Total */}
+                <div className="flex justify-between items-center border-t-2 border-black pt-4 gap-4">
                   <div>
-                    <span className="text-base font-bold text-gray-900 block">Total Due</span>
-                    <span className="text-xs text-gray-500">Inclusive of VAT & Courier</span>
+                    <span className="text-sm font-bold text-gray-900 block">Total Due</span>
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">Inclusive of VAT &amp; Courier</span>
                   </div>
-                  <span className="text-3xl font-bold text-gray-900">
+                  <span className="shrink-0 whitespace-nowrap text-xl sm:text-2xl font-serif font-bold text-black text-right">
                     R {finalTotal.toFixed(2)}
                   </span>
                 </div>
 
-                {/* Primary WhatsApp Action Button */}
+                {/* Primary Paystack Checkout Button */}
                 <button
                   type="submit"
-                  form="concierge-checkout-form"
-                  className="w-full flex items-center justify-center gap-3 bg-[#25D366] text-white py-4 px-6 rounded-xl font-bold text-base hover:bg-[#1ebd5a] active:scale-[0.99] transition-all cursor-pointer shadow-md shadow-emerald-500/20"
+                  form="paystack-checkout-form"
+                  disabled={isSubmitting}
+                  className="btn-primary w-full justify-center !py-3.5 sm:!py-4 text-xs sm:text-sm tracking-wide"
                 >
-                  <WhatsappLogo size={24} weight="fill" />
-                  <span>Place Order via WhatsApp Concierge</span>
-                </button>
-
-                {/* Secondary Option: Copy Order Text */}
-                <button
-                  type="button"
-                  onClick={handleCopyOrder}
-                  className="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-700 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-gray-50 active:scale-[0.99] transition-all"
-                >
-                  {copied ? (
+                  {isSubmitting ? (
                     <>
-                      <Check size={16} weight="bold" className="text-[#3d7b32]" />
-                      <span>Order Copied to Clipboard!</span>
+                      <Spinner size={18} className="animate-spin text-white" />
+                      <span>Redirecting to Paystack...</span>
                     </>
                   ) : (
                     <>
-                      <Copy size={16} weight="bold" />
-                      <span>Copy Order Details</span>
+                      <LockSimple size={18} weight="bold" />
+                      <span>Pay R{finalTotal.toFixed(2)} with Paystack</span>
                     </>
                   )}
                 </button>
 
-                {orderSent && (
-                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 space-y-1">
-                    <p className="font-bold">Opening WhatsApp...</p>
-                    <p>If WhatsApp didn't open automatically, use the "Copy Order Details" button and send it directly to our support number or email.</p>
+                <div className="pt-1 flex flex-col items-center justify-center gap-1.5 text-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-gray-500 font-medium tracking-wide">Processed securely by</span>
+                    <Image
+                      src="/images/payments/paystack.svg"
+                      alt="Paystack"
+                      width={84}
+                      height={16}
+                      className="h-3.5 w-auto object-contain opacity-90"
+                    />
                   </div>
-                )}
-
-                {/* Reassurance Footer */}
-                <div className="pt-4 border-t border-gray-100 space-y-2.5 text-center">
-                  <div className="flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
-                    <EnvelopeSimple size={16} weight="bold" className="text-[#3d7b32]" />
-                    <span>Support: {siteConfig.supportEmail}</span>
-                  </div>
-                  <p className="text-[11px] text-gray-400">
-                    Official domain: <span className="font-medium text-gray-600">{siteConfig.domain}</span>. Handcrafted with reverence in South Africa.
+                  <p className="text-[10px] text-gray-500 flex items-center justify-center gap-1">
+                    <ShieldCheck size={13} weight="bold" className="text-green" />
+                    <span>256-Bit SSL Encryption • PCI-DSS Level 1 Certified</span>
                   </p>
+                </div>
+
+                {/* Collapsible WhatsApp Backup */}
+                <div className="pt-2 border-t-2 border-black">
+                  <button
+                    type="button"
+                    onClick={() => setShowWhatsAppFallback(!showWhatsAppFallback)}
+                    className="w-full text-center text-xs text-gray-700 hover:text-[#25D366] font-semibold transition-colors flex items-center justify-center gap-1.5 py-1"
+                  >
+                    <WhatsappLogo size={16} weight="fill" style={{ color: "#25D366" }} />
+                    <span>Prefer manual EFT or WhatsApp assistance?</span>
+                  </button>
+
+                  {showWhatsAppFallback && (
+                    <div className="mt-3 p-4 bg-gray-50 rounded-2xl border-2 border-black text-xs space-y-3">
+                      <p className="text-gray-600 leading-relaxed">
+                        If you prefer to arrange payment via direct EFT or speak with a concierge consultant:
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleCopyOrder}
+                        className="btn-secondary w-full justify-center"
+                      >
+                        {copied ? (
+                          <>
+                            <Check size={14} weight="bold" className="text-green" />
+                            <span>Order Copied to Clipboard!</span>
+                          </>
+                        ) : (
+                          <>
+                            <WhatsappLogo size={15} weight="fill" style={{ color: "#25D366" }} />
+                            <span>Copy Order to WhatsApp</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
               </div>

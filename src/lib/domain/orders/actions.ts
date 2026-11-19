@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   createOrder,
+  getOrderByNumber,
   updateOrderStatus,
   markOrderAsPaid,
   markOrderPaymentFailed,
@@ -12,10 +13,16 @@ import {
   initializePaystackTransaction,
   verifyPaystackTransaction,
 } from "@/lib/domain/payments/paystack";
+import { fetchShiplogicRates, ShippingRateOption, GetRatesParams } from "@/lib/domain/shipping/rates";
 
 export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) {
   try {
     const order = await createOrder(data);
+
+    // TODO [ZOHO INTEGRATION - Zoho Inventory & Zoho CRM]:
+    // Connect Zoho Inventory API to push new sales orders for inventory allocation,
+    // order fulfillment, and Zoho CRM contact synchronization.
+
     return { success: true, orderNumber: order.orderNumber };
   } catch (error) {
     console.error("Error creating order:", error);
@@ -57,6 +64,11 @@ export async function initiateCheckoutWithPaystackAction(
     // 3. Initialize transaction with Paystack (amount must be in cents for ZAR)
     const amountInCents = Math.round(Number(order.total) * 100);
 
+    console.log(`[💳 PAYSTACK INITIALIZE] Creating transaction session for ${order.orderNumber}:`);
+    console.log(`   ├─ Amount: ${amountInCents} cents (R${Number(order.total).toFixed(2)})`);
+    console.log(`   ├─ Customer: ${order.email}`);
+    console.log(`   └─ Callback: ${callbackUrl}`);
+
     const paystackSession = await initializePaystackTransaction({
       email: order.email,
       amountInCents,
@@ -71,9 +83,13 @@ export async function initiateCheckoutWithPaystackAction(
       },
     });
 
+    console.log(`[💳 PAYSTACK INITIALIZE] Session ready. Authorization URL: ${paystackSession.authorizationUrl}`);
+
     return {
       success: true,
       authorizationUrl: paystackSession.authorizationUrl,
+      accessCode: paystackSession.accessCode,
+      reference: order.orderNumber,
       orderNumber: order.orderNumber,
     };
   } catch (error: unknown) {
@@ -106,9 +122,6 @@ export async function verifyPaymentAction(reference: string) {
           ? `Paystack (${verification.channel.toUpperCase()})`
           : "Paystack",
       });
-
-      revalidatePath("/admin/orders");
-      revalidatePath(`/admin/orders/${order.id}`);
 
       return {
         success: true,
@@ -143,11 +156,97 @@ export async function verifyPaymentAction(reference: string) {
 export async function updateOrderStatusAction(id: string, status: OrderStatus) {
   try {
     await updateOrderStatus(id, status);
-    revalidatePath("/admin/orders");
-    revalidatePath(`/admin/orders/${id}`);
+
+    // TODO [ZOHO INTEGRATION - Zoho Inventory / Zoho Desk]:
+    // Order status changes and shipping dispatch will be handled via Zoho Inventory webhooks.
+
     return { success: true };
   } catch (error) {
     console.error("Error updating order status:", error);
     return { success: false, error: "Failed to update status." };
+  }
+}
+
+/**
+ * Retrieves public, verified receipt details for an order by order number.
+ */
+export async function getOrderDetailsAction(orderNumber: string) {
+  try {
+    if (!orderNumber) {
+      return { success: false, error: "Order number is required." };
+    }
+
+    const order = await getOrderByNumber(orderNumber.trim());
+    if (!order) {
+      return { success: false, error: "Order not found." };
+    }
+
+    return {
+      success: true,
+      order: {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        createdAt: order.createdAt.toISOString(),
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod || "Paystack",
+        paymentId: order.paymentId,
+        firstName: order.firstName,
+        lastName: order.lastName,
+        email: order.email,
+        phone: order.phone,
+        shippingAddress: order.shippingAddress as {
+          streetAddress?: string;
+          suburb?: string;
+          city?: string;
+          province?: string;
+          postalCode?: string;
+          country?: string;
+        },
+        shippingMethod: order.shippingMethod || "Door-to-Door Courier",
+        shippingCost: Number(order.shippingCost),
+        subtotal: Number(order.subtotal),
+        discountAmount: Number(order.discountAmount),
+        total: Number(order.total),
+        currency: order.currency || "ZAR",
+        items: order.items.map((i) => ({
+          id: i.id,
+          productId: i.productId,
+          name: i.name,
+          price: Number(i.price),
+          quantity: i.quantity,
+          total: Number(i.total),
+          image: i.product?.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg",
+          category: i.product?.category,
+        })),
+      },
+    };
+  } catch (error: unknown) {
+    console.error("Error fetching order details:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to retrieve order receipt.",
+    };
+  }
+}
+
+/**
+ * Server action to fetch dynamic shipping rate options from The Courier Guy / Shiplogic.
+ */
+export async function getShippingRatesAction(params: GetRatesParams): Promise<{
+  success: boolean;
+  rates: ShippingRateOption[];
+  error?: string;
+}> {
+  try {
+    const rates = await fetchShiplogicRates(params);
+    return { success: true, rates };
+  } catch (error: unknown) {
+    console.error("Error fetching shipping rates:", error);
+    return {
+      success: false,
+      rates: [],
+      error: error instanceof Error ? error.message : "Failed to load live shipping rates.",
+    };
   }
 }

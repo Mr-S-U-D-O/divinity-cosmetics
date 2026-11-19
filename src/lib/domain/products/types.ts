@@ -21,6 +21,7 @@ export interface Product {
   metaTitle?: string | null
   metaDescription?: string | null
   sortOrder: number
+  isFeatured: boolean
   createdAt?: Date
   updatedAt?: Date
   // Temporary UI fields (can stay for now)

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, ShoppingCart, Check } from "@phosphor-icons/react/dist/ssr";
+import { ShoppingBag, Minus, Plus } from "@phosphor-icons/react";
+import { animate } from "animejs";
 
 import { Product } from "@/lib/domain/products/types";
 import { useCart } from "@/lib/context/CartContext";
@@ -13,78 +14,171 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart();
-  const [added, setAdded] = useState(false);
+  const { items, addItem, updateQuantity } = useCart();
+  const [mounted, setMounted] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const isOutOfStock = Boolean(product.trackInventory && product.stock <= 0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const cartItem = items.find((i) => i.product.id === product.id);
+  const quantity = mounted ? cartItem?.quantity || 0 : 0;
+
+  const primaryImage = product.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (isOutOfStock) return;
     addItem(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+
+    if (cardRef.current) {
+      const media = cardRef.current.querySelector('[data-anime="card-media"]');
+      if (media) {
+        animate(media, {
+          scale: [1, 1.025, 1],
+          duration: 520,
+          ease: "outQuart",
+        });
+      }
+    }
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(product.id, quantity - 1);
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (product.trackInventory && quantity >= product.stock) return;
+    updateQuantity(product.id, quantity + 1);
   };
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all duration-300 flex flex-col h-full group">
-      {/* Image with Badge */}
-      <Link href={`/products/${product.slug}`} className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-5 block bg-gray-50">
+    <article
+      ref={cardRef}
+      className="anime-product-card group flex flex-col h-full bg-transparent transition-all duration-300 will-change-transform"
+    >
+      {/* Editorial Media Canvas */}
+      <Link
+        href={`/products/${product.slug}`}
+        data-anime="card-media"
+        className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#f4f2ee] mb-4 block will-change-transform border border-black"
+        aria-label={`View ${product.name}`}
+      >
         <Image
-          src={product.images[0]}
+          src={primaryImage}
           alt={product.name}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
-          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        {product.badge && (
-          <div className="absolute top-3 left-3 bg-[#3d7b32] text-white text-[10px] font-bold tracking-widest px-3 py-1.5 rounded-full shadow-sm z-10">
+
+        {isOutOfStock ? (
+          <div className="absolute top-3.5 left-3.5 bg-stone-900/90 text-stone-100 text-[10px] font-medium tracking-[0.14em] uppercase px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 z-10">
+            Sold Out
+          </div>
+        ) : product.badge ? (
+          <div className="absolute top-3.5 left-3.5 bg-white/95 text-stone-800 text-[10px] font-bold tracking-[0.14em] uppercase px-2.5 py-1 rounded-full backdrop-blur-md border border-black shadow-sm z-10">
             {product.badge}
           </div>
-        )}
+        ) : null}
       </Link>
 
+      {/* Product Content Details */}
       <div className="flex flex-col flex-1">
-        {/* Category & Rating */}
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-[10px] text-[#3d7b32] font-semibold tracking-widest uppercase">
+        {/* Category micro-tag */}
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] font-semibold text-green uppercase tracking-[0.18em]">
             {product.category}
           </span>
-          <div className="flex items-center gap-1.5">
-            <div className="flex text-[#ffb81c]">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={10} weight={i < Math.floor(product.rating || 0) ? "fill" : "regular"} />
-              ))}
-            </div>
-            <span className="text-[10px] text-gray-400 font-medium">({product.reviewCount || 0})</span>
-          </div>
         </div>
 
-        {/* Title */}
-        <Link href={`/products/${product.slug}`} className="hover:text-[#3d7b32] transition-colors mb-2">
-          <h3 className="text-[17px] font-bold text-gray-900 leading-snug tracking-tight">{product.name}</h3>
+        {/* Product Title */}
+        <Link href={`/products/${product.slug}`} className="block group/title mb-1.5">
+          <h3 className="font-heading text-lg sm:text-xl text-stone-900 font-normal leading-snug tracking-tight group-hover/title:text-green transition-colors duration-200">
+            {product.name}
+          </h3>
         </Link>
 
-        {/* Description */}
-        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-6 flex-1">
-          {product.description}
+        {/* Formulation Summary */}
+        <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed mb-4 flex-1">
+          {product.shortDescription || product.description}
         </p>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-400 font-medium tracking-widest uppercase">PRICE</span>
-            <span className="text-xs font-bold bg-[#e8efe7] text-[#3d7b32] px-2.5 py-1 rounded-md">R{product.basePrice}</span>
+        {/* Pricing & Minimalist Action */}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-black">
+          <div className="flex items-baseline gap-2">
+            <span className="text-base font-semibold text-stone-900 tracking-tight">
+              R{product.basePrice}
+            </span>
+            {product.compareAtPrice && product.compareAtPrice > product.basePrice && (
+              <span className="text-xs text-stone-400 line-through">
+                R{product.compareAtPrice}
+              </span>
+            )}
           </div>
-          <button 
-            onClick={handleAddToCart}
-            className={`btn-primary-sm ${
-              added ? "!bg-transparent !text-[#1a1a1a] !border-[#1a1a1a] !border-solid" : ""
-            }`}
-            style={added ? { border: '1.5px solid #1a1a1a' } : undefined}
-          >
-            {added ? <Check size={14} weight="bold" /> : <ShoppingCart size={14} weight="bold" />}
-            <span>{added ? "Added!" : "Add to Cart"}</span>
-          </button>
+
+          {quantity === 0 ? (
+            <button
+              ref={btnRef}
+              type="button"
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              aria-label={isOutOfStock ? `${product.name} is sold out` : `Add ${product.name} to bag`}
+              className={`inline-flex items-center justify-center gap-1.5 min-h-[38px] px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-colors duration-200 cursor-pointer will-change-transform ${
+                isOutOfStock
+                  ? "!border !border-stone-200 !bg-stone-100 !text-stone-400 !cursor-not-allowed"
+                  : "border border-black text-black bg-transparent hover:bg-black hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black"
+              }`}
+            >
+              {isOutOfStock ? (
+                <span>Sold Out</span>
+              ) : (
+                <>
+                  <ShoppingBag size={14} weight="bold" />
+                  <span>Add to Bag</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <div
+              className="inline-flex items-center border border-black rounded-full h-[38px] overflow-hidden bg-white shadow-sm will-change-transform"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleDecrement}
+                aria-label={`Decrease quantity of ${product.name}`}
+                className="w-8 h-full flex items-center justify-center text-black hover:text-green hover:bg-green/10 active:scale-90 transition-colors cursor-pointer"
+              >
+                <Minus size={12} weight="bold" />
+              </button>
+              <span className="w-6 text-center text-xs font-bold select-none text-black font-sans">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={handleIncrement}
+                disabled={Boolean(product.trackInventory && quantity >= product.stock)}
+                aria-label={`Increase quantity of ${product.name}`}
+                className="w-8 h-full flex items-center justify-center text-black hover:text-green hover:bg-green/10 active:scale-90 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Plus size={12} weight="bold" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }

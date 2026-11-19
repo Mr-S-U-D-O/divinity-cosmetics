@@ -29,6 +29,7 @@ function mapProduct(product: PrismaProduct): Product {
     metaTitle: product.metaTitle,
     metaDescription: product.metaDescription,
     sortOrder: product.sortOrder,
+    isFeatured: Boolean(product.isFeatured),
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   }
@@ -68,4 +69,39 @@ export async function getProductById(id: string): Promise<Product | null> {
   })
 
   return product ? mapProduct(product) : null
+}
+
+export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
+  const featured = await prisma.product.findMany({
+    where: {
+      status: "ACTIVE",
+      isFeatured: true,
+    },
+    orderBy: [
+      { sortOrder: "asc" },
+      { updatedAt: "desc" },
+    ],
+    take: limit,
+  })
+
+  if (featured.length > 0) {
+    return featured.map(mapProduct)
+  }
+
+  // Graceful fallback: if no products are marked as featured yet, return active products up to 6
+  const fallback = await prisma.product.findMany({
+    where: { status: "ACTIVE" },
+    orderBy: { sortOrder: "asc" },
+    take: limit,
+  })
+
+  return fallback.map(mapProduct)
+}
+
+export async function getFeaturedCount(): Promise<number> {
+  return prisma.product.count({
+    where: {
+      isFeatured: true,
+    },
+  })
 }

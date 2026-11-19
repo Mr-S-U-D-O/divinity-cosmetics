@@ -12,25 +12,32 @@ async function main() {
       name: "Marula & Baobab Body Lotion",
       slug: "marula-baobab-body-lotion",
       description:
-        "A rich, comforting body lotion made with Marula and Baobab botanicals to leave skin feeling soft, replenished, and beautifully cared for. The nourishing texture absorbs into the skin without leaving a heavy finish, making it an easy everyday ritual for every skin type.",
+        "A facial-grade botanical body treatment formulated with high concentrations of cold-pressed South African Marula and wild-harvested Baobab seed oils. Unlike watery supermarket pump lotions that evaporate in five seconds, this nutrient-dense emulsion takes a few minutes to sink in—forming a physical 24-hour seal against Highveld winters, harsh UV, hard municipal water, and coastal humidity shifts. Applied consistently over a 90-day cycle, it rebuilds a thinning moisture barrier, eliminates midday ashiness, and softens crepey texture on arms, legs, and décolletage.",
       shortDescription:
-        "Nourishing Marula and Baobab body lotion for soft, hydrated skin.",
-      basePrice: 300,
+        "Facial-grade 400ml body lotion with cold-pressed Marula & Baobab oils for 24-hour hydration and 90-day barrier repair.",
+      basePrice: 400,
       images: [
         "/images/body-lotion-marula-baobab-hero.jpg",
         "/images/body-lotion-marula-baobab-detail.jpg",
       ],
       category: "Body Care",
       status: ProductStatus.ACTIVE,
-      badge: "SIGNATURE FORMULATION",
-      concerns: ["Deep Hydration", "Soothing & Sensitive"],
-      ingredients: ["Marula", "Baobab"],
-      stock: 10,
+      badge: "FLAGSHIP 400ML FORMULATION",
+      concerns: [
+        "24-Hour Barrier Repair",
+        "Crepey & Mature Skin",
+        "Highveld & Climate Protection",
+        "Eliminates Midday Ashiness",
+      ],
+      ingredients: ["Cold-Pressed Marula Oil", "Wild-Harvested Baobab Oil"],
+      stock: 25,
       trackInventory: true,
+      isFeatured: true,
       sortOrder: 1,
-      metaTitle: "Marula & Baobab Body Lotion | Divinity Cosmetics",
+      metaTitle:
+        "Marula & Baobab Body Lotion (400ml) | Facial-Grade Barrier Repair | Divinity Cosmetics",
       metaDescription:
-        "Shop Divinity Cosmetics Marula & Baobab Body Lotion, a nourishing South African botanical moisturiser for soft, hydrated skin.",
+        "Replace watery supermarket lotions with Divinity Cosmetics Marula & Baobab Body Lotion (400ml, R400). Cold-pressed African botanical oils for 24-hour hydration and 90-day barrier repair.",
     },
   });
 

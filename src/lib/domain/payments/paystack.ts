@@ -155,7 +155,11 @@ export function verifyPaystackWebhookSignature(
       .createHmac("sha512", secretKey)
       .update(rawBody)
       .digest("hex");
-    return hash === signatureHeader;
+    
+    const hashBuf = Buffer.from(hash, "utf8");
+    const sigBuf = Buffer.from(signatureHeader, "utf8");
+    if (hashBuf.length !== sigBuf.length) return false;
+    return crypto.timingSafeEqual(hashBuf, sigBuf);
   } catch (e) {
     console.error("Paystack signature validation error:", e);
     return false;

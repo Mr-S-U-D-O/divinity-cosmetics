@@ -1,9 +1,13 @@
 "use server";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { prisma } from "@/lib/prisma";
+
+// ============================================================================
+// NOTE [ZOHO ONE SUITE INTEGRATION]:
+// Reseller partner applications and review pipelines will connect to Zoho CRM / Zoho Desk.
+// Storefront submissions persist to database and forward as partner leads into Zoho One.
+// ============================================================================
 
 export interface ResellerApplicationInput {
   phoneNumber: string;
@@ -35,12 +39,14 @@ export async function submitResellerApplicationAction(data: ResellerApplicationI
       },
     });
 
-    await prisma.resellerApplication.create({
+    const application = await prisma.resellerApplication.create({
       data: { userId, ...data },
     });
 
-    revalidatePath("/admin/resellers");
-    return { success: true };
+    // TODO [ZOHO INTEGRATION - Zoho CRM / Zoho Desk]:
+    // Create new Lead or Partner Application Ticket in Zoho CRM / Zoho Desk with applicant details.
+
+    return { success: true, applicationId: application.id };
   } catch (error) {
     console.error("Failed to submit reseller application:", error);
     return { success: false, error: "We could not submit your application. Please try again." };
@@ -52,7 +58,8 @@ export async function updateResellerApplicationStatusAction(
   status: "approved" | "rejected" | "pending",
   formData: FormData,
 ) {
-  await requireAdmin();
+  // TODO [ZOHO INTEGRATION - Zoho CRM]:
+  // Reseller approval/rejection workflows will be handled in Zoho CRM.
   const reviewNotes = formData.get("reviewNotes");
   const notes = typeof reviewNotes === "string" ? reviewNotes : undefined;
 
@@ -74,7 +81,7 @@ export async function updateResellerApplicationStatusAction(
       });
     }
 
-    revalidatePath("/admin/resellers");
+    return { success: true };
   } catch (error) {
     console.error("Failed to update reseller application:", error);
     throw new Error("Could not update this application.");

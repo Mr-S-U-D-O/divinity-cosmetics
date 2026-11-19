@@ -7,6 +7,32 @@ import { verifyPaymentAction } from "@/lib/domain/orders/actions";
 import { CheckCircle, XCircle, SpinnerGap } from "@phosphor-icons/react";
 import Link from "next/link";
 
+function VerifySkeletonCard() {
+  return (
+    <div className="max-w-md w-full bg-white border border-black p-8 md:p-12 rounded-3xl shadow-sm text-center space-y-6 animate-pulse">
+      {/* Icon circle skeleton */}
+      <div className="w-16 h-16 rounded-full bg-emerald-50 border border-black/20 flex items-center justify-center mx-auto text-green">
+        <SpinnerGap size={36} className="animate-spin text-green" />
+      </div>
+
+      {/* Headings & copy skeletons */}
+      <div className="space-y-3">
+        <div className="h-7 w-48 bg-stone-200 rounded-lg mx-auto" />
+        <div className="h-3.5 w-72 max-w-full bg-stone-200 rounded-md mx-auto" />
+        <div className="h-3.5 w-60 max-w-full bg-stone-200 rounded-md mx-auto" />
+      </div>
+
+      {/* Verification status pill */}
+      <div className="pt-2">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 border border-black/15 text-stone-600 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-green animate-ping" />
+          <span>Confirming transaction with Paystack...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,25 +82,15 @@ function VerifyContent() {
     handleVerification();
   }, [reference, clearCart, router]);
 
-  return (
-    <div className="max-w-md w-full bg-white border border-gray-100 p-8 md:p-12 rounded-sm shadow-sm text-center">
-      {status === "verifying" && (
-        <div className="space-y-6">
-          <div className="flex justify-center text-black">
-            <SpinnerGap size={56} className="animate-spin text-[#3d7b32]" />
-          </div>
-          <h2 className="text-2xl font-medium tracking-tight text-gray-900">
-            Confirming Payment
-          </h2>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            Please wait while we verify your transaction with Paystack. Do not refresh or close this page.
-          </p>
-        </div>
-      )}
+  if (status === "verifying") {
+    return <VerifySkeletonCard />;
+  }
 
+  return (
+    <div className="max-w-md w-full bg-white border border-black p-8 md:p-12 rounded-3xl shadow-sm text-center">
       {status === "success" && (
         <div className="space-y-6 animate-in fade-in duration-500">
-          <div className="flex justify-center text-[#3d7b32]">
+          <div className="flex justify-center text-green">
             <CheckCircle size={64} weight="fill" />
           </div>
           <h2 className="text-2xl font-medium tracking-tight text-gray-900">
@@ -94,19 +110,19 @@ function VerifyContent() {
           <h2 className="text-2xl font-medium tracking-tight text-gray-900">
             Payment Incomplete
           </h2>
-          <p className="text-sm text-gray-600 bg-red-50 border border-red-100 p-4 rounded-sm">
+          <p className="text-sm text-gray-600 bg-red-50 border border-red-500 p-4 rounded-xl">
             {errorMessage}
           </p>
           <div className="pt-4 flex flex-col gap-3">
             <Link
               href="/checkout"
-              className="w-full inline-block bg-black text-white py-3 px-6 font-medium uppercase tracking-wider text-xs hover:bg-[#3d7b32] transition-colors"
+              className="btn-primary w-full justify-center"
             >
               Return to Checkout
             </Link>
             <Link
               href="/shop"
-              className="text-xs text-gray-500 hover:text-black transition-colors"
+              className="btn-secondary w-full justify-center"
             >
               Continue Shopping
             </Link>
@@ -119,14 +135,8 @@ function VerifyContent() {
 
 export default function CheckoutVerifyPage() {
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 font-sans text-[#1a1a1a]">
-      <Suspense
-        fallback={
-          <div className="min-h-screen pt-40 flex justify-center text-gray-500">
-            Loading verification...
-          </div>
-        }
-      >
+    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 font-sans text-black">
+      <Suspense fallback={<VerifySkeletonCard />}>
         <VerifyContent />
       </Suspense>
     </main>

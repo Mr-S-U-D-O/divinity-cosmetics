@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL_UNPOOLED")
+  // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // ======================
@@ -129,8 +129,9 @@ model Product {
   metaTitle       String?
   metaDescription String?
 
-  // Ordering
-  sortOrder Int @default(0)
+  // Ordering & Homepage Featured
+  sortOrder  Int     @default(0)
+  isFeatured Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -170,6 +171,19 @@ model Order {
   paymentStatus PaymentStatus @default(PENDING)
   paymentMethod String?
   paymentId     String? // external payment reference
+
+  // Zoho Integration
+  zohoContactId    String?
+  zohoSalesOrderId String?
+  zohoInvoiceId    String?
+  zohoStatus       String? // SYNCED | PENDING | FAILED
+
+  // Courier Guy / Shipping Integration
+  waybillNumber       String?
+  trackingUrl         String?
+  shiplogicShipmentId String? // Shiplogic shipment `id`, used to re-fetch labels via GET /shipments/label?id=
+  labelUrl            String? // Signed S3 waybill PDF URL (expires ~24h)
+  shippedAt           DateTime?
 
   // Reseller tracking
   referralCode String?

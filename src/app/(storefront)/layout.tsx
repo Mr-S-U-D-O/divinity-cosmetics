@@ -2,6 +2,7 @@ import React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/ui/CartDrawer";
+import { AnimeOrchestrator } from "@/components/animations/AnimeOrchestrator";
 
 export default function StorefrontLayout({
   children,
@@ -10,6 +11,7 @@ export default function StorefrontLayout({
 }) {
   return (
     <>
+      <AnimeOrchestrator />
       <Header />
       {children}
       <Footer />

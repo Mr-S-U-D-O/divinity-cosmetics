@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { Prisma, OrderStatus } from "@prisma/client"
+import { syncPaidOrderToZoho } from "@/lib/domain/zoho/service"
 
 export const STANDARD_SHIPPING_COST = 100.0;
 
@@ -71,8 +72,9 @@ export async function createOrder(data: CreateOrderInput) {
   for (const item of data.items) {
     const product = productMap.get(item.productId);
     if (!product) {
+      const displayName = item.name ? `"${item.name}"` : `Product with ID '${item.productId}'`;
       throw new Error(
-        `Product with ID '${item.productId}' is not available or does not exist.`
+        `${displayName} is no longer available in the store catalog. Please remove it from your cart to continue.`
       );
     }
 
@@ -97,7 +99,11 @@ export async function createOrder(data: CreateOrderInput) {
   }
 
   // 4. Server-authoritative shipping cost
-  const serverShippingCost = STANDARD_SHIPPING_COST;
+  // Respects dynamic shipping options selected from The Courier Guy / Shiplogic
+  const serverShippingCost =
+    typeof data.shippingCost === "number" && data.shippingCost >= 0
+      ? Number(data.shippingCost)
+      : STANDARD_SHIPPING_COST;
 
   // 5. Server-authoritative referral verification
   let serverDiscountAmount = 0;
@@ -126,6 +132,13 @@ export async function createOrder(data: CreateOrderInput) {
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, "");
   const randomPart = Math.floor(1000 + Math.random() * 9000);
   const orderNumber = `DIV-${datePart}-${randomPart}`;
+
+  console.log(`[💾 DATABASE] Initializing new order: ${orderNumber}`);
+  console.log(`   ├─ Customer: ${data.firstName} ${data.lastName} (${data.email})`);
+  console.log(`   ├─ Items (${verifiedOrderItems.length}): ${verifiedOrderItems.map((i) => `${i.quantity}x ${i.name}`).join(", ")}`);
+  console.log(`   ├─ Subtotal: R${serverSubtotal.toFixed(2)}`);
+  console.log(`   ├─ Shipping: R${serverShippingCost.toFixed(2)} [${data.shippingMethod || "Standard"}]`);
+  console.log(`   └─ Authoritative Total: R${serverTotal.toFixed(2)}`);
 
   // 8. Ensure user exists in DB if userId is provided
   if (data.userId) {
@@ -190,8 +203,20 @@ export async function getOrderById(id: string) {
 export async function getOrderByNumber(orderNumber: string) {
   return prisma.order.findUnique({
     where: { orderNumber },
-    include: { items: true },
-  })
+    include: {
+      items: {
+        include: {
+          product: {
+            select: {
+              images: true,
+              slug: true,
+              category: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 export async function getAllOrders() {
@@ -218,7 +243,10 @@ export async function markOrderAsPaid(
     paymentMethod?: string;
   }
 ) {
-  return prisma.$transaction(async (tx) => {
+  let wasAlreadyPaid = false;
+  console.log(`[💳 PAYMENT VERIFIED] Processing paid order: ${orderNumber} (Ref: ${paymentDetails.paymentId})`);
+
+  const paidOrder = await prisma.$transaction(async (tx) => {
     const existingOrder = await tx.order.findUnique({
       where: { orderNumber },
       include: { items: true },
@@ -230,17 +258,22 @@ export async function markOrderAsPaid(
 
     // Idempotency: if already paid, return early
     if (existingOrder.paymentStatus === "PAID") {
+      console.log(`[💳 PAYMENT IDEMPOTENCY] Order ${orderNumber} is already PAID. Skipping duplicate processing.`);
+      wasAlreadyPaid = true;
       return existingOrder;
     }
 
     // Safely decrement inventory stock for tracked products
+    console.log(`[💾 DATABASE] Deducting inventory stock for ${existingOrder.items.length} items...`);
     for (const item of existingOrder.items) {
       const product = await tx.product.findUnique({
         where: { id: item.productId },
-        select: { id: true, trackInventory: true, stock: true },
+        select: { id: true, name: true, trackInventory: true, stock: true },
       });
 
       if (product && product.trackInventory) {
+        const newStock = product.stock - item.quantity;
+        console.log(`   └─ ${product.name}: stock ${product.stock} -> ${newStock} (-${item.quantity})`);
         await tx.product.update({
           where: { id: product.id },
           data: {
@@ -252,7 +285,7 @@ export async function markOrderAsPaid(
       }
     }
 
-    return tx.order.update({
+    const updated = await tx.order.update({
       where: { orderNumber },
       data: {
         paymentStatus: "PAID",
@@ -264,7 +297,27 @@ export async function markOrderAsPaid(
         items: true,
       },
     });
+
+    console.log(`[💾 DATABASE] Order ${orderNumber} transitioned to PAID / PROCESSING.`);
+    return updated;
   });
+
+  // Phase 1 Automation: Push verified paid order to Zoho Books & Zoho Inventory
+  if (!wasAlreadyPaid) {
+    console.log(`[💼 ZOHO PIPELINE] Triggering Phase 1: Pushing ${orderNumber} to Zoho Books & Inventory...`);
+    try {
+      const syncResult = await syncPaidOrderToZoho(orderNumber);
+      if (syncResult.success) {
+        console.log(`[💼 ZOHO PIPELINE] Success: ${orderNumber} synced. Sales Order: ${syncResult.salesOrderId}, Invoice: ${syncResult.invoiceId}`);
+      } else if (syncResult.skipped) {
+        console.log(`[💼 ZOHO PIPELINE] Skipped for ${orderNumber} (${syncResult.reason || "already synced or unconfigured"}).`);
+      }
+    } catch (zohoErr) {
+      console.error(`[💼 ZOHO PIPELINE ERROR] Non-blocking sync error for order ${orderNumber}:`, zohoErr);
+    }
+  }
+
+  return paidOrder;
 }
 
 

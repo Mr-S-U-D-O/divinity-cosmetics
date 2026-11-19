@@ -3,8 +3,70 @@
 import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { motion } from "motion/react";
-import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
+import { CheckCircle } from "@phosphor-icons/react";
 import { submitResellerApplicationAction } from "@/lib/domain/resellers/actions";
+
+function ResellerFormSkeleton() {
+  return (
+    <div className="bg-white rounded-3xl p-8 md:p-12 border border-black shadow-xl shadow-black/[0.02] flex flex-col gap-6 animate-pulse">
+      {/* Header skeleton */}
+      <div className="border-b border-black pb-6 mb-2 space-y-2">
+        <div className="h-6 w-36 bg-stone-200 rounded-md" />
+        <div className="h-4 w-72 max-w-full bg-stone-200 rounded-md" />
+      </div>
+
+      {/* Name inputs skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <div className="h-3 w-20 bg-stone-200 rounded" />
+          <div className="h-11 w-full bg-stone-100 rounded-xl border border-stone-200" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 w-20 bg-stone-200 rounded" />
+          <div className="h-11 w-full bg-stone-100 rounded-xl border border-stone-200" />
+        </div>
+      </div>
+
+      {/* Email input skeleton */}
+      <div className="space-y-2">
+        <div className="h-3 w-24 bg-stone-200 rounded" />
+        <div className="h-11 w-full bg-stone-100 rounded-xl border border-stone-200" />
+      </div>
+
+      {/* Business Details header skeleton */}
+      <div className="border-b border-black pb-6 pt-4 mb-2 mt-2 space-y-2">
+        <div className="h-6 w-44 bg-stone-200 rounded-md" />
+        <div className="h-4 w-60 max-w-full bg-stone-200 rounded-md" />
+      </div>
+
+      {/* Phone number and Business Name skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <div className="h-3 w-28 bg-stone-200 rounded" />
+          <div className="h-11 w-full bg-stone-50 rounded-xl border border-black/20" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 w-32 bg-stone-200 rounded" />
+          <div className="h-11 w-full bg-stone-50 rounded-xl border border-black/20" />
+        </div>
+      </div>
+
+      {/* Channel and Reason skeletons */}
+      <div className="space-y-2">
+        <div className="h-3 w-36 bg-stone-200 rounded" />
+        <div className="h-11 w-full bg-stone-50 rounded-xl border border-black/20" />
+      </div>
+
+      <div className="space-y-2">
+        <div className="h-3 w-40 bg-stone-200 rounded" />
+        <div className="h-24 w-full bg-stone-50 rounded-xl border border-black/20" />
+      </div>
+
+      {/* Button skeleton */}
+      <div className="h-14 w-full bg-stone-200 rounded-full" />
+    </div>
+  );
+}
 
 export function ResellerForm() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -21,11 +83,7 @@ export function ResellerForm() {
 
   // Handle loading and unauthenticated states
   if (!isLoaded) {
-    return (
-      <div className="w-full flex justify-center py-24">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-[#3d7b32] rounded-full animate-spin"></div>
-      </div>
-    );
+    return <ResellerFormSkeleton />;
   }
 
   if (!isSignedIn) {
@@ -64,12 +122,12 @@ export function ResellerForm() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl p-10 md:p-16 text-center border border-black/5 shadow-xl shadow-black/[0.02]"
+        className="bg-white rounded-3xl p-10 md:p-16 text-center border border-black shadow-xl shadow-black/[0.02]"
       >
-        <div className="flex justify-center mb-6 text-[#3d7b32]">
+        <div className="flex justify-center mb-6 text-green">
           <CheckCircle size={64} weight="duotone" />
         </div>
-        <h2 className="text-3xl font-black tracking-tight mb-4 text-[#111]">Application Received.</h2>
+        <h2 className="text-3xl font-black tracking-tight mb-4 text-black">Application Received.</h2>
         <p className="text-gray-600 max-w-md mx-auto">
           Our team will review your details and be in touch within 48 hours.
         </p>
@@ -83,10 +141,10 @@ export function ResellerForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       onSubmit={handleSubmit} 
-      className="bg-white rounded-3xl p-8 md:p-12 border border-black/5 shadow-xl shadow-black/[0.02] flex flex-col gap-6"
+      className="bg-white rounded-3xl p-8 md:p-12 border border-black shadow-xl shadow-black/[0.02] flex flex-col gap-6"
     >
-      <div className="border-b border-black/5 pb-6 mb-2">
-        <h3 className="text-xl font-bold text-[#111] mb-2">Your Details</h3>
+      <div className="border-b border-black pb-6 mb-2">
+        <h3 className="text-xl font-bold text-black mb-2">Your Details</h3>
         <p className="text-sm text-gray-500">Your basic information is pulled securely from your account.</p>
       </div>
 
@@ -122,8 +180,8 @@ export function ResellerForm() {
         />
       </div>
 
-      <div className="border-b border-black/5 pb-6 pt-4 mb-2 mt-2">
-        <h3 className="text-xl font-bold text-[#111] mb-2">Business Details</h3>
+      <div className="border-b border-black pb-6 pt-4 mb-2 mt-2">
+        <h3 className="text-xl font-bold text-black mb-2">Business Details</h3>
         <p className="text-sm text-gray-500">Tell us about your retail channels.</p>
       </div>
 
@@ -137,7 +195,7 @@ export function ResellerForm() {
           onChange={handleInputChange}
           placeholder="+1 (555) 000-0000"
           required
-          className="w-full bg-white border border-gray-300 text-[#111] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#3d7b32] focus:ring-1 focus:ring-[#3d7b32] transition-colors" 
+          className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors" 
         />
       </div>
 
@@ -151,7 +209,7 @@ export function ResellerForm() {
           onChange={handleInputChange}
           placeholder="e.g. Aura Wellness Spa or @aurawellness"
           required
-          className="w-full bg-white border border-gray-300 text-[#111] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#3d7b32] focus:ring-1 focus:ring-[#3d7b32] transition-colors" 
+          className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors" 
         />
       </div>
 
@@ -164,7 +222,7 @@ export function ResellerForm() {
             value={formData.primaryChannel}
             onChange={handleInputChange}
             required
-            className="w-full bg-white border border-gray-300 text-[#111] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#3d7b32] focus:ring-1 focus:ring-[#3d7b32] transition-colors appearance-none cursor-pointer"
+            className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors appearance-none cursor-pointer"
           >
             <option value="" disabled>Select a channel...</option>
             <option value="Retail Store">Retail Store</option>
@@ -190,7 +248,7 @@ export function ResellerForm() {
           placeholder="Tell us a bit about your clientele and why Divinity is a good fit..."
           required
           rows={4}
-          className="w-full bg-white border border-gray-300 text-[#111] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#3d7b32] focus:ring-1 focus:ring-[#3d7b32] transition-colors resize-none"
+          className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors resize-none"
         ></textarea>
       </div>
 
@@ -200,9 +258,7 @@ export function ResellerForm() {
           disabled={isSubmitting}
           className="btn-primary w-full sm:w-auto px-10 py-4 text-sm tracking-wider uppercase disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Submitting..." : (
-            <>Submit Application <ArrowRight weight="bold" /></>
-          )}
+          {isSubmitting ? "Submitting..." : "Submit Application"}
         </button>
       </div>
     </motion.form>

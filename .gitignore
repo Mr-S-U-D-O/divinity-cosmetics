@@ -29,12 +29,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+/scratch
+/mockup designs
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
+
+# local ide / mcp configs
+.vscode/
+.mcp.json
 
 # typescript
 *.tsbuildinfo
