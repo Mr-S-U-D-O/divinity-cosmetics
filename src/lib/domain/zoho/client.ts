@@ -120,13 +120,21 @@ export async function zohoFetch<T = any>(
     cache: "no-store",
   });
 
-  const json = await response.json().catch(() => null);
+  const rawText = await response.text().catch(() => "");
+  let json: any = null;
+  try {
+    json = rawText ? JSON.parse(rawText) : null;
+  } catch {
+    json = null;
+  }
 
   // In Zoho Books API, code: 0 signifies an operation success
   if (!response.ok || (json && typeof json.code === "number" && json.code !== 0)) {
     const code = json?.code ?? response.status;
     const message = json?.message || response.statusText || "Unknown Zoho API Error";
-    console.error(`[Zoho API Error] ${options.method || "GET"} /${cleanEndpoint} returned code ${code}:`, message);
+    console.error(
+      `[Zoho API Error] ${options.method || "GET"} /${cleanEndpoint} | HTTP ${response.status} | code=${code} | message=${message} | fullResponse=${rawText}`
+    );
     throw new Error(`Zoho API Error (${code}): ${message}`);
   }
 

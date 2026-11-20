@@ -8,6 +8,8 @@ import {
 } from "@/lib/seo/schema";
 import { ShopClient } from "./ShopClient";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title:
     "Shop Marula & Baobab Body Lotion (400ml) | Facial-Grade Botanical Catalog",

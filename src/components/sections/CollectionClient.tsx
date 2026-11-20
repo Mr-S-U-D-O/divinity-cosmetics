@@ -5,7 +5,7 @@ import { MagnifyingGlass, X } from "@phosphor-icons/react";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Product } from "@/lib/domain/products/types";
 import Link from "next/link";
-import { animate, createSpring, stagger } from "animejs";
+import { animate, spring, stagger } from "animejs";
 
 export function CollectionClient({ products }: { products: Product[] }) {
   const [activeTab, setActiveTab] = useState<string>("All");
@@ -69,7 +69,7 @@ export function CollectionClient({ products }: { products: Product[] }) {
     setActiveTab(tab);
     animate(e.currentTarget, {
       scale: [0.94, 1.04, 1],
-      ease: createSpring({ mass: 1, stiffness: 220, damping: 12 }),
+      ease: spring({ mass: 1, stiffness: 220, damping: 12 }),
     });
   };
 

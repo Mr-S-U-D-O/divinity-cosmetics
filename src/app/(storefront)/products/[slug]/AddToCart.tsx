@@ -13,7 +13,7 @@ import {
   Truck,
   ShieldCheck,
 } from "@phosphor-icons/react";
-import { animate, createSpring } from "animejs";
+import { animate, spring } from "animejs";
 import { useCart } from "@/lib/context/CartContext";
 import { Product } from "@/lib/domain/products/types";
 
@@ -64,7 +64,7 @@ export function AddToCart({ product }: { product: Product }) {
     if (btnRef.current) {
       animate(btnRef.current, {
         scale: [0.96, 1.02, 1],
-        ease: createSpring({ mass: 1, stiffness: 240, damping: 12 }),
+        ease: spring({ mass: 1, stiffness: 240, damping: 12 }),
       });
     }
     addSelectedQuantityToCart();

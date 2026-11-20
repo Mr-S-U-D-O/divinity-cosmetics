@@ -82,7 +82,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {isOutOfStock ? (
           <div className="absolute top-3.5 left-3.5 bg-stone-900/90 text-stone-100 text-[10px] font-medium tracking-[0.14em] uppercase px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 z-10">
-            Sold Out
+            Out of Stock
           </div>
         ) : product.badge ? (
           <div className="absolute top-3.5 left-3.5 bg-white/95 text-stone-800 text-[10px] font-bold tracking-[0.14em] uppercase px-2.5 py-1 rounded-full backdrop-blur-md border border-black shadow-sm z-10">
@@ -139,7 +139,7 @@ export function ProductCard({ product }: ProductCardProps) {
               }`}
             >
               {isOutOfStock ? (
-                <span>Sold Out</span>
+                <span>Out of Stock</span>
               ) : (
                 <>
                   <ShoppingBag size={14} weight="bold" />

@@ -6,6 +6,8 @@ export interface Product {
   id: string
   name: string
   slug: string
+  sku?: string | null
+  zohoItemId?: string | null
   description: string
   shortDescription?: string | null
   basePrice: number          // we will convert Decimal → number when fetching

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { Product, ProductStatus } from "./types"
 import { Prisma, Product as PrismaProduct } from "@prisma/client"
+import { syncProductsStockFromZoho } from "@/lib/domain/zoho/service"
 
 // Helper to convert Prisma Decimal to number
 function toNumber(value: Prisma.Decimal | number | null | undefined): number {
@@ -9,11 +10,13 @@ function toNumber(value: Prisma.Decimal | number | null | undefined): number {
 }
 
 // Convert Prisma product to our frontend Product type
-function mapProduct(product: PrismaProduct): Product {
+function mapProduct(product: PrismaProduct, liveStock?: number): Product {
   return {
     id: product.id,
     name: product.name,
     slug: product.slug,
+    sku: product.sku,
+    zohoItemId: product.zohoItemId,
     description: product.description,
     shortDescription: product.shortDescription,
     basePrice: toNumber(product.basePrice),
@@ -24,7 +27,7 @@ function mapProduct(product: PrismaProduct): Product {
     badge: product.badge,
     concerns: product.concerns || [],
     ingredients: product.ingredients || [],
-    stock: product.stock,
+    stock: liveStock !== undefined ? liveStock : product.stock,
     trackInventory: product.trackInventory,
     metaTitle: product.metaTitle,
     metaDescription: product.metaDescription,
@@ -33,6 +36,12 @@ function mapProduct(product: PrismaProduct): Product {
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   }
+}
+
+async function hydrateWithZohoStock(products: PrismaProduct[]): Promise<Product[]> {
+  if (products.length === 0) return []
+  const stockMap = await syncProductsStockFromZoho(products)
+  return products.map((p) => mapProduct(p, stockMap.get(p.id)))
 }
 
 export async function getAllProducts(options?: {
@@ -52,7 +61,7 @@ export async function getAllProducts(options?: {
     orderBy: { sortOrder: "asc" },
   })
 
-  return products.map(mapProduct)
+  return hydrateWithZohoStock(products)
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
@@ -60,7 +69,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     where: { slug },
   })
 
-  return product ? mapProduct(product) : null
+  if (!product) return null
+  const [hydrated] = await hydrateWithZohoStock([product])
+  return hydrated
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
@@ -68,7 +79,9 @@ export async function getProductById(id: string): Promise<Product | null> {
     where: { id },
   })
 
-  return product ? mapProduct(product) : null
+  if (!product) return null
+  const [hydrated] = await hydrateWithZohoStock([product])
+  return hydrated
 }
 
 export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
@@ -85,7 +98,7 @@ export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
   })
 
   if (featured.length > 0) {
-    return featured.map(mapProduct)
+    return hydrateWithZohoStock(featured)
   }
 
   // Graceful fallback: if no products are marked as featured yet, return active products up to 6
@@ -95,7 +108,7 @@ export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
     take: limit,
   })
 
-  return fallback.map(mapProduct)
+  return hydrateWithZohoStock(fallback)
 }
 
 export async function getFeaturedCount(): Promise<number> {

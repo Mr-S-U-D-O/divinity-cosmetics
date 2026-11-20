@@ -11,7 +11,20 @@ import {
 import { Prisma } from "@prisma/client";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
-  include: { items: true };
+  include: {
+    items: {
+      include: {
+        product: {
+          select: {
+            id: true;
+            name: true;
+            sku: true;
+            zohoItemId: true;
+          };
+        };
+      };
+    };
+  };
 }>;
 
 interface ParsedShippingAddress {
@@ -23,7 +36,133 @@ interface ParsedShippingAddress {
   country?: string;
 }
 
-function parseOrderShippingAddress(rawAddress: any): ZohoAddress {
+const STOCK_CACHE_TTL_MS = 60_000; // 60-second TTL for storefront browsing
+const zohoStockCache = new Map<string, { stock: number; expiresAt: number }>();
+
+/**
+ * Fetches live stock for a single Zoho Inventory item (`GET /items/{zohoItemId}`).
+ * Reads `available_stock`, falling back to `stock_on_hand`.
+ * Pass `{ bypassCache: true }` for strict pre-checkout validation.
+ */
+export async function fetchZohoItemStock(
+  zohoItemId: string,
+  options?: { bypassCache?: boolean }
+): Promise<number | null> {
+  if (!zohoItemId || !isZohoConfigured()) {
+    return null;
+  }
+
+  const now = Date.now();
+  if (!options?.bypassCache) {
+    const cached = zohoStockCache.get(zohoItemId);
+    if (cached && now < cached.expiresAt) {
+      return cached.stock;
+    }
+  }
+
+  try {
+    const res = await zohoFetch<{
+      item?: {
+        available_stock?: number | string | null;
+        stock_on_hand?: number | string | null;
+        actual_available_stock?: number | string | null;
+      };
+    }>(`items/${encodeURIComponent(zohoItemId)}`);
+
+    const rawStock =
+      res.item?.available_stock ??
+      res.item?.stock_on_hand ??
+      res.item?.actual_available_stock;
+
+    if (rawStock === undefined || rawStock === null || rawStock === "") {
+      return null;
+    }
+
+    const parsed = Math.max(0, Math.floor(Number(rawStock)));
+    if (Number.isNaN(parsed)) {
+      return null;
+    }
+
+    zohoStockCache.set(zohoItemId, {
+      stock: parsed,
+      expiresAt: now + STOCK_CACHE_TTL_MS,
+    });
+
+    return parsed;
+  } catch (error) {
+    console.error(
+      `[Zoho Inventory] Failed to fetch live stock for zohoItemId=${zohoItemId}:`,
+      error
+    );
+    return null;
+  }
+}
+
+/**
+ * Mirrors live Zoho Inventory stock (with 60s TTL cache) into Prisma `Product.stock`
+ * so storefront pages always reflect Zoho as the Single Source of Truth.
+ */
+export async function syncProductsStockFromZoho(
+  products: Array<{ id: string; zohoItemId?: string | null; stock: number }>
+): Promise<Map<string, number>> {
+  const result = new Map<string, number>();
+  if (!isZohoConfigured() || products.length === 0) {
+    for (const p of products) {
+      result.set(p.id, p.stock);
+    }
+    return result;
+  }
+
+  await Promise.all(
+    products.map(async (p) => {
+      if (!p.zohoItemId) {
+        result.set(p.id, p.stock);
+        return;
+      }
+
+      const liveStock = await fetchZohoItemStock(p.zohoItemId, {
+        bypassCache: false,
+      });
+
+      if (liveStock === null) {
+        result.set(p.id, p.stock);
+        return;
+      }
+
+      result.set(p.id, liveStock);
+
+      // Mirror into Prisma when stock differs so DB stays aligned with Zoho
+      if (liveStock !== p.stock) {
+        prisma.product
+          .update({
+            where: { id: p.id },
+            data: { stock: liveStock },
+          })
+          .catch((err) => {
+            console.warn(
+              `[Zoho Inventory] Failed to mirror stock=${liveStock} to Prisma for product ${p.id}:`,
+              err
+            );
+          });
+      }
+    })
+  );
+
+  return result;
+}
+
+/**
+ * Clears cached stock for a Zoho item (e.g., right after a paid order syncs).
+ */
+export function invalidateZohoStockCache(zohoItemId?: string | null) {
+  if (zohoItemId) {
+    zohoStockCache.delete(zohoItemId);
+  } else {
+    zohoStockCache.clear();
+  }
+}
+
+function parseOrderShippingAddress(rawAddress: unknown): ZohoAddress {
   if (!rawAddress) {
     return {
       country: "South Africa",
@@ -31,22 +170,48 @@ function parseOrderShippingAddress(rawAddress: any): ZohoAddress {
   }
 
   const addr: ParsedShippingAddress =
-    typeof rawAddress === "string" ? JSON.parse(rawAddress) : rawAddress;
+    typeof rawAddress === "string"
+      ? JSON.parse(rawAddress)
+      : ((rawAddress as ParsedShippingAddress) || {});
 
-  const street = addr.streetAddress || "";
-  const cityWithSuburb = addr.suburb ? `${addr.suburb}, ${addr.city || ""}` : addr.city || "";
+  const street = (addr.streetAddress || "").slice(0, 95);
+  const cityWithSuburb = addr.suburb && addr.suburb.toLowerCase() !== (addr.city || "").toLowerCase()
+    ? `${addr.suburb}, ${addr.city || ""}`
+    : addr.city || addr.suburb || "";
 
   return {
     address: street,
-    city: cityWithSuburb,
-    state: addr.province || "Gauteng",
-    zip: addr.postalCode || "",
-    country: addr.country || "South Africa",
+    city: cityWithSuburb.slice(0, 50),
+    state: (addr.province || "Gauteng").slice(0, 50),
+    zip: (addr.postalCode || "").slice(0, 20),
+    country: (addr.country || "South Africa").slice(0, 50),
   };
 }
 
+function formatShippingAddressSummary(rawAddress: unknown): string {
+  const addr = parseOrderShippingAddress(rawAddress);
+  return [addr.address, addr.city, addr.state, addr.zip, addr.country]
+    .filter(Boolean)
+    .join(", ");
+}
+
 /**
- * Cached map of Zoho Inventory items to link sales order lines to tracked stock.
+ * Maps storefront payment method labels (e.g. "Paystack (CARD)") to Zoho Books
+ * recognized payment modes so `POST /customerpayments` never rejects the mode.
+ */
+function mapZohoPaymentMode(rawMethod?: string | null): string {
+  const lower = (rawMethod || "").toLowerCase();
+  if (lower.includes("bank") || lower.includes("eft") || lower.includes("ozow") || lower.includes("transfer")) {
+    return "Bank Transfer";
+  }
+  if (lower.includes("cash")) {
+    return "Cash";
+  }
+  return "Credit Card";
+}
+
+/**
+ * Cached map of Zoho Inventory items (fallback only for products missing `zohoItemId` in Prisma).
  */
 let cachedZohoItems: Map<string, { itemId: string; name: string; sku?: string }> | null = null;
 
@@ -65,40 +230,55 @@ async function getOrFetchZohoItems(): Promise<Map<string, { itemId: string; name
     }
     cachedZohoItems = map;
   } catch (err) {
-    console.warn("[Zoho Sync] Failed to fetch items catalog for mapping:", err);
+    console.warn("[Zoho Sync] Failed to fetch items catalog for fallback mapping:", err);
   }
   return map;
 }
 
+/**
+ * Resolves Zoho line items dynamically from Prisma `Product.zohoItemId` / `Product.sku`.
+ * Scales cleanly to 100+ SKUs without any hardcoded item IDs.
+ */
 export async function resolveZohoLineItems(
-  items: Array<{ name: string; price: any; quantity: number }>
+  items: OrderWithItems["items"]
 ) {
-  const itemsMap = await getOrFetchZohoItems();
+  let fallbackMap: Map<string, { itemId: string; name: string; sku?: string }> | null = null;
 
-  return items.map((item) => {
-    const lowerName = item.name.toLowerCase().trim();
-    let match = itemsMap.get(lowerName);
+  const resolved = [];
+  for (const item of items) {
+    const dbZohoItemId = item.product?.zohoItemId?.trim();
+    const dbSku = item.product?.sku?.trim();
 
-    if (!match) {
-      for (const [key, val] of itemsMap.entries()) {
-        if (
-          (key.includes("marula") && lowerName.includes("marula")) ||
-          (key.includes("baobab") && lowerName.includes("baobab"))
-        ) {
-          match = val;
-          break;
-        }
-      }
+    if (dbZohoItemId) {
+      resolved.push({
+        item_id: dbZohoItemId,
+        name: item.name,
+        description: `Divinity Cosmetics ${item.name}${dbSku ? ` (${dbSku})` : ""}`,
+        rate: Number(item.price),
+        quantity: item.quantity,
+      });
+      continue;
     }
 
-    return {
+    // Fallback for legacy products not yet assigned a zohoItemId in Prisma
+    if (!fallbackMap) {
+      fallbackMap = await getOrFetchZohoItems();
+    }
+
+    const match =
+      (dbSku ? fallbackMap.get(dbSku.toLowerCase()) : undefined) ||
+      fallbackMap.get(item.name.toLowerCase().trim());
+
+    resolved.push({
       ...(match?.itemId ? { item_id: match.itemId } : {}),
       name: match?.name || item.name,
       description: `Divinity Cosmetics ${match?.name || item.name}`,
       rate: Number(item.price),
       quantity: item.quantity,
-    };
-  });
+    });
+  }
+
+  return resolved;
 }
 
 /**
@@ -109,7 +289,6 @@ export async function findOrCreateZohoCustomer(
 ): Promise<string> {
   const customerEmail = order.email.trim();
 
-  // 1. Search for existing contact by email
   console.log(`[Zoho Sync] Searching for contact with email: ${customerEmail}`);
   const searchResult = await zohoFetch<{
     contacts: Array<{ contact_id: string; contact_name: string; email: string }>;
@@ -121,7 +300,6 @@ export async function findOrCreateZohoCustomer(
     return existingId;
   }
 
-  // 2. Format customer address and contact details
   const zohoAddress = parseOrderShippingAddress(order.shippingAddress);
   const fullName = `${order.firstName} ${order.lastName}`.trim() || customerEmail;
 
@@ -161,16 +339,22 @@ export async function findOrCreateZohoCustomer(
 
 /**
  * Creates a Confirmed Sales Order in Zoho Inventory / Books.
- * Confirmed status places the order directly into the packaging & fulfillment queue.
+ * Note: Do NOT pass an inline `shipping_address` object to `POST /salesorders` — Zoho Books v3
+ * automatically inherits the structured shipping address from the Contact and throws Error 15
+ * if an inline address object is stringified (>100 chars).
  */
 export async function createZohoSalesOrder(
   customerId: string,
   order: OrderWithItems
 ): Promise<{ salesOrderId: string; salesOrderNumber: string }> {
-  const zohoAddress = parseOrderShippingAddress(order.shippingAddress);
   const orderDate = new Date(order.createdAt).toISOString().slice(0, 10);
-
   const lineItems = await resolveZohoLineItems(order.items);
+  const deliverySummary = formatShippingAddressSummary(order.shippingAddress);
+
+  const notesParts = [
+    order.customerNotes ? `Customer note: ${order.customerNotes}` : null,
+    deliverySummary ? `Deliver to: ${deliverySummary}` : null,
+  ].filter(Boolean);
 
   const payload: ZohoCreateSalesOrderPayload = {
     customer_id: customerId,
@@ -178,20 +362,18 @@ export async function createZohoSalesOrder(
     reference_number: order.orderNumber,
     date: orderDate,
     shipment_date: orderDate,
-    status: "confirmed", // Important: places it in Zoho Inventory packing queue
     line_items: lineItems,
     shipping_charge: Number(order.shippingCost),
     notes:
-      order.customerNotes ||
+      notesParts.join(" | ") ||
       "Standard Door-to-Door Courier Delivery (Wright Crossing Hub)",
     terms:
-      "Paid in full via Paystack. Fulfillment and packaging gate: Wright Crossing Shopping Centre Hub.",
+      "Paid in full via Paystack. Fulfillment hub: Wright Crossing Shopping Centre.",
     delivery_method: order.shippingMethod || "Standard Door-to-Door Courier",
-    shipping_address: zohoAddress,
   };
 
   console.log(
-    `[Zoho Sync] Creating confirmed Sales Order for ${order.orderNumber} (Customer: ${customerId}) with ${lineItems.length} items (linked to Zoho catalog)`
+    `[Zoho Sync] Creating Sales Order for ${order.orderNumber} (Customer: ${customerId}) with ${lineItems.length} items`
   );
 
   const result = await zohoFetch<{
@@ -203,15 +385,27 @@ export async function createZohoSalesOrder(
 
   const salesOrderId = result.salesorder.salesorder_id;
   const salesOrderNumber = result.salesorder.salesorder_number;
-  console.log(
-    `[Zoho Sync] Successfully created Sales Order: ${salesOrderNumber} (ID: ${salesOrderId})`
-  );
+
+  // Explicitly mark the Sales Order as Confirmed so it enters the Zoho Inventory packing queue
+  try {
+    await zohoFetch(`salesorders/${encodeURIComponent(salesOrderId)}/status/confirmed`, {
+      method: "POST",
+    });
+    console.log(
+      `[Zoho Sync] Sales Order ${salesOrderNumber} (ID: ${salesOrderId}) confirmed in Zoho Inventory.`
+    );
+  } catch (confirmErr) {
+    console.error(
+      `[Zoho Sync] Sales Order ${salesOrderId} created, but failed to mark as confirmed:`,
+      confirmErr
+    );
+  }
 
   return { salesOrderId, salesOrderNumber };
 }
 
 /**
- * Creates a Tax Invoice linked to the Sales Order in Zoho Books.
+ * Creates a Tax Invoice linked to the Sales Order in Zoho Books and marks it as Sent.
  */
 export async function createZohoInvoiceForSalesOrder(
   customerId: string,
@@ -219,7 +413,6 @@ export async function createZohoInvoiceForSalesOrder(
   order: OrderWithItems
 ): Promise<string> {
   const orderDate = new Date(order.createdAt).toISOString().slice(0, 10);
-
   const lineItems = await resolveZohoLineItems(order.items);
 
   const invoicePayload: ZohoCreateInvoicePayload = {
@@ -228,7 +421,6 @@ export async function createZohoInvoiceForSalesOrder(
     reference_number: order.orderNumber,
     date: orderDate,
     due_date: orderDate,
-    status: "sent",
     line_items: lineItems,
     shipping_charge: Number(order.shippingCost),
     notes: "Thank you for choosing Divinity Cosmetics. Paid in full via Paystack.",
@@ -247,6 +439,20 @@ export async function createZohoInvoiceForSalesOrder(
 
   const invoiceId = invoiceResult.invoice.invoice_id;
   console.log(`[Zoho Sync] Successfully created Invoice ID: ${invoiceId}`);
+
+  // Mark invoice as sent so customerpayments can cleanly apply against it
+  try {
+    await zohoFetch(`invoices/${encodeURIComponent(invoiceId)}/status/sent`, {
+      method: "POST",
+    });
+    console.log(`[Zoho Sync] Invoice ${invoiceId} marked as SENT.`);
+  } catch (sentErr) {
+    console.error(
+      `[Zoho Sync] Invoice ${invoiceId} created, but failed to mark as sent:`,
+      sentErr
+    );
+  }
+
   return invoiceId;
 }
 
@@ -260,14 +466,15 @@ export async function recordZohoInvoicePayment(
 ): Promise<string> {
   const paymentDate = new Date(order.createdAt).toISOString().slice(0, 10);
   const totalAmount = Number(order.total);
+  const zohoPaymentMode = mapZohoPaymentMode(order.paymentMethod);
 
   const paymentPayload: ZohoCreatePaymentPayload = {
     customer_id: customerId,
-    payment_mode: order.paymentMethod || "Paystack",
+    payment_mode: zohoPaymentMode,
     amount: totalAmount,
     date: paymentDate,
     reference_number: order.paymentId || order.orderNumber,
-    description: `Payment for Order ${order.orderNumber} via Paystack`,
+    description: `Payment for Order ${order.orderNumber} via ${order.paymentMethod || "Paystack"}`,
     invoices: [
       {
         invoice_id: invoiceId,
@@ -276,7 +483,9 @@ export async function recordZohoInvoicePayment(
     ],
   };
 
-  console.log(`[Zoho Sync] Recording payment of R${totalAmount.toFixed(2)} against Invoice ${invoiceId}`);
+  console.log(
+    `[Zoho Sync] Recording payment of R${totalAmount.toFixed(2)} (${zohoPaymentMode}) against Invoice ${invoiceId}`
+  );
   const paymentResult = await zohoFetch<{ payment: { payment_id: string } }>(
     "customerpayments",
     {
@@ -292,17 +501,20 @@ export async function recordZohoInvoicePayment(
 
 /**
  * Primary Orchestrator: Pushes a paid order into Zoho One (Books & Inventory).
- * Safe, idempotent, non-blocking: never crashes order confirmation flow if Zoho credentials
- * are missing or external API has network interruptions.
+ * Safe, idempotent, non-blocking: persists partial Zoho IDs as each step succeeds and logs
+ * any Zoho API failure loudly with full error details.
  */
 export async function syncPaidOrderToZoho(
   orderNumber: string
 ): Promise<ZohoSyncResult> {
+  let customerId: string | undefined;
+  let salesOrderId: string | undefined;
+  let invoiceId: string | undefined;
+
   try {
-    // 1. Check if Zoho credentials are configured
     if (!isZohoConfigured()) {
-      console.log(
-        `[💼 ZOHO PIPELINE] Zoho One credentials incomplete in .env.local (ZOHO_ORG_ID or ZOHO_REFRESH_TOKEN is blank). Skipping Zoho push so sandbox payment succeeds cleanly.`
+      console.warn(
+        `[💼 ZOHO PIPELINE] Zoho One credentials incomplete in environment (ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_ORG_ID, or ZOHO_REFRESH_TOKEN missing). Skipping Zoho push.`
       );
       return {
         success: false,
@@ -311,10 +523,22 @@ export async function syncPaidOrderToZoho(
       };
     }
 
-    // 2. Load order and items from database
     const order = await prisma.order.findUnique({
       where: { orderNumber },
-      include: { items: true },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                sku: true,
+                zohoItemId: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!order) {
@@ -325,8 +549,8 @@ export async function syncPaidOrderToZoho(
       };
     }
 
-    // 3. Idempotency Check: if already synced, skip duplicate creation
-    if (order.zohoSalesOrderId && order.zohoInvoiceId) {
+    // Idempotency Check: if already fully synced, skip duplicate creation
+    if (order.zohoSalesOrderId && order.zohoInvoiceId && order.zohoStatus === "SYNCED") {
       console.log(
         `[Zoho Sync] Order ${orderNumber} is already synchronized to Zoho (SO: ${order.zohoSalesOrderId}, Inv: ${order.zohoInvoiceId}). Skipping.`
       );
@@ -342,17 +566,20 @@ export async function syncPaidOrderToZoho(
     console.log(`[Zoho Sync] Beginning Phase 1 sync for paid order: ${orderNumber}...`);
 
     // Step A: Find or Create Customer
-    const customerId = await findOrCreateZohoCustomer(order);
+    customerId = order.zohoContactId || (await findOrCreateZohoCustomer(order));
 
     // Step B: Create Confirmed Sales Order (for Inventory packing queue)
-    const { salesOrderId } = await createZohoSalesOrder(customerId, order);
+    if (order.zohoSalesOrderId) {
+      salesOrderId = order.zohoSalesOrderId;
+    } else {
+      const so = await createZohoSalesOrder(customerId, order);
+      salesOrderId = so.salesOrderId;
+    }
 
     // Step C: Create Tax Invoice in Zoho Books
-    const invoiceId = await createZohoInvoiceForSalesOrder(
-      customerId,
-      salesOrderId,
-      order
-    );
+    invoiceId =
+      order.zohoInvoiceId ||
+      (await createZohoInvoiceForSalesOrder(customerId, salesOrderId, order));
 
     // Step D: Record payment to mark Invoice as PAID
     const paymentId = await recordZohoInvoicePayment(
@@ -376,6 +603,13 @@ export async function syncPaidOrderToZoho(
       },
     });
 
+    // Invalidate live Zoho stock cache for all items in this order
+    for (const item of order.items) {
+      if (item.product?.zohoItemId) {
+        invalidateZohoStockCache(item.product.zohoItemId);
+      }
+    }
+
     console.log(`[Zoho Sync] Phase 1 completed successfully for order ${orderNumber}!`);
 
     return {
@@ -386,10 +620,13 @@ export async function syncPaidOrderToZoho(
       paymentId,
     };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Unknown error";
-    console.error(`[Zoho Sync Error] Failed to sync order ${orderNumber} to Zoho:`, errorMsg);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(
+      `[Zoho Sync Error] Failed to sync order ${orderNumber} to Zoho (Contact=${customerId ?? "none"}, SO=${salesOrderId ?? "none"}, Inv=${invoiceId ?? "none"}):`,
+      error
+    );
 
-    // Mark order status as FAILED in local DB without crashing caller
+    // Persist any IDs already created + error message so retries don't duplicate
     try {
       const existing = await prisma.order.findUnique({
         where: { orderNumber },
@@ -399,6 +636,9 @@ export async function syncPaidOrderToZoho(
       await prisma.order.update({
         where: { orderNumber },
         data: {
+          ...(customerId ? { zohoContactId: customerId } : {}),
+          ...(salesOrderId ? { zohoSalesOrderId: salesOrderId } : {}),
+          ...(invoiceId ? { zohoInvoiceId: invoiceId } : {}),
           zohoStatus: "FAILED",
           internalNotes: existing?.internalNotes
             ? `${existing.internalNotes} | ${failNote}`
@@ -415,4 +655,3 @@ export async function syncPaidOrderToZoho(
     };
   }
 }
-

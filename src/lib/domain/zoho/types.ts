@@ -58,13 +58,12 @@ export interface ZohoCreateSalesOrderPayload {
   reference_number?: string;
   date: string;
   shipment_date?: string;
-  status: "confirmed" | "draft";
   line_items: ZohoSalesOrderLineItem[];
   shipping_charge?: number;
   notes?: string;
   terms?: string;
   delivery_method?: string;
-  shipping_address?: ZohoAddress;
+  shipping_address_id?: string;
 }
 
 export interface ZohoCreateInvoicePayload {

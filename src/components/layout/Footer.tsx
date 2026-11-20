@@ -9,7 +9,7 @@ import {
   WhatsappLogo,
 } from "@phosphor-icons/react";
 import { siteConfig } from "@/lib/config/site";
-import { animate, createSpring } from "animejs";
+import { animate, spring } from "animejs";
 
 const SOCIAL_LINKS = [
   {
@@ -29,7 +29,7 @@ export function Footer() {
   const handleSocialEnter = (e: React.MouseEvent<HTMLElement>) => {
     animate(e.currentTarget, {
       scale: [1, 1.12, 1],
-      ease: createSpring({ mass: 1, stiffness: 220, damping: 12 }),
+      ease: spring({ mass: 1, stiffness: 220, damping: 12 }),
     });
   };
 

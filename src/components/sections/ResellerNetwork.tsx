@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Headset, MapPin } from "@phosphor-icons/react";
-import { animate, createSpring } from "animejs";
+import { animate, spring } from "animejs";
 
 const cardBase =
   "rounded-2xl border-2 border-black bg-white";
@@ -19,7 +19,7 @@ export function ResellerNetwork() {
       animate(badge, {
         scale: [1, 1.15, 1],
         rotate: [0, 8, 0],
-        ease: createSpring({ mass: 1, stiffness: 220, damping: 12 }),
+        ease: spring({ mass: 1, stiffness: 220, damping: 12 }),
       });
     }
   };

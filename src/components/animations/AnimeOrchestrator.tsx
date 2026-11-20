@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { animate, createSpring, onScroll } from "animejs";
+import { animate, spring, onScroll } from "animejs";
 
 /**
  * Global Anime.js v4 Botanical-Luxury Orchestrator.
@@ -142,7 +142,7 @@ export function AnimeOrchestrator() {
             if (chevron) {
               animate(chevron, {
                 rotate: 180,
-                ease: createSpring({ mass: 1, stiffness: 180, damping: 14 }),
+                ease: spring({ mass: 1, stiffness: 180, damping: 14 }),
               });
             }
             if (answer) {
@@ -157,7 +157,7 @@ export function AnimeOrchestrator() {
             if (chevron) {
               animate(chevron, {
                 rotate: 0,
-                ease: createSpring({ mass: 1, stiffness: 180, damping: 14 }),
+                ease: spring({ mass: 1, stiffness: 180, damping: 14 }),
               });
             }
           }
@@ -180,13 +180,13 @@ export function AnimeOrchestrator() {
           animate(buttonEl, {
             translateY: -2,
             scale: 1.015,
-            ease: createSpring({ mass: 1.3, stiffness: 85, damping: 18 }),
+            ease: spring({ mass: 1.3, stiffness: 85, damping: 18 }),
           });
           const icon = buttonEl.querySelector("svg");
           if (icon) {
             animate(icon, {
               translateX: [0, 3],
-              ease: createSpring({ mass: 1, stiffness: 160, damping: 12 }),
+              ease: spring({ mass: 1, stiffness: 160, damping: 12 }),
             });
           }
         };
@@ -219,7 +219,7 @@ export function AnimeOrchestrator() {
         const onMouseUp = () => {
           animate(buttonEl, {
             scale: 1.015,
-            ease: createSpring({ mass: 1, stiffness: 200, damping: 12 }),
+            ease: spring({ mass: 1, stiffness: 200, damping: 12 }),
           });
         };
 

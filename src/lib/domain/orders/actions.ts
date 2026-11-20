@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 import {
   createOrder,
   getOrderByNumber,
@@ -14,6 +15,7 @@ import {
   verifyPaystackTransaction,
 } from "@/lib/domain/payments/paystack";
 import { fetchShiplogicRates, ShippingRateOption, GetRatesParams } from "@/lib/domain/shipping/rates";
+import { fetchZohoItemStock } from "@/lib/domain/zoho/service";
 
 export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) {
   try {
@@ -45,6 +47,76 @@ export async function initiateCheckoutWithPaystackAction(
         error:
           "Paystack Secret Key is not configured. Please add PAYSTACK_SECRET_KEY to your .env file.",
       };
+    }
+
+    // 0. Strict Pre-Checkout Live Stock Gate (Zoho Inventory Single Source of Truth)
+    // Performs a live, uncached stock check against Zoho Inventory BEFORE creating any order or Paystack session.
+    if (data.items && data.items.length > 0) {
+      const productIds = Array.from(new Set(data.items.map((i) => i.productId)));
+      const dbProducts = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: {
+          id: true,
+          name: true,
+          stock: true,
+          trackInventory: true,
+          zohoItemId: true,
+        },
+      });
+      const productById = new Map(dbProducts.map((p) => [p.id, p]));
+
+      for (const item of data.items) {
+        const product = productById.get(item.productId);
+        if (!product || !product.trackInventory) continue;
+
+        const requestedQty = Math.floor(Number(item.quantity));
+        if (product.zohoItemId) {
+          const liveZohoStock = await fetchZohoItemStock(product.zohoItemId, {
+            bypassCache: true,
+          });
+
+          if (liveZohoStock !== null) {
+            // Keep Prisma mirrored with live Zoho stock
+            if (liveZohoStock !== product.stock) {
+              await prisma.product
+                .update({
+                  where: { id: product.id },
+                  data: { stock: liveZohoStock },
+                })
+                .catch(() => {});
+            }
+
+            if (liveZohoStock < requestedQty) {
+              console.warn(
+                `[Zoho Stock Gate] Blocked checkout for "${product.name}" (requested=${requestedQty}, zohoAvailableStock=${liveZohoStock}).`
+              );
+              return {
+                success: false,
+                error:
+                  liveZohoStock <= 0
+                    ? `Sorry, ${product.name} is currently out of stock.`
+                    : `Sorry, only ${liveZohoStock} unit${
+                        liveZohoStock === 1 ? "" : "s"
+                      } of ${product.name} ${
+                        liveZohoStock === 1 ? "is" : "are"
+                      } currently available in stock.`,
+              };
+            }
+          }
+        } else if (product.stock < requestedQty) {
+          return {
+            success: false,
+            error:
+              product.stock <= 0
+                ? `Sorry, ${product.name} is currently out of stock.`
+                : `Sorry, only ${product.stock} unit${
+                    product.stock === 1 ? "" : "s"
+                  } of ${product.name} ${
+                    product.stock === 1 ? "is" : "are"
+                  } currently available in stock.`,
+          };
+        }
+      }
     }
 
     // 1. Create order in database (server strictly recalculates prices from DB)

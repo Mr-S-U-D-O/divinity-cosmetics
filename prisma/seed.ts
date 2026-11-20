@@ -11,6 +11,8 @@ async function main() {
     data: {
       name: "Marula & Baobab Body Lotion",
       slug: "marula-baobab-body-lotion",
+      sku: "DIV-MBL-400",
+      zohoItemId: "1612725000000147076",
       description:
         "A facial-grade botanical body treatment formulated with high concentrations of cold-pressed South African Marula and wild-harvested Baobab seed oils. Unlike watery supermarket pump lotions that evaporate in five seconds, this nutrient-dense emulsion takes a few minutes to sink in—forming a physical 24-hour seal against Highveld winters, harsh UV, hard municipal water, and coastal humidity shifts. Applied consistently over a 90-day cycle, it rebuilds a thinning moisture barrier, eliminates midday ashiness, and softens crepey texture on arms, legs, and décolletage.",
       shortDescription:

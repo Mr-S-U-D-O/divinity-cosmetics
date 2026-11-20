@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   animate,
   createAnimatable,
-  createSpring,
+  spring,
 } from "animejs";
 
 const communityAvatars = [
@@ -172,7 +172,7 @@ export function Hero() {
     animate(e.currentTarget, {
       translateY: -6,
       scale: 1.14,
-      ease: createSpring({ mass: 1, stiffness: 220, damping: 12 }),
+      ease: spring({ mass: 1, stiffness: 220, damping: 12 }),
     });
   };
 

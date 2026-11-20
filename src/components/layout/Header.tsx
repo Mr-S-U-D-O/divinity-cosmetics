@@ -7,7 +7,7 @@ import { MagnifyingGlass, ShoppingCart, ArrowRight, X, User, List } from "@phosp
 import { useCart } from "@/lib/context/CartContext";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "motion/react";
-import { animate, createSpring, stagger } from "animejs";
+import { animate, spring, stagger } from "animejs";
 
 const SAFlag = () => (
   <svg 
@@ -50,13 +50,13 @@ export function Header() {
     if (cartCount > prevCartCountRef.current && cartBtnRef.current) {
       animate(cartBtnRef.current, {
         scale: [1, 1.26, 1],
-        ease: createSpring({ mass: 1, stiffness: 240, damping: 10 }),
+        ease: spring({ mass: 1, stiffness: 240, damping: 10 }),
       });
       const badge = cartBtnRef.current.querySelector(".cart-badge");
       if (badge) {
         animate(badge, {
           scale: [0.5, 1.35, 1],
-          ease: createSpring({ mass: 1, stiffness: 260, damping: 9 }),
+          ease: spring({ mass: 1, stiffness: 260, damping: 9 }),
         });
       }
     }

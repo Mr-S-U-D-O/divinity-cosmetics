@@ -15,7 +15,7 @@ export const siteConfig = {
     volume: "400ml",
     volumeImperial: "13.5 fl oz",
     priceZar: 400.0,
-    sku: "DIV-MB-BL-400",
+    sku: "DIV-MBL-400",
     category: "Body Care",
     image: "/images/marula-baobab-body-lotion.jpg",
     heroModelImage: "/images/divinity-hero-model-showcase.jpg",

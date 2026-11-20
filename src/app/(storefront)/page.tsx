@@ -11,6 +11,8 @@ import {
   buildHeroImageSchema,
 } from "@/lib/seo/schema";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: {
     absolute:

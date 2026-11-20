@@ -102,6 +102,8 @@ model Product {
   id               String  @id @default(cuid())
   name             String
   slug             String  @unique
+  sku              String? @unique
+  zohoItemId       String? @unique
   description      String
   shortDescription String?
 
