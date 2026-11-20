@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Package, Truck, User } from "@phosphor-icons/react/dist/ssr";
+import { Package, Truck, User } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -195,7 +195,6 @@ export default async function AccountPage() {
                         className="btn-primary !h-10 !py-0 !px-5 text-xs uppercase tracking-[0.14em]"
                       >
                         <span>Track Order</span>
-                        <ArrowUpRight size={14} weight="bold" />
                       </Link>
                     </div>
                   </article>

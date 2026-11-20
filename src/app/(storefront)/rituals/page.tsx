@@ -2,12 +2,8 @@ import type { Metadata } from "next";
 import React from "react";
 import Link from "next/link";
 import {
-  Sparkle,
   Sun,
   Moon,
-  Drop,
-  ShieldCheck,
-  Clock,
 } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
 import { buildBreadcrumbSchema } from "@/lib/seo/schema";
@@ -76,7 +72,7 @@ export default function RitualsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-[#1a1a1a]">
+    <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-[#1a1a1a]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -86,11 +82,10 @@ export default function RitualsPage() {
       <div className="max-w-5xl mx-auto space-y-20">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#e8efe7] text-[#3d7b32] rounded-full text-[11px] font-bold tracking-widest uppercase mb-2">
-            <Sparkle size={14} weight="fill" />
-            <span>Botanical Science &amp; The 90-Day Standard</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-gray-900 leading-tight">
+          <span className="text-xs font-bold tracking-[0.2em] uppercase text-green block">
+            Botanical Science &amp; The 90-Day Standard
+          </span>
+          <h1 className="font-chloe text-4xl md:text-6xl font-normal tracking-tight text-black leading-tight">
             Dismantling the 5-Second Myth.
           </h1>
           <p className="text-black text-base md:text-lg leading-relaxed">
@@ -100,21 +95,17 @@ export default function RitualsPage() {
 
         {/* Active Botanicals Deep Dive */}
         <section aria-labelledby="botanicals-heading" className="space-y-8">
-          <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#3d7b32]">
-              Active African Lipid Nutrition
-            </span>
+          <div className="max-w-2xl">
             <h2 id="botanicals-heading" className="text-3xl md:text-4xl font-normal text-black">
               Why Cold-Pressed Marula &amp; Baobab Outperform Watery Fillers
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="rounded-3xl border border-black bg-white p-8 md:p-10 space-y-4">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#3d7b32]">
-                <Drop size={16} weight="fill" />
-                <span>Sclerocarya birrea · Limpopo Harvest</span>
-              </div>
+            <div className="rounded-3xl border-2 border-black bg-white p-8 md:p-10 space-y-4">
+              <p className="text-xs italic text-black/75">
+                Sclerocarya birrea · Limpopo Harvest
+              </p>
               <h3 className="text-2xl md:text-3xl font-normal text-black">
                 Cold-Pressed Marula Seed Oil
               </h3>
@@ -123,11 +114,10 @@ export default function RitualsPage() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-black bg-white p-8 md:p-10 space-y-4">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#3d7b32]">
-                <ShieldCheck size={16} weight="fill" />
-                <span>Adansonia digitata · Wild-Harvested</span>
-              </div>
+            <div className="rounded-3xl border-2 border-black bg-white p-8 md:p-10 space-y-4">
+              <p className="text-xs italic text-black/75">
+                Adansonia digitata · Wild-Harvested
+              </p>
               <h3 className="text-2xl md:text-3xl font-normal text-black">
                 Wild-Harvested Baobab Seed Oil
               </h3>
@@ -140,10 +130,7 @@ export default function RitualsPage() {
 
         {/* Daily Morning & Evening Application Sequence */}
         <section aria-labelledby="daily-sequence-heading" className="space-y-8">
-          <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#3d7b32]">
-              Daily Application Architecture
-            </span>
+          <div className="max-w-2xl">
             <h2 id="daily-sequence-heading" className="text-3xl md:text-4xl font-normal text-black">
               How to Apply for 24-Hour Wardrobe Freedom
             </h2>
@@ -151,37 +138,35 @@ export default function RitualsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Morning Ritual */}
-            <div className="bg-white border border-black p-8 md:p-10 rounded-3xl shadow-sm space-y-6">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Sun size={26} weight="bold" />
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
-                  Morning Climate Shield
+            <div className="bg-white border-2 border-black p-8 md:p-10 rounded-3xl space-y-6">
+              <div className="flex items-center justify-between border-b border-black pb-4">
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-green">
+                  Morning · Climate Seal
                 </span>
-                <h3 className="text-2xl font-medium text-gray-900">
-                  Seal Against Midday Ashiness
-                </h3>
+                <Sun size={20} weight="regular" className="text-black" aria-hidden="true" />
               </div>
+              <h3 className="text-2xl font-medium text-black">
+                Seal Against Midday Ashiness
+              </h3>
               <div className="space-y-4 text-sm text-black leading-relaxed">
-                <div className="border-l border-[#3d7b32] pl-4 space-y-1">
-                  <p className="font-semibold text-gray-900">
+                <div className="border-l-2 border-black pl-4 space-y-1">
+                  <p className="font-semibold text-black">
                     Step 1: Warm Water Only (Skip Boiling Showers)
                   </p>
                   <p>
                     Steaming hot municipal water strips your skin&apos;s remaining lipid mantle. Rinse with warm water and pat gently with a towel so skin remains slightly damp.
                   </p>
                 </div>
-                <div className="border-l border-[#3d7b32] pl-4 space-y-1">
-                  <p className="font-semibold text-gray-900">
+                <div className="border-l-2 border-black pl-4 space-y-1">
+                  <p className="font-semibold text-black">
                     Step 2: The 3-Minute Damp-Skin Application
                   </p>
                   <p>
                     Within 3 minutes of stepping out of the shower, massage Divinity Marula &amp; Baobab Body Lotion generously over arms, elbows, knees, legs, and décolletage.
                   </p>
                 </div>
-                <div className="border-l border-[#3d7b32] pl-4 space-y-1">
-                  <p className="font-semibold text-gray-900">
+                <div className="border-l-2 border-black pl-4 space-y-1">
+                  <p className="font-semibold text-black">
                     Step 3: The 2-Minute Absorption Window
                   </p>
                   <p>
@@ -192,37 +177,35 @@ export default function RitualsPage() {
             </div>
 
             {/* Evening Ritual */}
-            <div className="bg-white border border-black p-8 md:p-10 rounded-3xl shadow-sm space-y-6">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <Moon size={26} weight="bold" />
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                  Overnight Barrier Restoration
+            <div className="bg-white border-2 border-black p-8 md:p-10 rounded-3xl space-y-6">
+              <div className="flex items-center justify-between border-b border-black pb-4">
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-green">
+                  Evening · 90-Day Renewal
                 </span>
-                <h3 className="text-2xl font-medium text-gray-900">
-                  Feed the 90-Day Renewal Cycle
-                </h3>
+                <Moon size={20} weight="regular" className="text-black" aria-hidden="true" />
               </div>
+              <h3 className="text-2xl font-medium text-black">
+                Feed the 90-Day Renewal Cycle
+              </h3>
               <div className="space-y-4 text-sm text-black leading-relaxed">
-                <div className="border-l border-[#3d7b32] pl-4 space-y-1">
-                  <p className="font-semibold text-gray-900">
+                <div className="border-l-2 border-black pl-4 space-y-1">
+                  <p className="font-semibold text-black">
                     Days 1–14: Immediate Comfort &amp; Relief
                   </p>
                   <p>
                     Surface tightness, winter itchiness, and midday dry patches subside as Baobab omegas seal micro-fissures in the stratum corneum.
                   </p>
                 </div>
-                <div className="border-l border-[#3d7b32] pl-4 space-y-1">
-                  <p className="font-semibold text-gray-900">
+                <div className="border-l-2 border-black pl-4 space-y-1">
+                  <p className="font-semibold text-black">
                     Days 15–45: Deep Lipid Replenishment
                   </p>
                   <p>
                     Cold-pressed Marula oleic acid restores intercellular lipid density on high-exposure zones like forearms, shins, and chest.
                   </p>
                 </div>
-                <div className="border-l border-[#3d7b32] pl-4 space-y-1">
-                  <p className="font-semibold text-gray-900">
+                <div className="border-l-2 border-black pl-4 space-y-1">
+                  <p className="font-semibold text-black">
                     Days 46–90: Visibly Softened Crepey Texture
                   </p>
                   <p>
@@ -237,12 +220,8 @@ export default function RitualsPage() {
         {/* Future Range Roadmap */}
         <section
           aria-labelledby="roadmap-heading"
-          className="rounded-3xl border border-black bg-[#faf9f6] p-8 md:p-10 space-y-4"
+          className="rounded-3xl border-2 border-black bg-[#faf8f5] p-8 md:p-10 space-y-4"
         >
-          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#3d7b32]">
-            <Clock size={16} weight="bold" />
-            <span>Future Formulations Roadmap</span>
-          </div>
           <h2 id="roadmap-heading" className="text-2xl md:text-3xl font-normal text-black">
             Launching with One Uncompromising Essential—Expanding Soon.
           </h2>
@@ -252,7 +231,7 @@ export default function RitualsPage() {
         </section>
 
         {/* Bottom CTA */}
-        <div className="bg-[#faf9f6] border-2 border-black rounded-3xl p-6 sm:p-8 md:p-12 text-center space-y-4 shadow-sm">
+        <div className="bg-[#faf8f5] border-2 border-black rounded-3xl p-6 sm:p-8 md:p-12 text-center space-y-4">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-900">
             Start Your 90-Day Barrier Repair Today
           </h2>

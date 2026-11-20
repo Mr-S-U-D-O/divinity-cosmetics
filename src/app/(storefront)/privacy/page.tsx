@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import React from "react";
-import { ShieldCheck } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
 import { buildBreadcrumbSchema } from "@/lib/seo/schema";
 
@@ -20,26 +19,25 @@ export default function PrivacyPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-white pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
+    <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <div className="max-w-3xl mx-auto space-y-10">
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green/10 text-green rounded-full text-[11px] font-bold tracking-widest uppercase border border-black">
-            <ShieldCheck size={14} weight="bold" />
-            <span>POPIA Compliant · South Africa</span>
-          </div>
-          <h1 className="text-4xl font-medium tracking-tight text-gray-900">
+          <span className="text-xs font-bold tracking-[0.2em] uppercase text-green block">
+            POPIA Compliant · South Africa
+          </span>
+          <h1 className="font-chloe text-4xl font-normal tracking-tight text-black">
             Privacy Policy
           </h1>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-black/75">
             Last updated: November 2026 · Official Domain: {siteConfig.domain}
           </p>
         </div>
 
-        <div className="bg-white border border-black p-8 md:p-12 rounded-2xl shadow-sm text-sm text-black leading-relaxed space-y-8">
+        <div className="bg-white border-2 border-black p-8 md:p-12 rounded-2xl text-sm text-black leading-relaxed space-y-8">
           <section className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">
               1. Commitment to Your Privacy (POPIA)

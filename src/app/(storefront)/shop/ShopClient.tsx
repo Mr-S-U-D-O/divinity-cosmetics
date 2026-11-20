@@ -288,10 +288,7 @@ export function ShopClient({ products }: ShopClientProps) {
       <section className="px-6 md:px-12 lg:px-16 pt-8 pb-6 max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-black pb-6">
           <div>
-            <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-green">
-              Facial-Grade Botanical Body Care · Flagship Launch
-            </span>
-            <h1 className="text-3xl md:text-5xl font-serif font-normal text-black mt-1">
+            <h1 className="text-3xl md:text-5xl font-serif font-normal text-black">
               Shop Formulations
             </h1>
             <p className="text-xs md:text-sm text-black mt-2 max-w-2xl font-sans leading-relaxed">
@@ -753,7 +750,7 @@ export function ShopClient({ products }: ShopClientProps) {
         {/* Right Content Area */}
         <div className="flex-1">
           {/* Controls Bar: Search & Sort */}
-          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-black shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6 bg-white p-4 rounded-2xl border-2 border-black">
             {/* Search Input */}
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -814,7 +811,7 @@ export function ShopClient({ products }: ShopClientProps) {
                 </span>
               )}
               {inStockOnly && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-xs text-emerald-800 border border-emerald-200 font-medium">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-xs text-black border border-black font-medium">
                   In Stock Only
                   <button onClick={() => setInStockOnly(false)} className="hover:text-red-600">
                     <X size={12} weight="bold" />
@@ -838,7 +835,7 @@ export function ShopClient({ products }: ShopClientProps) {
               {selectedConcerns.map((c) => (
                 <span
                   key={c}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-xs text-amber-800 border border-amber-200 font-medium"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-xs text-black border border-black font-medium"
                 >
                   {c}
                   <button
@@ -852,7 +849,7 @@ export function ShopClient({ products }: ShopClientProps) {
               {selectedIngredients.map((i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-xs text-blue-800 border border-blue-200 font-medium"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-xs text-black border border-black font-medium"
                 >
                   {i}
                   <button
@@ -904,7 +901,7 @@ export function ShopClient({ products }: ShopClientProps) {
               </div>
 
               {/* Working Pagination Bar */}
-              <div className="mt-12 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 border-t border-gray-200 pt-6 gap-4 font-medium">
+              <div className="mt-12 flex flex-col sm:flex-row justify-between items-center text-xs text-black/75 border-t border-black pt-6 gap-4 font-medium">
                 <span>
                   Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} botanical {totalItems === 1 ? "creation" : "creations"}
                 </span>
@@ -914,7 +911,7 @@ export function ShopClient({ products }: ShopClientProps) {
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-black hover:text-black disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="w-8 h-8 rounded-full border border-black flex items-center justify-center text-black hover:border-green hover:text-green disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       aria-label="Previous page"
                     >
                       &lt;
@@ -928,8 +925,8 @@ export function ShopClient({ products }: ShopClientProps) {
                           onClick={() => handlePageChange(pageNum)}
                           className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${
                             isActive
-                              ? "bg-[#1a1a1a] text-white shadow-sm"
-                              : "border border-gray-200 bg-white text-gray-700 hover:border-black hover:text-black"
+                              ? "bg-[#1a1a1a] text-white border border-black"
+                              : "border border-black bg-white text-black hover:border-green hover:text-green"
                           }`}
                           aria-current={isActive ? "page" : undefined}
                         >
@@ -940,7 +937,7 @@ export function ShopClient({ products }: ShopClientProps) {
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-black hover:text-black disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="w-8 h-8 rounded-full border border-black flex items-center justify-center text-black hover:border-green hover:text-green disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       aria-label="Next page"
                     >
                       &gt;
@@ -950,9 +947,9 @@ export function ShopClient({ products }: ShopClientProps) {
               </div>
             </>
           ) : (
-            <div className="text-center py-28 px-4 bg-white border border-black rounded-3xl shadow-sm">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-black">
-                <Package size={30} className="text-gray-400" />
+            <div className="text-center py-28 px-4 bg-white border-2 border-black rounded-3xl">
+              <div className="size-14 bg-[#faf8f5] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-black text-black">
+                <Package size={26} weight="regular" />
               </div>
               <h3 className="text-xl font-bold tracking-tight mb-2 text-black">
                 No formulations found

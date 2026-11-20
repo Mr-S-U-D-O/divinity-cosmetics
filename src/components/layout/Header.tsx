@@ -367,255 +367,221 @@ export function Header() {
       </AnimatePresence>
 
 
-      {/* Mega Menu Dropdowns */}
+      {/* Mega Menu Dropdowns (Desktop Only) */}
       <AnimatePresence>
         {activeMenu === 'shop' && (
           <motion.div
-            initial={{ opacity: 0, y: -4 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full left-0 w-full bg-[#fcfbf9] border-t border-b border-black/[0.08] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.06)] z-[990] overflow-hidden"
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute top-full left-0 w-full bg-[#fcfbf9] border-t border-b border-black shadow-[0_28px_56px_-16px_rgba(0,0,0,0.06)] z-[990] overflow-hidden hidden lg:block"
             onMouseEnter={() => handleMouseEnter('shop')}
           >
-            <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-10 pb-7">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10">
-                {/* Column 1: The Formulary (4 cols) */}
-                <div className="md:col-span-4 lg:col-span-4 flex flex-col justify-between md:border-r md:border-black/[0.07] md:pr-8 lg:pr-10">
+            <div className="max-w-7xl mx-auto px-10 xl:px-14 pt-11 pb-8">
+              <div className="grid grid-cols-12 gap-10 xl:gap-14">
+                {/* Column 1: The Formulations (3 cols) */}
+                <div data-anime="mega-item" className="col-span-3 flex flex-col justify-between">
                   <div>
-                    {/* Header */}
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="text-[10px] font-mono tracking-widest text-black/40 uppercase">01</span>
-                      <span className="h-px w-5 bg-black/15" />
-                      <span className="text-[10px] tracking-[0.24em] font-medium text-black/55 uppercase">
-                        The Formulary
+                    <span className="text-[10px] tracking-[0.24em] font-bold text-green uppercase block mb-6">
+                      The Formulations
+                    </span>
+
+                    <ul className="space-y-4">
+                      <li>
+                        <Link
+                          href="/shop"
+                          onClick={() => setActiveMenu(null)}
+                          className="group/link flex items-center justify-between text-[15px] font-medium text-black hover:text-green-dark transition-colors"
+                        >
+                          <span>All Formulations</span>
+                          <ArrowRight size={13} className="text-black group-hover/link:text-green-dark group-hover/link:translate-x-1 transition-all" />
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/products/marula-baobab-body-lotion"
+                          onClick={() => setActiveMenu(null)}
+                          className="group/link flex items-center justify-between text-[15px] font-medium text-black hover:text-green-dark transition-colors"
+                        >
+                          <span>Body Care</span>
+                          <ArrowRight size={13} className="text-black group-hover/link:text-green-dark group-hover/link:translate-x-1 transition-all" />
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/rituals"
+                          onClick={() => setActiveMenu(null)}
+                          className="group/link flex items-center justify-between text-[15px] font-medium text-black hover:text-green-dark transition-colors"
+                        >
+                          <span>Daily Regimens</span>
+                          <ArrowRight size={13} className="text-black group-hover/link:text-green-dark group-hover/link:translate-x-1 transition-all" />
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/reseller"
+                          onClick={() => setActiveMenu(null)}
+                          className="group/link flex items-center justify-between text-[15px] font-medium text-black hover:text-green-dark transition-colors"
+                        >
+                          <span>Reseller Stockists</span>
+                          <ArrowRight size={13} className="text-black group-hover/link:text-green-dark group-hover/link:translate-x-1 transition-all" />
+                        </Link>
+                      </li>
+                    </ul>
+
+                    {/* Curated By Need */}
+                    <div className="mt-8 pt-6 border-t border-black">
+                      <span className="text-[10px] tracking-[0.24em] font-bold text-green uppercase block mb-3.5">
+                        Curated by Need
                       </span>
-                    </div>
-
-                    {/* Active Flagship Category: Body Care */}
-                    <div data-anime="mega-item" className="group/item mb-6">
-                      <Link
-                        href="/products/marula-baobab-body-lotion"
-                        className="block p-4 -mx-4 rounded-xl hover:bg-black/[0.03] transition-all duration-200"
-                        onClick={() => setActiveMenu(null)}
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-chloe text-2xl text-black group-hover/item:text-green-dark transition-colors tracking-tight">
-                            Body Care
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 text-[9.5px] font-semibold tracking-[0.16em] uppercase px-2.5 py-0.5 rounded-full bg-green/10 text-green-dark border border-green/25">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse" />
-                            Flagship Live
-                          </span>
-                        </div>
-                        <p className="text-xs text-black/60 font-normal leading-relaxed">
-                          Marula &amp; Baobab Botanical Emulsion (400ml)
-                        </p>
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-green uppercase tracking-wider mt-2.5 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                          <span>View Flagship</span>
-                          <ArrowRight size={12} className="group-hover/item:translate-x-1 transition-transform" />
-                        </span>
-                      </Link>
-                    </div>
-
-                    {/* Forthcoming Lineages with quiet editorial typography */}
-                    <div className="pt-4 border-t border-black/[0.06]">
-                      <div className="flex items-center justify-between mb-3.5">
-                        <span className="text-[9.5px] tracking-[0.2em] font-medium text-black/40 uppercase">
-                          Future Formulations
-                        </span>
-                        <span className="text-[10px] font-mono text-black/30">Pipeline</span>
-                      </div>
-
-                      <ul className="space-y-3">
-                        <li data-anime="mega-item" className="flex items-center justify-between text-sm py-1 border-b border-black/[0.03]">
-                          <span className="text-black/50 font-light">Face Care</span>
-                          <span className="text-[11px] font-serif italic text-black/35">In formulation</span>
+                      <ul className="space-y-2.5">
+                        <li>
+                          <Link
+                            href="/shop"
+                            onClick={() => setActiveMenu(null)}
+                            className="text-xs text-black/75 hover:text-black transition-colors block py-0.5"
+                          >
+                            Barrier Repair &amp; Dryness
+                          </Link>
                         </li>
-                        <li data-anime="mega-item" className="flex items-center justify-between text-sm py-1 border-b border-black/[0.03]">
-                          <span className="text-black/50 font-light">Oils &amp; Serums</span>
-                          <span className="text-[11px] font-serif italic text-black/35">Late 2026</span>
+                        <li>
+                          <Link
+                            href="/shop"
+                            onClick={() => setActiveMenu(null)}
+                            className="text-xs text-black/75 hover:text-black transition-colors block py-0.5"
+                          >
+                            Highveld Winter Hydration
+                          </Link>
                         </li>
-                        <li data-anime="mega-item" className="flex items-center justify-between text-sm py-1">
-                          <span className="text-black/50 font-light">Curated Bundles</span>
-                          <span className="text-[11px] font-serif italic text-black/35">Seasonal release</span>
+                        <li>
+                          <Link
+                            href="/shop"
+                            onClick={() => setActiveMenu(null)}
+                            className="text-xs text-black/75 hover:text-black transition-colors block py-0.5"
+                          >
+                            Cold-Pressed Seed Oils
+                          </Link>
                         </li>
                       </ul>
                     </div>
                   </div>
-
-                  {/* Catalog Link */}
-                  <div className="pt-6 mt-4">
-                    <Link
-                      href="/shop"
-                      className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-black hover:text-green transition-colors group/all"
-                      onClick={() => setActiveMenu(null)}
-                    >
-                      <span>Explore All Formulations</span>
-                      <ArrowRight size={13} className="group-hover/all:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
                 </div>
 
                 {/* Column 2: House & Rituals (4 cols) */}
-                <div className="md:col-span-4 lg:col-span-4 flex flex-col justify-between md:border-r md:border-black/[0.07] md:pr-8 lg:pr-10">
+                <div data-anime="mega-item" className="col-span-4 flex flex-col justify-between border-l border-black pl-10 xl:pl-14">
                   <div>
-                    {/* Header */}
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="text-[10px] font-mono tracking-widest text-black/40 uppercase">02</span>
-                      <span className="h-px w-5 bg-black/15" />
-                      <span className="text-[10px] tracking-[0.24em] font-medium text-black/55 uppercase">
-                        The 90-Day Standard
-                      </span>
+                    <span className="text-[10px] tracking-[0.24em] font-bold text-green uppercase block mb-6">
+                      The House &amp; Rituals
+                    </span>
+
+                    <div className="space-y-6">
+                      <Link
+                        href="/rituals"
+                        onClick={() => setActiveMenu(null)}
+                        className="group/ritual block"
+                      >
+                        <h4 className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
+                          <span>90-Day Barrier Repair</span>
+                          <ArrowRight size={14} className="text-black group-hover/ritual:text-green-dark group-hover/ritual:translate-x-1 transition-all" />
+                        </h4>
+                        <p className="text-xs text-black/75 leading-relaxed font-normal">
+                          Restoring lipid density against dry Highveld winds and harsh municipal tap water.
+                        </p>
+                      </Link>
+
+                      <Link
+                        href="/about"
+                        onClick={() => setActiveMenu(null)}
+                        className="group/ritual block pt-5 border-t border-black"
+                      >
+                        <h4 className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
+                          <span>South African Lineage</span>
+                          <ArrowRight size={14} className="text-black group-hover/ritual:text-green-dark group-hover/ritual:translate-x-1 transition-all" />
+                        </h4>
+                        <p className="text-xs text-black/75 leading-relaxed font-normal">
+                          Wild-harvested Limpopo Marula and cold-pressed Mpumalanga Baobab seed oils.
+                        </p>
+                      </Link>
+
+                      <Link
+                        href="/about"
+                        onClick={() => setActiveMenu(null)}
+                        className="group/ritual block pt-5 border-t border-black"
+                      >
+                        <h4 className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
+                          <span>The Facial-Grade Thesis</span>
+                          <ArrowRight size={14} className="text-black group-hover/ritual:text-green-dark group-hover/ritual:translate-x-1 transition-all" />
+                        </h4>
+                        <p className="text-xs text-black/75 leading-relaxed font-normal">
+                          Extending the biological standards of facial serums to full-body care.
+                        </p>
+                      </Link>
                     </div>
-
-                    <div className="space-y-2">
-                      {/* Ritual 1 */}
-                      <div data-anime="mega-item" className="group/item">
-                        <Link
-                          href="/rituals"
-                          className="block p-3.5 -mx-3.5 rounded-xl hover:bg-black/[0.03] transition-all duration-200"
-                          onClick={() => setActiveMenu(null)}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-chloe text-lg text-black group-hover/item:text-green-dark transition-colors tracking-tight">
-                              90-Day Barrier Repair Ritual
-                            </span>
-                            <ArrowRight size={14} className="text-black/30 group-hover/item:text-black group-hover/item:translate-x-1 transition-all" />
-                          </div>
-                          <p className="text-xs text-black/60 font-normal leading-relaxed">
-                            Restoring lipid density against Highveld winters and harsh municipal water.
-                          </p>
-                        </Link>
-                      </div>
-
-                      {/* Ritual 2 */}
-                      <div data-anime="mega-item" className="group/item">
-                        <Link
-                          href="/about"
-                          className="block p-3.5 -mx-3.5 rounded-xl hover:bg-black/[0.03] transition-all duration-200"
-                          onClick={() => setActiveMenu(null)}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-chloe text-lg text-black group-hover/item:text-green-dark transition-colors tracking-tight">
-                              A Note from the Founder
-                            </span>
-                            <ArrowRight size={14} className="text-black/30 group-hover/item:text-black group-hover/item:translate-x-1 transition-all" />
-                          </div>
-                          <p className="text-xs text-black/60 font-normal leading-relaxed">
-                            Why investing in facial serums while settling for watery body lotion creates the vanity divide.
-                          </p>
-                        </Link>
-                      </div>
-
-                      {/* Ritual 3 */}
-                      <div data-anime="mega-item" className="group/item">
-                        <Link
-                          href="/rituals"
-                          className="block p-3.5 -mx-3.5 rounded-xl hover:bg-black/[0.03] transition-all duration-200"
-                          onClick={() => setActiveMenu(null)}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-chloe text-lg text-black group-hover/item:text-green-dark transition-colors tracking-tight">
-                              South African Botanical Lineage
-                            </span>
-                            <ArrowRight size={14} className="text-black/30 group-hover/item:text-black group-hover/item:translate-x-1 transition-all" />
-                          </div>
-                          <p className="text-xs text-black/60 font-normal leading-relaxed">
-                            Cold-pressed Marula from Limpopo &amp; wild-harvested Baobab seed oils.
-                          </p>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Editorial Quote */}
-                  <div className="pt-6 mt-4 border-t border-black/[0.06]">
-                    <p className="text-[11px] font-serif italic text-black/45 leading-relaxed">
-                      &ldquo;Facial-grade nutrition is not a luxury for the face alone; your body demands equal biological respect.&rdquo;
-                    </p>
                   </div>
                 </div>
 
-                {/* Column 3: Featured Atelier Showcase (Keeping the image) (4 cols) */}
-                <div data-anime="mega-feature" className="md:col-span-4 lg:col-span-4 flex flex-col justify-between">
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="text-[10px] font-mono tracking-widest text-black/40 uppercase">03</span>
-                      <span className="h-px w-5 bg-black/15" />
-                      <span className="text-[10px] tracking-[0.24em] font-medium text-black/55 uppercase">
-                        Flagship Plate
-                      </span>
+                {/* Column 3: The Featured Flagship Still Life (5 cols) */}
+                <div data-anime="mega-feature" className="col-span-5 border-l border-black pl-10 xl:pl-14">
+                  <span className="text-[10px] tracking-[0.24em] font-bold text-green uppercase block mb-6">
+                    Featured Formulation
+                  </span>
+
+                  <Link
+                    href="/products/marula-baobab-body-lotion"
+                    onClick={() => setActiveMenu(null)}
+                    className="group/flagship flex flex-row items-center gap-6 bg-[#faf8f5] hover:bg-white rounded-2xl p-5 border-2 border-black transition-all duration-300"
+                  >
+                    {/* Bottle Visual with Calm Breathing Room */}
+                    <div className="relative w-36 h-44 xl:w-40 xl:h-48 rounded-xl overflow-hidden bg-white border-2 border-black shrink-0">
+                      <Image
+                        src="/images/mega-menu-lotion.jpg"
+                        alt="Divinity Cosmetics Marula & Baobab Body Lotion 400ml"
+                        fill
+                        className="object-cover object-center group-hover/flagship:scale-[1.03] transition-transform duration-700 ease-out"
+                        sizes="(max-width: 1280px) 160px, 180px"
+                      />
                     </div>
 
-                    {/* Exhibition Plate Link */}
-                    <Link
-                      href="/products/marula-baobab-body-lotion"
-                      onClick={() => setActiveMenu(null)}
-                      className="group/feature block bg-white rounded-2xl border border-black/[0.08] p-4 hover:border-black/25 hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.08)] transition-all duration-300"
-                    >
-                      {/* Image Canvas */}
-                      <div className="relative w-full h-44 rounded-xl overflow-hidden bg-[#f4f2ee] mb-4">
-                        <Image
-                          src="/images/marula-baobab-body-lotion.jpg"
-                          alt="Divinity Cosmetics Marula & Baobab Body Lotion 400ml"
-                          fill
-                          className="object-cover object-center group-hover/feature:scale-[1.03] transition-transform duration-700 ease-out"
-                          sizes="(max-width: 1024px) 100vw, 380px"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-40 group-hover/feature:opacity-20 transition-opacity" />
-                        
-                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full border border-black/10 text-[9px] font-bold tracking-[0.16em] uppercase text-black">
-                          400ml · Flagship
-                        </div>
-                      </div>
-
-                      {/* Museum Plaque Typography */}
-                      <div className="flex items-baseline justify-between gap-2 mb-1.5">
-                        <h4 className="font-chloe text-xl text-black font-normal tracking-tight group-hover/feature:text-green-dark transition-colors">
-                          Marula &amp; Baobab Body Lotion
-                        </h4>
-                        <span className="text-sm font-semibold text-black tracking-tight shrink-0">
-                          R400
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-black/60 font-normal leading-relaxed line-clamp-2 mb-4">
-                        A rich, facial-grade botanical emulsion forming a physical 24-hour moisture seal.
+                    {/* Editorial Details */}
+                    <div className="flex-1 min-w-0 pr-2">
+                      <span className="inline-block text-[9.5px] font-bold tracking-[0.18em] uppercase text-green mb-1.5">
+                        Botanical Flagship
+                      </span>
+                      <h4 className="font-chloe text-xl xl:text-2xl text-black font-normal leading-snug tracking-tight mb-1 group-hover/flagship:text-green-dark transition-colors">
+                        Marula &amp; Baobab Body Lotion
+                      </h4>
+                      <p className="text-xs font-semibold text-black tracking-tight mb-2.5">
+                        400ml · R400
                       </p>
-
-                      <div className="flex items-center justify-between pt-3 border-t border-black/[0.06]">
-                        <span className="inline-flex items-center gap-1.5 text-green text-[11px] font-semibold tracking-wider uppercase group-hover/feature:text-green-dark transition-colors">
-                          <span>Acquire Formulation</span>
-                          <ArrowRight size={13} className="group-hover/feature:translate-x-1.5 transition-transform duration-300" />
-                        </span>
-                        <span className="text-[10px] text-black/40 font-mono tracking-widest uppercase">
-                          Limpopo Batch
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
+                      <p className="text-xs text-black/75 font-normal leading-relaxed mb-4 line-clamp-2">
+                        Facial-grade cold-pressed emulsion delivering a physical 24-hour lipid barrier seal.
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-black group-hover/flagship:text-green-dark uppercase tracking-wider transition-colors">
+                        <span>Discover Formulation</span>
+                        <ArrowRight size={12} className="group-hover/flagship:translate-x-1 transition-transform" />
+                      </span>
+                    </div>
+                  </Link>
                 </div>
               </div>
 
-              {/* Bottom Ribbon / Atelier Footnote */}
-              <div className="mt-8 pt-5 border-t border-black/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-black/50">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green" />
-                  <span className="font-medium text-black/70">Divinity Cosmetics</span>
-                  <span className="text-black/30">·</span>
-                  <span>South African Botanical Formulary</span>
-                  <span className="text-black/30 hidden md:inline">·</span>
-                  <span className="hidden md:inline">Limpopo Marula &amp; Mpumalanga Baobab</span>
+              {/* Bottom Assurance Bar */}
+              <div className="mt-8 pt-5 border-t border-black flex items-center justify-between text-[11px] text-black/75">
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-black">Divinity Cosmetics</span>
+                  <span>·</span>
+                  <span>Limpopo Marula &amp; Mpumalanga Baobab</span>
+                  <span>·</span>
+                  <span>Cruelty-Free Botanical Formulation</span>
                 </div>
-                <div className="flex items-center gap-3 text-black/60">
+                <div className="flex items-center gap-2 text-black">
                   <span>Complimentary delivery over R500</span>
-                  <span className="text-black/30">·</span>
+                  <span>·</span>
                   <Link
                     href="/shipping"
                     onClick={() => setActiveMenu(null)}
-                    className="text-black/75 hover:text-green transition-colors underline underline-offset-2"
+                    className="text-black hover:text-green-dark transition-colors underline underline-offset-4"
                   >
                     Nationwide Dispatch
                   </Link>

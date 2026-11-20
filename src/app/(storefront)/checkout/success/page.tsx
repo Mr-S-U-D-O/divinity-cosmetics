@@ -10,7 +10,6 @@ import {
   Check, 
   Copy, 
   Printer, 
-  ArrowRight, 
   Truck, 
   Package, 
   Clock, 
@@ -335,7 +334,6 @@ function SuccessContent() {
             >
               <Truck size={15} weight="bold" />
               <span>Track Your Order</span>
-              <ArrowRight size={14} weight="bold" />
             </Link>
           </div>
         )}

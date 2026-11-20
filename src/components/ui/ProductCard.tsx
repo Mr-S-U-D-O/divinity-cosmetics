@@ -79,25 +79,20 @@ export function ProductCard({ product }: ProductCardProps) {
           className="object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-
-        {isOutOfStock ? (
-          <div className="absolute top-3.5 left-3.5 bg-stone-900/90 text-stone-100 text-[10px] font-medium tracking-[0.14em] uppercase px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 z-10">
-            Out of Stock
-          </div>
-        ) : product.badge ? (
-          <div className="absolute top-3.5 left-3.5 bg-white/95 text-stone-800 text-[10px] font-bold tracking-[0.14em] uppercase px-2.5 py-1 rounded-full backdrop-blur-md border border-black shadow-sm z-10">
-            {product.badge}
-          </div>
-        ) : null}
       </Link>
 
       {/* Product Content Details */}
       <div className="flex flex-col flex-1">
-        {/* Category micro-tag */}
-        <div className="flex items-center justify-between mb-1.5">
+        {/* Category micro-tag & availability */}
+        <div className="flex items-center justify-between gap-2 mb-1.5">
           <span className="text-[11px] font-semibold text-green uppercase tracking-[0.18em]">
             {product.category}
           </span>
+          {isOutOfStock && (
+            <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-red-700">
+              Out of Stock
+            </span>
+          )}
         </div>
 
         {/* Product Title */}

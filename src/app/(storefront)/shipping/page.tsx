@@ -34,7 +34,7 @@ export default function ShippingPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-white pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
+    <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -42,11 +42,10 @@ export default function ShippingPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green/10 text-green rounded-full text-[11px] font-bold tracking-widest uppercase mb-4">
-            <Truck size={14} weight="bold" />
-            <span>South Africa Nationwide Delivery</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4">
+          <span className="text-xs font-bold tracking-[0.2em] uppercase text-green block mb-4">
+            South Africa Nationwide Delivery
+          </span>
+          <h1 className="font-chloe text-4xl md:text-5xl font-normal tracking-tight text-black mb-4">
             Shipping &amp; Returns
           </h1>
           <p className="text-black text-base leading-relaxed">
@@ -56,11 +55,11 @@ export default function ShippingPage() {
 
         {/* Highlight Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <div className="bg-white border border-black p-6 rounded-2xl shadow-sm text-center space-y-2">
+          <div className="bg-white border-2 border-black p-6 rounded-2xl text-center space-y-2">
             <span className="text-2xl font-bold text-green block">
               Free Delivery
             </span>
-            <p className="text-xs text-gray-600 uppercase tracking-wider font-semibold">
+            <p className="text-xs text-black uppercase tracking-wider font-semibold">
               Orders Over R500
             </p>
             <p className="text-xs text-black">
@@ -68,9 +67,9 @@ export default function ShippingPage() {
             </p>
           </div>
 
-          <div className="bg-white border border-black p-6 rounded-2xl shadow-sm text-center space-y-2">
+          <div className="bg-white border-2 border-black p-6 rounded-2xl text-center space-y-2">
             <span className="text-2xl font-bold text-green block">2–4 Days</span>
-            <p className="text-xs text-gray-600 uppercase tracking-wider font-semibold">
+            <p className="text-xs text-black uppercase tracking-wider font-semibold">
               Fast Courier Dispatch
             </p>
             <p className="text-xs text-black">
@@ -78,9 +77,9 @@ export default function ShippingPage() {
             </p>
           </div>
 
-          <div className="bg-white border border-black p-6 rounded-2xl shadow-sm text-center space-y-2">
+          <div className="bg-white border-2 border-black p-6 rounded-2xl text-center space-y-2">
             <span className="text-2xl font-bold text-green block">14 Days</span>
-            <p className="text-xs text-gray-600 uppercase tracking-wider font-semibold">
+            <p className="text-xs text-black uppercase tracking-wider font-semibold">
               Purity Guarantee
             </p>
             <p className="text-xs text-black">
@@ -90,7 +89,7 @@ export default function ShippingPage() {
         </div>
 
         {/* Detailed Sections */}
-        <div className="bg-white border border-black rounded-2xl p-8 md:p-12 shadow-sm space-y-10">
+        <div className="bg-white border-2 border-black rounded-2xl p-8 md:p-12 space-y-10">
           <section className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-gray-900 flex items-center gap-2">
               <Truck size={22} className="text-green" weight="bold" />

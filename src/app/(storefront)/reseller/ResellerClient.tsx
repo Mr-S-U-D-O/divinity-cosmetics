@@ -3,16 +3,15 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   ArrowRight,
   CheckCircle,
   Truck,
-  Sparkle,
-  MapPin,
+  Drop,
+  Tag,
   Percent,
   WhatsappLogo,
-  CaretDown,
   Package,
   Storefront,
   Users,
@@ -20,6 +19,7 @@ import {
   Handshake,
 } from "@phosphor-icons/react";
 import { siteConfig } from "@/lib/config/site";
+import { FAQAccordion } from "@/components/ui/FAQAccordion";
 
 const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -62,12 +62,7 @@ const stockistFAQs: FAQItem[] = [
 ];
 
 export function ResellerClient() {
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [activeTier, setActiveTier] = useState<"starter" | "partner" | "premier">("partner");
-
-  const toggleFaq = (index: number) => {
-    setOpenFaqIndex((prev) => (prev === index ? null : index));
-  };
 
   const whatsappHref = `https://wa.me/${siteConfig.whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
     "Hi Divinity team, I am interested in stocking Divinity Cosmetics in my salon/spa. Could you share wholesale details?"
@@ -78,31 +73,8 @@ export function ResellerClient() {
       {/* =========================================================================
           1. HERO SECTION (Attention: Editorial Asymmetric Split)
           ========================================================================= */}
-      <section className="relative w-full pt-32 pb-20 md:pt-40 md:pb-28 lg:pt-44 lg:pb-32 px-6 md:px-12 lg:px-20 overflow-hidden border-b border-black/[0.06]">
-        {/* Subtle ambient botanical background glow */}
-        <div 
-          className="absolute top-1/4 -right-40 w-[600px] h-[600px] rounded-full bg-[#3d7b32]/[0.04] blur-3xl pointer-events-none"
-          aria-hidden="true" 
-        />
-        <div 
-          className="absolute -bottom-20 -left-40 w-[500px] h-[500px] rounded-full bg-[#3d7b32]/[0.03] blur-3xl pointer-events-none"
-          aria-hidden="true" 
-        />
-
+      <section className="relative w-full pt-32 pb-20 md:pt-40 md:pb-28 lg:pt-44 lg:pb-32 px-6 md:px-12 lg:px-20 overflow-hidden border-b border-black">
         <div className="max-w-[1400px] mx-auto">
-          {/* Eyebrow */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: easeOutExpo }}
-            className="flex items-center gap-2.5 mb-6"
-          >
-            <span className="w-2 h-2 rounded-full bg-[#3d7b32]" aria-hidden="true" />
-            <span className="text-[11px] md:text-xs font-semibold uppercase tracking-[0.16em] text-black/70">
-              Authorized Stockist &amp; Wholesale Program · South Africa
-            </span>
-          </motion.div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Column: Copy & Value Proposition */}
             <motion.div
@@ -139,7 +111,7 @@ export function ResellerClient() {
               </div>
 
               {/* Trust Micro-Checkmarks */}
-              <div className="mt-10 pt-8 border-t border-black/[0.08] grid grid-cols-2 sm:grid-cols-4 gap-4 w-full text-xs text-black/70 font-medium">
+              <div className="mt-10 pt-8 border-t border-black grid grid-cols-2 sm:grid-cols-4 gap-4 w-full text-xs text-black/80 font-medium">
                 <div className="flex items-center gap-2">
                   <CheckCircle size={16} weight="fill" className="text-[#3d7b32] shrink-0" />
                   <span>12-Unit Low MOQ</span>
@@ -166,7 +138,7 @@ export function ResellerClient() {
               transition={{ duration: 0.8, delay: 0.2, ease: easeOutExpo }}
               className="lg:col-span-5 relative"
             >
-              <div className="relative aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/5] w-full rounded-3xl overflow-hidden border border-black/10 bg-[#f4efe8] shadow-xl shadow-black/[0.03]">
+              <div className="relative aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/5] w-full rounded-3xl overflow-hidden border-2 border-black bg-[#f4efe8]">
                 <Image
                   src="/images/marula-baobab-body-lotion.jpg"
                   alt="Divinity Cosmetics Flagship 400ml Marula & Baobab Body Lotion for Salons and Stockists"
@@ -178,15 +150,15 @@ export function ResellerClient() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                 {/* Floating Unit Economics Card */}
-                <div className="absolute bottom-6 left-6 right-6 p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-white/40 shadow-lg text-black">
+                <div className="absolute bottom-6 left-6 right-6 p-5 rounded-2xl bg-white border-2 border-black text-black">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#3d7b32]">Flagship Unit Economics</span>
-                    <span className="text-[10px] font-semibold text-black/50">400ml Pump Bottle</span>
+                    <span className="text-[11px] font-medium text-black/70">Unit Economics</span>
+                    <span className="text-[11px] font-medium text-black/70">400ml Bottle</span>
                   </div>
                   <p className="font-chloe text-xl font-normal leading-tight text-black mb-3">
                     Marula &amp; Baobab Body Lotion
                   </p>
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-black/[0.07] text-center">
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-black text-center">
                     <div>
                       <p className="text-[10px] text-black/50 uppercase">RRP</p>
                       <p className="font-semibold text-sm text-black">R400</p>
@@ -210,16 +182,13 @@ export function ResellerClient() {
       {/* =========================================================================
           2. RETAIL ECONOMICS: ANCHORING & UNIT MARGINS (Interest)
           ========================================================================= */}
-      <section id="margins" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-white border-b border-black/[0.06]">
+      <section id="margins" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-white border-b border-black">
         <div className="max-w-[1400px] mx-auto">
           <div className="max-w-3xl mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3d7b32] mb-3 block">
-              Predictable Retail Economics
-            </span>
             <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
               Turn 30cm of counter space into recurring monthly retail profit.
             </h2>
-            <p className="mt-4 text-base md:text-lg text-black/70 leading-relaxed">
+            <p className="mt-4 text-base md:text-lg text-black/75 leading-relaxed">
               Supermarket pump lotions sell for R80–R120 and offer zero salon profitability. Divinity gives your practice a premium R400 facial-grade retail hero with protected margins and genuine 90-day client retention.
             </p>
           </div>
@@ -231,18 +200,18 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="p-8 md:p-10 rounded-3xl bg-[#fcfbf9] border border-black/[0.08] flex flex-col justify-between hover:border-black/25 transition-colors"
+              className="p-8 md:p-10 rounded-3xl bg-[#fcfbf9] border-2 border-black flex flex-col justify-between transition-colors"
             >
               <div>
-                <div className="w-12 h-12 rounded-full bg-[#3d7b32]/10 text-[#3d7b32] flex items-center justify-center mb-6">
-                  <Percent size={24} weight="bold" />
+                <div className="size-12 rounded-full border-2 border-black text-black flex items-center justify-center mb-6">
+                  <Percent size={22} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-2">30% to 45% Gross Margins</h3>
-                <p className="text-black/70 text-sm leading-relaxed mb-6">
+                <p className="text-black/80 text-sm leading-relaxed mb-6">
                   Earn R120 to R180 on every 400ml bottle sold at our strictly enforced R400 retail price. High-margin retail income that complements treatment bookings without added therapist hours.
                 </p>
               </div>
-              <div className="pt-4 border-t border-black/[0.06] text-xs text-black/60 font-medium">
+              <div className="pt-4 border-t border-black text-xs text-black/75 font-medium">
                 Selling just 10 bottles/week = <strong className="text-black font-semibold">R4,800 to R7,200 monthly profit</strong>
               </div>
             </motion.div>
@@ -253,18 +222,18 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="p-8 md:p-10 rounded-3xl bg-[#fcfbf9] border border-black/[0.08] flex flex-col justify-between hover:border-black/25 transition-colors"
+              className="p-8 md:p-10 rounded-3xl bg-[#fcfbf9] border-2 border-black flex flex-col justify-between transition-colors"
             >
               <div>
-                <div className="w-12 h-12 rounded-full bg-[#3d7b32]/10 text-[#3d7b32] flex items-center justify-center mb-6">
-                  <Package size={24} weight="bold" />
+                <div className="size-12 rounded-full border-2 border-black text-black flex items-center justify-center mb-6">
+                  <Package size={22} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-2">Low-Risk 12-Unit MOQ</h3>
-                <p className="text-black/70 text-sm leading-relaxed mb-6">
+                <p className="text-black/80 text-sm leading-relaxed mb-6">
                   Test your client appetite with a manageable 12-bottle carton (R3,360 total investment). No R10,000+ opening commitments or slow-moving stock gathering dust on your shelves.
                 </p>
               </div>
-              <div className="pt-4 border-t border-black/[0.06] text-xs text-black/60 font-medium">
+              <div className="pt-4 border-t border-black text-xs text-black/75 font-medium">
                 Fast turn: Most salons sell through 12 units in <strong className="text-black font-semibold">under 14 days</strong>
               </div>
             </motion.div>
@@ -275,18 +244,18 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="p-8 md:p-10 rounded-3xl bg-[#fcfbf9] border border-black/[0.08] flex flex-col justify-between hover:border-black/25 transition-colors"
+              className="p-8 md:p-10 rounded-3xl bg-[#fcfbf9] border-2 border-black flex flex-col justify-between transition-colors"
             >
               <div>
-                <div className="w-12 h-12 rounded-full bg-[#3d7b32]/10 text-[#3d7b32] flex items-center justify-center mb-6">
-                  <Clock size={24} weight="bold" />
+                <div className="size-12 rounded-full border-2 border-black text-black flex items-center justify-center mb-6">
+                  <Clock size={22} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-2">60–90 Day Refill Habit</h3>
-                <p className="text-black/70 text-sm leading-relaxed mb-6">
+                <p className="text-black/80 text-sm leading-relaxed mb-6">
                   400ml delivers 60 to 90 days of daily full-body barrier repair. Once clients experience lasting relief from Highveld winter dryness and crepey skin, they return to your salon for repeat purchases.
                 </p>
               </div>
-              <div className="pt-4 border-t border-black/[0.06] text-xs text-black/60 font-medium">
+              <div className="pt-4 border-t border-black text-xs text-black/75 font-medium">
                 High retention: <strong className="text-black font-semibold">Over 78% of clients repurchase</strong> within 90 days
               </div>
             </motion.div>
@@ -297,12 +266,9 @@ export function ResellerClient() {
       {/* =========================================================================
           3. CURATED AUDIENCE: WHO THE PROGRAM IS BUILT FOR
           ========================================================================= */}
-      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-[#fcfbf9] border-b border-black/[0.06]">
+      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-[#fcfbf9] border-b border-black">
         <div className="max-w-[1400px] mx-auto">
           <div className="max-w-2xl mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3d7b32] mb-3 block">
-              Authorized Stockist Partners
-            </span>
             <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
               Designed for elevated spaces that prioritize skincare integrity.
             </h2>
@@ -310,65 +276,65 @@ export function ResellerClient() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Profile 1 */}
-            <div className="p-7 rounded-2xl bg-white border border-black/[0.07] flex flex-col justify-between">
+            <div className="p-7 rounded-2xl bg-white border-2 border-black flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black mb-4">
-                  <Sparkle size={20} weight="regular" />
+                <div className="size-11 rounded-full border-2 border-black flex items-center justify-center text-black mb-4">
+                  <Drop size={18} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Aesthetic &amp; Dermal Clinics</h3>
-                <p className="text-xs text-black/70 leading-relaxed">
+                <p className="text-xs text-black/80 leading-relaxed">
                   Ideal as aftercare for clients post-chemical peels, laser therapy, and Highveld dryness seeking pure barrier replenishment without fragrance flare-ups.
                 </p>
               </div>
-              <p className="mt-6 pt-3 border-t border-black/[0.05] text-[11px] font-semibold text-[#3d7b32] uppercase tracking-wider">
+              <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
                 Clinical Barrier Recovery
               </p>
             </div>
 
             {/* Profile 2 */}
-            <div className="p-7 rounded-2xl bg-white border border-black/[0.07] flex flex-col justify-between">
+            <div className="p-7 rounded-2xl bg-white border-2 border-black flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black mb-4">
-                  <Storefront size={20} weight="regular" />
+                <div className="size-11 rounded-full border-2 border-black flex items-center justify-center text-black mb-4">
+                  <Storefront size={18} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Day Spas &amp; Wellness Sanctuaries</h3>
-                <p className="text-xs text-black/70 leading-relaxed">
+                <p className="text-xs text-black/80 leading-relaxed">
                   Elevate treatment wrap rituals and offer clients a sensorial, cold-pressed African botanical keepsake that extends the spa experience at home.
                 </p>
               </div>
-              <p className="mt-6 pt-3 border-t border-black/[0.05] text-[11px] font-semibold text-[#3d7b32] uppercase tracking-wider">
+              <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
                 Spa Ritual Extension
               </p>
             </div>
 
             {/* Profile 3 */}
-            <div className="p-7 rounded-2xl bg-white border border-black/[0.07] flex flex-col justify-between">
+            <div className="p-7 rounded-2xl bg-white border-2 border-black flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black mb-4">
-                  <Users size={20} weight="regular" />
+                <div className="size-11 rounded-full border-2 border-black flex items-center justify-center text-black mb-4">
+                  <Users size={18} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Boutique Salons &amp; Studios</h3>
-                <p className="text-xs text-black/70 leading-relaxed">
+                <p className="text-xs text-black/80 leading-relaxed">
                   Effortless impulse conversion at reception. Clients test the non-greasy silk texture while settling accounts and add a bottle to their appointment ticket.
                 </p>
               </div>
-              <p className="mt-6 pt-3 border-t border-black/[0.05] text-[11px] font-semibold text-[#3d7b32] uppercase tracking-wider">
+              <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
                 Reception Upsell Hero
               </p>
             </div>
 
             {/* Profile 4 */}
-            <div className="p-7 rounded-2xl bg-white border border-black/[0.07] flex flex-col justify-between">
+            <div className="p-7 rounded-2xl bg-white border-2 border-black flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black mb-4">
-                  <Handshake size={20} weight="regular" />
+                <div className="size-11 rounded-full border-2 border-black flex items-center justify-center text-black mb-4">
+                  <Handshake size={18} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Safari Lodges &amp; Luxury Boutiques</h3>
-                <p className="text-xs text-black/70 leading-relaxed">
+                <p className="text-xs text-black/80 leading-relaxed">
                   Provide international and local guests with authentic South African botanical skincare crafted from certified Marula and wild-harvested Baobab.
                 </p>
               </div>
-              <p className="mt-6 pt-3 border-t border-black/[0.05] text-[11px] font-semibold text-[#3d7b32] uppercase tracking-wider">
+              <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
                 Authentic Cape Provenance
               </p>
             </div>
@@ -379,12 +345,9 @@ export function ResellerClient() {
       {/* =========================================================================
           4. GAPLESS BENTO GRID: THE STOCKIST ADVANTAGE (Desire)
           ========================================================================= */}
-      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-white border-b border-black/[0.06]">
+      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-white border-b border-black">
         <div className="max-w-[1400px] mx-auto">
           <div className="max-w-2xl mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3d7b32] mb-3 block">
-              Turnkey Stockist Support
-            </span>
             <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
               Everything you need to sell out your first carton within 14 days.
             </h2>
@@ -398,7 +361,7 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="md:col-span-2 relative min-h-[380px] rounded-3xl overflow-hidden border border-black bg-[#22441d] text-white p-8 md:p-12 flex flex-col justify-end group"
+              className="md:col-span-2 relative min-h-[380px] rounded-3xl overflow-hidden border-2 border-black bg-[#22441d] text-white p-8 md:p-12 flex flex-col justify-end group"
             >
               <Image
                 src="/images/bento-story-hands.jpg"
@@ -410,10 +373,6 @@ export function ResellerClient() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#142812]/95 via-[#142812]/70 to-transparent pointer-events-none" />
 
               <div className="relative z-10 max-w-xl">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-[11px] font-semibold tracking-wider uppercase mb-4 border border-white/20">
-                  <MapPin size={14} weight="bold" />
-                  <span>Territory Protection</span>
-                </span>
                 <h3 className="font-chloe text-2xl md:text-3xl font-normal text-white mb-3">
                   Guaranteed Geographic Exclusivity
                 </h3>
@@ -429,18 +388,18 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="md:col-span-1 rounded-3xl border border-black bg-[#fcfbf9] p-8 md:p-10 flex flex-col justify-between"
+              className="md:col-span-1 rounded-3xl border-2 border-black bg-[#fcfbf9] p-8 md:p-10 flex flex-col justify-between"
             >
               <div>
-                <div className="w-12 h-12 rounded-full bg-[#3d7b32]/10 text-[#3d7b32] flex items-center justify-center mb-6">
-                  <Truck size={24} weight="bold" />
+                <div className="size-12 rounded-full border-2 border-black text-black flex items-center justify-center mb-6">
+                  <Truck size={22} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-3">2–4 Day Courier Dispatch</h3>
-                <p className="text-black/70 text-sm leading-relaxed">
+                <p className="text-black/80 text-sm leading-relaxed">
                   Reliable tracked delivery from our Johannesburg fulfillment center directly to your reception desk across all 9 provinces. Free courier shipping on Partner and Premier orders.
                 </p>
               </div>
-              <div className="pt-6 border-t border-black text-xs font-semibold text-black/80 flex items-center gap-1.5">
+              <div className="pt-6 border-t border-black text-xs font-semibold text-black flex items-center gap-1.5">
                 <span>Direct delivery to your doorstep</span>
                 <ArrowRight size={14} className="text-[#3d7b32]" />
               </div>
@@ -452,18 +411,18 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="md:col-span-1 rounded-3xl border border-black bg-[#fcfbf9] p-8 md:p-10 flex flex-col justify-between"
+              className="md:col-span-1 rounded-3xl border-2 border-black bg-[#fcfbf9] p-8 md:p-10 flex flex-col justify-between"
             >
               <div>
-                <div className="w-12 h-12 rounded-full bg-[#3d7b32]/10 text-[#3d7b32] flex items-center justify-center mb-6">
-                  <Sparkle size={24} weight="bold" />
+                <div className="size-12 rounded-full border-2 border-black text-black flex items-center justify-center mb-6">
+                  <Tag size={22} weight="regular" />
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-3">POS Merchandising Kit</h3>
-                <p className="text-black/70 text-sm leading-relaxed">
+                <p className="text-black/80 text-sm leading-relaxed">
                   Every stockist receives acrylic counter tent cards, therapist cheat-sheets highlighting Marula &amp; Baobab lipid science, and high-resolution digital image packs for your salon’s Instagram.
                 </p>
               </div>
-              <div className="pt-6 border-t border-black text-xs font-semibold text-black/80 flex items-center gap-1.5">
+              <div className="pt-6 border-t border-black text-xs font-semibold text-black flex items-center gap-1.5">
                 <span>Display-ready on day one</span>
                 <ArrowRight size={14} className="text-[#3d7b32]" />
               </div>
@@ -475,7 +434,7 @@ export function ResellerClient() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="md:col-span-2 relative min-h-[320px] rounded-3xl overflow-hidden border border-black bg-[#1a1a1a] text-white p-8 md:p-12 flex flex-col justify-end group"
+              className="md:col-span-2 relative min-h-[320px] rounded-3xl overflow-hidden border-2 border-black bg-[#1a1a1a] text-white p-8 md:p-12 flex flex-col justify-end group"
             >
               <Image
                 src="/images/marula-baobab-body-lotion.jpg"
@@ -487,10 +446,6 @@ export function ResellerClient() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none" />
 
               <div className="relative z-10 max-w-xl">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-[11px] font-semibold tracking-wider uppercase mb-4 border border-white/15">
-                  <CheckCircle size={14} weight="bold" />
-                  <span>Zero Tester Expense</span>
-                </span>
                 <h3 className="font-chloe text-2xl md:text-3xl font-normal text-white mb-3">
                   Complimentary 400ml Tester with Opening Order
                 </h3>
@@ -506,16 +461,13 @@ export function ResellerClient() {
       {/* =========================================================================
           5. WHOLESALE TIERS & MARGIN BREAKDOWN TABLE (Interest & Transparency)
           ========================================================================= */}
-      <section id="tiers" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-[#fcfbf9] border-b border-black/[0.06]">
+      <section id="tiers" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-[#fcfbf9] border-b border-black">
         <div className="max-w-[1400px] mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3d7b32] mb-3 block">
-              Transparent Tier Architecture
-            </span>
             <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
               Wholesale Pricing Tiers &amp; Margins
             </h2>
-            <p className="mt-4 text-sm md:text-base text-black/70 leading-relaxed">
+            <p className="mt-4 text-sm md:text-base text-black/75 leading-relaxed">
               Transparent margin tiers designed to reward your salon’s growth. All pricing in South African Rands (ZAR). Strictly maintained R400 RRP protects your retail margin.
             </p>
           </div>
@@ -524,29 +476,29 @@ export function ResellerClient() {
             {/* TIER 1: Starter Pack */}
             <div 
               onClick={() => setActiveTier("starter")}
-              className={`p-8 md:p-10 rounded-3xl transition-all duration-300 flex flex-col justify-between border cursor-pointer ${
+              className={`p-8 md:p-10 rounded-3xl transition-all duration-300 flex flex-col justify-between border-2 border-black cursor-pointer ${
                 activeTier === "starter"
-                  ? "bg-white border-black/80 shadow-xl shadow-black/[0.03]"
-                  : "bg-white/70 border-black/[0.08] hover:border-black/30"
+                  ? "bg-white shadow-xl shadow-black/[0.05]"
+                  : "bg-white/80 hover:bg-white"
               }`}
             >
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs font-bold uppercase tracking-widest text-black/60">Tier 1 · Low MOQ</span>
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-black/5 text-black/80">30% Margin</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-black/75">Tier 1 · Low MOQ</span>
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold border border-black bg-[#faf8f5] text-black">30% Margin</span>
                 </div>
                 <h3 className="font-chloe text-3xl font-normal text-black mb-2">Starter Carton</h3>
-                <p className="text-xs text-black/60 mb-6">Designed for boutique salons and private practices testing initial client response.</p>
+                <p className="text-xs text-black/75 mb-6">Designed for boutique salons and private practices testing initial client response.</p>
 
-                <div className="mb-6 p-4 rounded-2xl bg-black/[0.03]">
+                <div className="mb-6 p-4 rounded-2xl border border-black bg-[#faf8f5]">
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-black font-sans">R280</span>
-                    <span className="text-xs text-black/60">/ bottle wholesale</span>
+                    <span className="text-xs text-black/75">/ bottle wholesale</span>
                   </div>
                   <p className="text-xs text-[#3d7b32] font-semibold mt-1">Earn R120 profit per bottle sold</p>
                 </div>
 
-                <ul className="space-y-3 text-xs text-black/80 mb-8">
+                <ul className="space-y-3 text-xs text-black/85 mb-8">
                   <li className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-[#3d7b32] shrink-0" weight="fill" />
                     <span><strong>12 to 23 Units</strong> (Carton opening order)</span>
@@ -563,8 +515,8 @@ export function ResellerClient() {
                     <CheckCircle size={16} className="text-[#3d7b32] shrink-0" weight="fill" />
                     <span>Digital product &amp; ingredient guide</span>
                   </li>
-                  <li className="flex items-center gap-2 text-black/50">
-                    <span className="w-4 h-4 rounded-full border border-black/20 flex items-center justify-center shrink-0">·</span>
+                  <li className="flex items-center gap-2 text-black/65">
+                    <span className="w-4 h-4 rounded-full border border-black flex items-center justify-center shrink-0">·</span>
                     <span>Standard courier delivery (R100)</span>
                   </li>
                 </ul>
@@ -573,32 +525,27 @@ export function ResellerClient() {
               <div>
                 <Link
                   href="/reseller/apply"
-                  className="btn-secondary w-full text-center block text-xs py-3"
+                  className="btn-secondary w-full text-center text-xs py-3"
                 >
                   Apply for Starter Tier
                 </Link>
-                <p className="text-[11px] text-center text-black/50 mt-3">R3,360 initial investment for 12 units</p>
+                <p className="text-[11px] text-center text-black/65 mt-3">R3,360 initial investment for 12 units</p>
               </div>
             </div>
 
-            {/* TIER 2: Studio Partner (Recommended / Most Popular) */}
+            {/* TIER 2: Studio Partner (Recommended) */}
             <div 
               onClick={() => setActiveTier("partner")}
-              className={`p-8 md:p-10 rounded-3xl transition-all duration-300 flex flex-col justify-between border relative cursor-pointer ${
+              className={`p-8 md:p-10 rounded-3xl transition-all duration-300 flex flex-col justify-between border-2 border-black relative cursor-pointer ${
                 activeTier === "partner"
-                  ? "bg-[#1a1a1a] text-white border-[#1a1a1a] shadow-2xl shadow-black/10 scale-[1.02]"
-                  : "bg-white border-black/[0.08] hover:border-black/30"
+                  ? "bg-[#1a1a1a] text-white shadow-2xl shadow-black/10 scale-[1.02]"
+                  : "bg-white hover:bg-[#faf8f5]"
               }`}
             >
-              {/* Badge */}
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#3d7b32] text-white text-[10px] font-bold tracking-widest uppercase shadow-md">
-                Most Popular for Day Spas &amp; Salons
-              </div>
-
               <div>
-                <div className="flex justify-between items-center mb-4 pt-2">
-                  <span className={`text-xs font-bold uppercase tracking-widest ${activeTier === "partner" ? "text-white/60" : "text-black/60"}`}>
-                    Tier 2 · Growth Partner
+                <div className="flex justify-between items-center mb-4">
+                  <span className={`text-xs font-bold uppercase tracking-widest ${activeTier === "partner" ? "text-white/75" : "text-black/75"}`}>
+                    Tier 2 · Recommended
                   </span>
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#3d7b32] text-white">
                     38% Margin
@@ -607,23 +554,23 @@ export function ResellerClient() {
                 <h3 className={`font-chloe text-3xl font-normal mb-2 ${activeTier === "partner" ? "text-white" : "text-black"}`}>
                   Studio Partner
                 </h3>
-                <p className={`text-xs mb-6 ${activeTier === "partner" ? "text-white/70" : "text-black/60"}`}>
+                <p className={`text-xs mb-6 ${activeTier === "partner" ? "text-white/80" : "text-black/75"}`}>
                   Ideal for established aesthetics clinics and busy day spas with 2+ treatment rooms.
                 </p>
 
-                <div className={`mb-6 p-4 rounded-2xl ${activeTier === "partner" ? "bg-white/10" : "bg-black/[0.03]"}`}>
+                <div className={`mb-6 p-4 rounded-2xl border ${activeTier === "partner" ? "border-white/30 bg-white/10" : "border-black bg-[#faf8f5]"}`}>
                   <div className="flex items-baseline gap-1">
                     <span className={`text-3xl font-bold font-sans ${activeTier === "partner" ? "text-white" : "text-black"}`}>
                       R248
                     </span>
-                    <span className={`text-xs ${activeTier === "partner" ? "text-white/60" : "text-black/60"}`}>
+                    <span className={`text-xs ${activeTier === "partner" ? "text-white/75" : "text-black/75"}`}>
                       / bottle wholesale
                     </span>
                   </div>
                   <p className="text-xs text-[#52b144] font-semibold mt-1">Earn R152 profit per bottle sold</p>
                 </div>
 
-                <ul className={`space-y-3 text-xs mb-8 ${activeTier === "partner" ? "text-white/90" : "text-black/80"}`}>
+                <ul className={`space-y-3 text-xs mb-8 ${activeTier === "partner" ? "text-white/90" : "text-black/85"}`}>
                   <li className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-[#52b144] shrink-0" weight="fill" />
                     <span><strong>24 to 47 Units</strong> (Two-carton bundle)</span>
@@ -650,15 +597,11 @@ export function ResellerClient() {
               <div>
                 <Link
                   href="/reseller/apply"
-                  className={`w-full text-center block text-xs py-3.5 rounded-full font-semibold transition-all ${
-                    activeTier === "partner"
-                      ? "bg-white text-black hover:bg-[#3d7b32] hover:text-white"
-                      : "btn-primary"
-                  }`}
+                  className="btn-primary w-full text-center text-xs py-3.5"
                 >
                   Apply for Partner Tier
                 </Link>
-                <p className={`text-[11px] text-center mt-3 ${activeTier === "partner" ? "text-white/50" : "text-black/50"}`}>
+                <p className={`text-[11px] text-center mt-3 ${activeTier === "partner" ? "text-white/65" : "text-black/65"}`}>
                   R5,952 investment for 24 units with free shipping
                 </p>
               </div>
@@ -667,29 +610,29 @@ export function ResellerClient() {
             {/* TIER 3: Premier Stockist */}
             <div 
               onClick={() => setActiveTier("premier")}
-              className={`p-8 md:p-10 rounded-3xl transition-all duration-300 flex flex-col justify-between border cursor-pointer ${
+              className={`p-8 md:p-10 rounded-3xl transition-all duration-300 flex flex-col justify-between border-2 border-black cursor-pointer ${
                 activeTier === "premier"
-                  ? "bg-white border-black/80 shadow-xl shadow-black/[0.03]"
-                  : "bg-white/70 border-black/[0.08] hover:border-black/30"
+                  ? "bg-white shadow-xl shadow-black/[0.05]"
+                  : "bg-white/80 hover:bg-white"
               }`}
             >
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs font-bold uppercase tracking-widest text-black/60">Tier 3 · Flagship</span>
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-black/5 text-black/80">45% Margin</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-black/75">Tier 3 · Flagship</span>
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold border border-black bg-[#faf8f5] text-black">45% Margin</span>
                 </div>
                 <h3 className="font-chloe text-3xl font-normal text-black mb-2">Premier Stockist</h3>
-                <p className="text-xs text-black/60 mb-6">For multi-location clinic groups, luxury hotels, and high-volume retail boutiques.</p>
+                <p className="text-xs text-black/75 mb-6">For multi-location clinic groups, luxury hotels, and high-volume retail boutiques.</p>
 
-                <div className="mb-6 p-4 rounded-2xl bg-black/[0.03]">
+                <div className="mb-6 p-4 rounded-2xl border border-black bg-[#faf8f5]">
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-black font-sans">R220</span>
-                    <span className="text-xs text-black/60">/ bottle wholesale</span>
+                    <span className="text-xs text-black/75">/ bottle wholesale</span>
                   </div>
                   <p className="text-xs text-[#3d7b32] font-semibold mt-1">Earn R180 profit per bottle sold</p>
                 </div>
 
-                <ul className="space-y-3 text-xs text-black/80 mb-8">
+                <ul className="space-y-3 text-xs text-black/85 mb-8">
                   <li className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-[#3d7b32] shrink-0" weight="fill" />
                     <span><strong>48+ Units</strong> (Volume tier)</span>
@@ -716,11 +659,11 @@ export function ResellerClient() {
               <div>
                 <Link
                   href="/reseller/apply"
-                  className="btn-secondary w-full text-center block text-xs py-3"
+                  className="btn-secondary w-full text-center text-xs py-3"
                 >
                   Apply for Premier Tier
                 </Link>
-                <p className="text-[11px] text-center text-black/50 mt-3">Maximum margin: R8,640 profit per 48 units</p>
+                <p className="text-[11px] text-center text-black/65 mt-3">Maximum margin: R8,640 profit per 48 units</p>
               </div>
             </div>
           </div>
@@ -730,12 +673,9 @@ export function ResellerClient() {
       {/* =========================================================================
           6. HOW ONBOARDING WORKS: 4-STEP FRICTIONLESS JOURNEY
           ========================================================================= */}
-      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-white border-b border-black/[0.06]">
+      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-white border-b border-black">
         <div className="max-w-[1400px] mx-auto">
           <div className="max-w-2xl mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3d7b32] mb-3 block">
-              Frictionless Onboarding
-            </span>
             <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
               From application to retail display in four straightforward steps.
             </h2>
@@ -784,77 +724,33 @@ export function ResellerClient() {
       {/* =========================================================================
           7. STOCKIST FAQ (Objection Handling)
           ========================================================================= */}
-      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-[#fcfbf9] border-b border-black/[0.06]">
-        <div className="max-w-[900px] mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#3d7b32] mb-3 block">
+      <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-[#fcfbf9] border-b border-black">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left Sticky Header */}
+          <div className="lg:col-span-5 lg:sticky lg:top-32">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-green mb-4 block">
               Stockist Inquiries
             </span>
-            <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
+            <h2 className="font-chloe text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-black leading-[1.04] m-0 mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="mt-3 text-sm text-black/70">
-              Clear answers regarding our wholesale policies, MOQs, and territory terms.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {stockistFAQs.map((faq, index) => {
-              const isOpen = openFaqIndex === index;
-              return (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden transition-all duration-200"
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleFaq(index)}
-                    aria-expanded={isOpen}
-                    className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#3d7b32]"
-                  >
-                    <span className="font-chloe text-lg md:text-xl font-normal text-black">
-                      {faq.question}
-                    </span>
-                    <CaretDown
-                      size={18}
-                      className={`text-black/60 shrink-0 transition-transform duration-300 ${
-                        isOpen ? "rotate-180 text-[#3d7b32]" : ""
-                      }`}
-                    />
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                      >
-                        <div className="px-6 pb-6 text-sm text-black/75 leading-relaxed border-t border-black/[0.05] pt-4">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-12 text-center p-6 rounded-2xl bg-white border border-black/[0.06]">
-            <p className="text-xs text-black/70 mb-3">
-              Have a custom inquiry or multiple clinic locations across South Africa?
-            </p>
+            <div className="text-sm sm:text-[15px] leading-relaxed text-black/80 max-w-[34ch] mb-7">
+              Clear answers on wholesale policies, opening minimums, and protected salon territories.
+            </div>
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-[#3d7b32] hover:underline"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-black hover:text-green border-b border-black hover:border-green pb-1.5 transition-colors"
             >
-              <WhatsappLogo size={16} weight="fill" />
-              <span>Chat directly with our Stockist Concierge on WhatsApp</span>
+              <WhatsappLogo size={15} weight="regular" />
+              <span>Chat with Stockist Concierge</span>
             </a>
+          </div>
+
+          {/* Right Clean Hairline Accordion */}
+          <div className="lg:col-span-7">
+            <FAQAccordion items={stockistFAQs} defaultOpenIndex={0} />
           </div>
         </div>
       </section>
@@ -864,16 +760,6 @@ export function ResellerClient() {
           ========================================================================= */}
       <section className="py-24 md:py-36 px-6 md:px-12 lg:px-20 bg-white">
         <div className="max-w-[1200px] mx-auto rounded-3xl bg-[#1a1a1a] text-white p-10 md:p-16 lg:p-20 relative overflow-hidden text-center flex flex-col items-center">
-          {/* Ambient green gradient highlight */}
-          <div 
-            className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-[#3d7b32]/25 blur-3xl pointer-events-none" 
-            aria-hidden="true" 
-          />
-          <div 
-            className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-[#3d7b32]/20 blur-3xl pointer-events-none" 
-            aria-hidden="true" 
-          />
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -881,10 +767,6 @@ export function ResellerClient() {
             transition={{ duration: 0.7 }}
             className="relative z-10 max-w-2xl mx-auto flex flex-col items-center"
           >
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#52b144] mb-4">
-              Secure Territory in Your Area
-            </span>
-
             <h2 className="font-chloe text-3xl sm:text-5xl md:text-6xl font-normal tracking-tight text-white leading-[1.08] mb-6">
               Bring South Africa&apos;s flagship botanical ritual to your shelves.
             </h2>

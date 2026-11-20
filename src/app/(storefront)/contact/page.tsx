@@ -6,7 +6,7 @@ import {
   EnvelopeSimple,
   MapPin,
   Clock,
-  Sparkle,
+  CheckCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
 import { buildBreadcrumbSchema } from "@/lib/seo/schema";
@@ -49,7 +49,7 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
+    <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -59,11 +59,10 @@ export default function ContactPage() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green/10 text-green rounded-full text-[11px] font-bold tracking-widest uppercase mb-4">
-            <Sparkle size={14} weight="fill" />
-            <span>Direct South African Concierge</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-4">
+          <span className="text-xs font-bold tracking-[0.2em] uppercase text-green block mb-4">
+            Direct South African Concierge
+          </span>
+          <h1 className="font-chloe text-4xl md:text-5xl font-normal tracking-tight text-black mb-4">
             We&apos;re Here to Assist You
           </h1>
           <p className="text-black text-base leading-relaxed">
@@ -74,12 +73,12 @@ export default function ContactPage() {
         {/* Contact Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {/* Card 1: WhatsApp Concierge */}
-          <div className="bg-white border-2 border-black rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-white border-2 border-black rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-[#25D366]/10 flex items-center justify-center border-2 border-[#25D366]">
-                <WhatsappLogo size={28} weight="fill" style={{ color: "#25D366" }} />
+              <div className="size-12 rounded-full flex items-center justify-center border-2 border-black text-black">
+                <WhatsappLogo size={22} weight="regular" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-gray-900">
+              <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-black">
                 Direct WhatsApp Concierge
               </h2>
               <p className="text-sm text-black leading-relaxed">
@@ -91,32 +90,32 @@ export default function ContactPage() {
                   <span>Mon – Sat: 08:00 – 18:00 (SAST)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Sparkle size={16} className="text-green shrink-0" weight="bold" />
+                  <CheckCircle size={16} className="text-green shrink-0" weight="bold" />
                   <span>Typical response time: Under 15 minutes</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t-2 border-black">
+            <div className="mt-8 pt-6 border-t border-black">
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary w-full !bg-[#25D366] !border-2 !border-[#25D366] !text-white hover:!bg-[#20ba5a] hover:!border-[#20ba5a] text-xs sm:text-sm text-center"
+                className="btn-primary w-full text-xs sm:text-sm text-center"
               >
-                <WhatsappLogo size={20} weight="fill" style={{ color: "#ffffff" }} className="shrink-0" />
+                <WhatsappLogo size={18} weight="regular" className="shrink-0" />
                 <span>Chat on WhatsApp <span className="whitespace-nowrap">({siteConfig.whatsappNumber})</span></span>
               </a>
             </div>
           </div>
 
           {/* Card 2: Official Support Email */}
-          <div className="bg-white border-2 border-black rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+          <div className="bg-white border-2 border-black rounded-2xl p-6 sm:p-8 flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 text-gray-900 flex items-center justify-center border-2 border-black">
-                <EnvelopeSimple size={28} weight="regular" />
+              <div className="size-12 rounded-full text-black flex items-center justify-center border-2 border-black">
+                <EnvelopeSimple size={22} weight="regular" />
               </div>
-              <h2 className="text-2xl font-medium tracking-tight text-gray-900">
+              <h2 className="text-2xl font-medium tracking-tight text-black">
                 Official Email Support
               </h2>
               <p className="text-sm text-black leading-relaxed">
@@ -124,12 +123,12 @@ export default function ContactPage() {
               </p>
               <div className="pt-2 space-y-2 text-xs text-black">
                 <div className="flex items-center gap-2">
-                  <MapPin size={16} className="text-gray-700" weight="bold" />
+                  <MapPin size={16} className="text-black" weight="bold" />
                   <span>Proudly Handcrafted &amp; Dispatched in South Africa</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <EnvelopeSimple size={16} className="text-gray-700" weight="bold" />
-                  <span className="font-medium text-gray-900">
+                  <EnvelopeSimple size={16} className="text-black" weight="bold" />
+                  <span className="font-medium text-black">
                     {siteConfig.supportEmail}
                   </span>
                 </div>
@@ -148,7 +147,7 @@ export default function ContactPage() {
         </div>
 
         {/* Order Notice Box */}
-        <div className="bg-[#faf9f6] border border-black rounded-2xl p-8 text-center max-w-3xl mx-auto space-y-4">
+        <div className="bg-[#faf8f5] border-2 border-black rounded-3xl p-8 text-center max-w-3xl mx-auto space-y-4">
           <h2 className="text-xl font-medium text-gray-900">
             Ready to Start Your 90-Day Barrier Repair?
           </h2>

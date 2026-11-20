@@ -6,9 +6,6 @@ import {
   ShieldCheck,
   Heart,
   Leaf,
-  ArrowRight,
-  Sparkle,
-  Quotes,
 } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
 import {
@@ -129,10 +126,6 @@ export default function AboutPage() {
         {/* Hero Section */}
         <div className="grid items-end gap-8 border-b border-black pb-12 md:grid-cols-[1.15fr_0.85fr] md:gap-16">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-green/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-green">
-              <Leaf size={14} weight="fill" />
-              <span>Facial-Grade Botanical Body Care · South Africa</span>
-            </div>
             <h1 className="max-w-3xl text-5xl font-medium leading-[0.95] tracking-[-0.04em] text-gray-900 md:text-7xl">
               Closing the Vanity Divide.
             </h1>
@@ -159,19 +152,13 @@ export default function AboutPage() {
                 priority
               />
               <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-black bg-white/95 p-6 backdrop-blur-md">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-green">
-                  The Uncompromising Standard
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-black">
+                <p className="text-sm leading-relaxed text-black">
                   &ldquo;A lotion that vanishes in five seconds isn&apos;t fast-absorbing—it is simply evaporating into thin air.&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-black bg-[#faf9f6] p-6 space-y-3">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-green">
-                At a Glance: The Launch Flagship
-              </span>
               <h2 className="text-2xl font-normal text-black">
                 Marula &amp; Baobab Body Lotion (400ml)
               </h2>
@@ -191,10 +178,6 @@ export default function AboutPage() {
 
           {/* Full Personal Note from the Founder */}
           <div className="rounded-[2rem] border border-black bg-white p-8 md:p-12 lg:p-14 shadow-sm">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-green mb-4">
-              <Quotes size={18} weight="fill" />
-              <span>Founder&apos;s Letter</span>
-            </div>
             <h2
               id="founders-note-heading"
               className="text-3xl md:text-5xl font-normal leading-tight text-black mb-8"
@@ -252,7 +235,7 @@ export default function AboutPage() {
                 <p className="text-lg font-semibold text-black">
                   — {siteConfig.founderSignOff}
                 </p>
-                <p className="text-xs uppercase tracking-widest text-green mt-1">
+                <p className="text-xs text-black/60 mt-1">
                   Handcrafted in South Africa · Official Store
                 </p>
               </div>
@@ -269,9 +252,6 @@ export default function AboutPage() {
         {/* The 4 Core Beliefs (ABC Framework) */}
         <section aria-labelledby="beliefs-heading" className="space-y-10">
           <div className="max-w-3xl space-y-3">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-green">
-              Our Formulation Philosophy
-            </span>
             <h2
               id="beliefs-heading"
               className="text-3xl md:text-5xl font-normal text-black leading-tight"
@@ -289,12 +269,12 @@ export default function AboutPage() {
                 key={belief.number}
                 className="rounded-3xl border border-black bg-white p-8 md:p-10 flex flex-col justify-between gap-6"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-widest text-green">
-                      Truth {belief.number}
+                <div className="space-y-4">
+                  <div className="flex items-baseline justify-between gap-4 border-b border-black/15 pb-3">
+                    <span className="font-chloe text-2xl text-black/45">
+                      {belief.number}
                     </span>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-black/60">
+                    <span className="text-xs text-black/60 text-right">
                       {belief.subtitle}
                     </span>
                   </div>
@@ -316,10 +296,6 @@ export default function AboutPage() {
           className="rounded-[2rem] border border-black bg-[#faf9f6] p-8 md:p-12 lg:p-16 space-y-10"
         >
           <div className="max-w-3xl space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-green">
-              <Sparkle size={15} weight="fill" />
-              <span>The 90-Day Transformation</span>
-            </div>
             <h2
               id="story-arc-heading"
               className="text-3xl md:text-5xl font-normal text-black leading-tight"
@@ -356,9 +332,7 @@ export default function AboutPage() {
         {/* Pillar Values */}
         <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[2rem] border border-black bg-black md:grid-cols-3">
           <div className="space-y-3 bg-white p-8 md:p-10">
-            <div className="w-10 h-10 rounded-lg bg-green/10 text-green flex items-center justify-center">
-              <Leaf size={22} weight="bold" />
-            </div>
+            <Leaf size={22} weight="regular" className="text-black/80" aria-hidden="true" />
             <h3 className="text-xl font-normal text-gray-900">
               Cold-Pressed Indigenous Oils
             </h3>
@@ -368,9 +342,7 @@ export default function AboutPage() {
           </div>
 
           <div className="space-y-3 bg-white p-8 md:p-10">
-            <div className="w-10 h-10 rounded-lg bg-green/10 text-green flex items-center justify-center">
-              <ShieldCheck size={22} weight="bold" />
-            </div>
+            <ShieldCheck size={22} weight="regular" className="text-black/80" aria-hidden="true" />
             <h3 className="text-xl font-normal text-gray-900">
               Built for the South African Climate
             </h3>
@@ -380,9 +352,7 @@ export default function AboutPage() {
           </div>
 
           <div className="space-y-3 bg-white p-8 md:p-10">
-            <div className="w-10 h-10 rounded-lg bg-green/10 text-green flex items-center justify-center">
-              <Heart size={22} weight="bold" />
-            </div>
+            <Heart size={22} weight="regular" className="text-black/80" aria-hidden="true" />
             <h3 className="text-xl font-normal text-gray-900">
               Cruelty-Free &amp; Future-Ready
             </h3>

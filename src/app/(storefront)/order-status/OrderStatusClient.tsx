@@ -316,12 +316,12 @@ export function OrderStatusClient() {
                 return (
                   <div
                     key={num}
-                    className={`rounded-2xl border p-4 flex items-start gap-3 transition-colors ${
+                    className={`rounded-2xl border-2 border-black p-4 flex items-start gap-3 transition-colors ${
                       isDone
-                        ? "border-black bg-[#3d7b32]/10"
+                        ? "bg-[#3d7b32]/10"
                         : isCurrent
-                        ? "border-black bg-[#fcfbf9]"
-                        : "border-black/25 bg-white opacity-60"
+                        ? "bg-[#fcfbf9]"
+                        : "bg-white opacity-60"
                     }`}
                   >
                     <div
@@ -388,12 +388,11 @@ export function OrderStatusClient() {
                     className="btn-primary !h-10 !py-0 !px-5 text-xs uppercase tracking-[0.14em] justify-center shrink-0"
                   >
                     <span>Track on The Courier Guy</span>
-                    <ArrowUpRight size={15} weight="bold" />
                   </a>
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border border-black/30 bg-[#fcfbf9] p-4 text-xs text-black/75">
+              <div className="rounded-2xl border-2 border-black bg-[#fcfbf9] p-4 text-xs text-black/80">
                 Your order is currently being carefully packed at our Wright Crossing Hub. Your Courier Guy waybill number will appear here automatically the moment dispatch is booked.
               </div>
             )}
@@ -402,12 +401,12 @@ export function OrderStatusClient() {
           {/* Scan Timeline & Itemized Order Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left: Live Scan Timeline */}
-            <div className="lg:col-span-7 rounded-3xl border border-black bg-white p-6 sm:p-7 space-y-5 shadow-xs">
+            <div className="lg:col-span-7 rounded-3xl border-2 border-black bg-white p-6 sm:p-7 space-y-5">
               <div className="flex items-center justify-between border-b border-black pb-3">
                 <h3 className="text-base font-bold text-black m-0">
                   Courier Scan Timeline
                 </h3>
-                <span className="text-[11px] font-mono text-black/55">
+                <span className="text-[11px] font-mono text-black/65">
                   {order.trackingEvents.length} {order.trackingEvents.length === 1 ? "event" : "events"}
                 </span>
               </div>
@@ -417,7 +416,7 @@ export function OrderStatusClient() {
                   {order.trackingEvents.map((ev, index) => (
                     <li
                       key={ev.id}
-                      className="relative pl-6 pb-4 last:pb-0 border-l border-black/25 last:border-l-transparent"
+                      className="relative pl-6 pb-4 last:pb-0 border-l-2 border-black last:border-l-transparent"
                     >
                       <span
                         className={`absolute -left-[5px] top-1 size-2.5 rounded-full border border-black ${
@@ -453,13 +452,13 @@ export function OrderStatusClient() {
             </div>
 
             {/* Right: Itemized Order Summary */}
-            <div className="lg:col-span-5 rounded-3xl border border-black bg-white p-6 sm:p-7 space-y-5 shadow-xs">
+            <div className="lg:col-span-5 rounded-3xl border-2 border-black bg-white p-6 sm:p-7 space-y-5">
               <div className="flex items-center justify-between border-b border-black pb-3">
                 <h3 className="text-base font-bold text-black m-0 flex items-center gap-2">
                   <Receipt size={16} weight="bold" />
                   <span>Order Summary</span>
                 </h3>
-                <span className="text-[11px] text-black/55">
+                <span className="text-[11px] text-black/65">
                   {new Date(order.createdAt).toLocaleDateString("en-ZA", {
                     day: "numeric",
                     month: "short",
@@ -472,7 +471,7 @@ export function OrderStatusClient() {
                 {order.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 pb-3 border-b border-black/15 last:border-0 last:pb-0"
+                    className="flex items-center gap-3 pb-3 border-b border-black last:border-0 last:pb-0"
                   >
                     <div className="relative size-12 rounded-xl overflow-hidden border border-black bg-[#fcfbf9] shrink-0">
                       <Image

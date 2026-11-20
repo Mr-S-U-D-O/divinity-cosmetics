@@ -92,8 +92,8 @@ export function ResellerNetwork() {
           >
             <Image
               data-reseller-img="bottle"
-              src="/images/marula-baobab-body-lotion.jpg"
-              alt="Divinity Cosmetics Marula and Baobab body lotion resting on a swirl of cream"
+              src="/images/reseller-lifestyle-tall.jpg"
+              alt="Divinity Cosmetics Marula and Baobab body lotion packed with travel tote and luggage under sunlit blue skies"
               fill
               sizes="(max-width: 1024px) 100vw, 40vw"
               className="object-cover object-center scale-110 will-change-transform"
@@ -144,10 +144,7 @@ export function ResellerNetwork() {
             className={`relative flex flex-col justify-between gap-10 overflow-hidden p-7 md:p-9 lg:col-span-7 lg:p-10 will-change-transform ${cardBase} bg-[#faf8f5]`}
           >
             <div className="max-w-xl">
-              <span className="text-xs font-bold uppercase tracking-widest text-green">
-                Authorized Stockist Network
-              </span>
-              <h3 className="mt-3 m-0 text-[clamp(2rem,3.4vw,3.1rem)] leading-[1.02] font-normal text-black">
+              <h3 className="m-0 text-[clamp(2rem,3.4vw,3.1rem)] leading-[1.02] font-normal text-black">
                 Bring Divinity to your shelves.
               </h3>
               <p className="mt-4 mb-0 max-w-[46ch] text-[1.05rem] leading-relaxed text-black/80">

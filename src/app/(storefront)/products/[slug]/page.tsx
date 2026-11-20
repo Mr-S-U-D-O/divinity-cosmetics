@@ -123,8 +123,18 @@ export default async function ProductPage(props: PageProps) {
   ]);
   const faqJsonLd = buildFAQPageSchema(PRODUCT_FAQS);
 
+  const formattedPrice = Number.isInteger(product.basePrice)
+    ? product.basePrice.toFixed(0)
+    : product.basePrice.toFixed(2);
+  const formattedCompareAt =
+    product.compareAtPrice && product.compareAtPrice > product.basePrice
+      ? Number.isInteger(product.compareAtPrice)
+        ? product.compareAtPrice.toFixed(0)
+        : product.compareAtPrice.toFixed(2)
+      : null;
+
   return (
-    <main className="min-h-screen bg-[#fcfbf9] text-[#1a1a1a] pt-24 sm:pt-28 lg:pt-32 pb-10 lg:pb-14 w-full max-w-full overflow-x-hidden flex items-center">
+    <main className="min-h-screen bg-[#fcfbf9] text-[#1a1a1a] pt-28 sm:pt-32 lg:pt-36 pb-16 lg:pb-24 w-full max-w-full overflow-x-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -132,26 +142,22 @@ export default async function ProductPage(props: PageProps) {
         }}
       />
 
-      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-8 lg:px-12">
-        {/* Compact Back / Breadcrumb Strip */}
-        <div className="mb-3 sm:mb-4 flex items-center justify-between gap-2">
+      <div className="w-full max-w-[1180px] mx-auto px-5 sm:px-8 lg:px-12">
+        {/* Quiet Breadcrumb */}
+        <div className="mb-6 sm:mb-8">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-black/70 hover:text-[#3d7b32] transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-black/75 hover:text-green transition-colors"
           >
             <ArrowLeft size={13} weight="bold" />
             <span>Back to Shop</span>
           </Link>
-
-          <span className="text-[11px] font-mono uppercase tracking-widest text-black/50">
-            SKU · {siteConfig.flagshipProduct.sku}
-          </span>
         </div>
 
-        {/* Single-Viewport Modern Minimalist Split Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-7 lg:gap-12 items-center">
-          {/* Left: Single Product Image Showcase */}
-          <div className="lg:col-span-6 w-full">
+        {/* Minimalist 2-Column Editorial Split */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 xl:gap-16 items-start">
+          {/* Left: Pure Studio Image */}
+          <div className="lg:col-span-6 w-full lg:sticky lg:top-32">
             <ProductGallery
               images={product.images}
               productName={product.name}
@@ -160,69 +166,50 @@ export default async function ProductPage(props: PageProps) {
             />
           </div>
 
-          {/* Right: Essential Product Info + Tabbed Details + Hero Buy Controls */}
-          <div className="lg:col-span-6 flex flex-col justify-between gap-4 sm:gap-5">
-            {/* 1. Status & Availability Pills */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#3d7b32]">
-                <span>{product.category || "Body Care"}</span>
-                <span aria-hidden="true">·</span>
-                <span>Facial-Grade Standard</span>
+          {/* Right: Uncluttered Details & Direct Purchase Flow */}
+          <div className="lg:col-span-6 flex flex-col lg:pt-2">
+            {/* Quiet Category & Volume Eyebrow */}
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-green">
+                {product.category || "Body Care"} · 400 ml
               </span>
 
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border border-black px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-                  inStock
-                    ? "bg-[#3d7b32]/10 text-[#244e1d]"
-                    : "bg-red-50 text-red-700"
-                }`}
-              >
-                <span
-                  className={`size-1.5 rounded-full ${
-                    inStock ? "bg-[#3d7b32] animate-pulse" : "bg-red-500"
-                  }`}
-                />
-                {inStock
-                  ? product.trackInventory
-                    ? `In Stock · ${product.stock} Available`
-                    : "In Stock · Ready for Dispatch"
-                  : "Currently Out of Stock"}
+              {!inStock ? (
+                <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-red-700">
+                  Out of Stock
+                </span>
+              ) : product.trackInventory && product.stock <= 5 ? (
+                <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#244e1d]">
+                  {product.stock} left
+                </span>
+              ) : null}
+            </div>
+
+            {/* Product Name */}
+            <h1 className="font-chloe text-3xl sm:text-4xl lg:text-[2.85rem] font-normal leading-[1.06] tracking-tight text-black m-0 mb-3">
+              {product.name}
+            </h1>
+
+            {/* Price */}
+            <div className="flex items-baseline gap-3 mb-6">
+              <span className="text-2xl font-medium tracking-tight text-black">
+                R{formattedPrice}
               </span>
+              {formattedCompareAt && (
+                <span className="text-sm text-black/40 line-through">
+                  R{formattedCompareAt}
+                </span>
+              )}
             </div>
 
-            {/* 2. Product Name */}
-            <div>
-              <h1 className="font-chloe text-3xl sm:text-4xl lg:text-[2.85rem] font-normal leading-[1.02] tracking-tight text-black m-0">
-                {product.name}
-              </h1>
-            </div>
+            {/* Immediate Summary Copy */}
+            <p className="text-sm sm:text-[15px] leading-relaxed text-black/70 m-0 mb-7">
+              {product.shortDescription ||
+                product.description ||
+                "A facial-grade 400ml botanical body emulsion formulated with cold-pressed South African Marula and wild-harvested Baobab seed oils for a physical 24-hour moisture seal."}
+            </p>
 
-            {/* 3. Price & Size Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-y border-black py-3">
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-2xl sm:text-3xl font-semibold tracking-tight text-black">
-                  R{product.basePrice.toFixed(2)}
-                </span>
-                {product.compareAtPrice &&
-                  product.compareAtPrice > product.basePrice && (
-                    <span className="text-sm text-black/45 line-through">
-                      R{product.compareAtPrice.toFixed(2)}
-                    </span>
-                  )}
-                <span className="text-xs text-black/60">
-                  (R{(product.basePrice / 400).toFixed(2)} / ml)
-                </span>
-              </div>
-
-              {/* Size Pill */}
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center rounded-full border border-black bg-white px-3 py-1 text-xs font-semibold tracking-wide text-black">
-                  Size: 400 ml / 13.5 fl oz
-                </span>
-              </div>
-            </div>
-
-            {/* 4. Interactive Condensed Tabbed Description + Quantity & Buy Focus CTA */}
+            {/* Direct Purchase Controls + Clean Hairline Accordions */}
             <AddToCart product={product} />
           </div>
         </div>

@@ -62,15 +62,12 @@ export function Story() {
             />
           </Link>
 
-          {/* 4. Text Card (Breaking the 5-Second Myth) */}
+          {/* 4. Text Card (The 5-Second Myth) */}
           <div
             data-story-card="myth"
-            className="order-4 md:order-none md:col-start-1 md:row-start-3 relative flex flex-col justify-between rounded-3xl border-2 border-black bg-white p-6 md:p-8 space-y-3 shadow-xs"
+            className="order-4 md:order-none md:col-start-1 md:row-start-3 relative flex flex-col justify-center rounded-3xl border-2 border-black bg-white p-6 md:p-8 shadow-xs"
           >
-            <span className="text-xs font-bold uppercase tracking-widest text-green">
-              Breaking the 5-Second Myth
-            </span>
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <h3 className="text-lg sm:text-xl md:text-2xl font-normal text-black leading-snug">
                 A lotion that vanishes in five seconds isn&apos;t fast-absorbing—it is evaporating into thin air.
               </h3>

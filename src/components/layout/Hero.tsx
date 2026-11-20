@@ -355,10 +355,16 @@ export function Hero() {
         {/* RIGHT COLUMN: Tall Feature Bento Container + Dual Stacked Pill CTAs */}
         <div className="relative z-10 flex h-full min-h-0 min-w-0 flex-col justify-between gap-3.5 xl:gap-4">
           {/* Top-Right Tall Bento Container */}
-          <div
-            data-anime="hero-bento"
-            className="relative min-h-0 w-full flex-1 rounded-2xl border-2 border-black bg-white p-6 will-change-transform"
-          />
+          <div className="relative min-h-0 w-full flex-1 overflow-hidden rounded-2xl border-2 border-black bg-[#faf8f5]">
+            <Image
+              src="/images/divinity-hero-botanical-canopy.jpg"
+              alt="Sunlit South African Baobab and Marula tree canopy bearing wild botanical fruit"
+              fill
+              sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 28vw, 380px"
+              className="object-cover object-center"
+              priority
+            />
+          </div>
 
           {/* Bottom-Right Dual Stacked Full-Width Pill CTAs */}
           <div className="flex w-full shrink-0 flex-col gap-3">
