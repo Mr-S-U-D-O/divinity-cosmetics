@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import {
   createOrder,
@@ -281,6 +282,12 @@ export async function getOrderDetailsAction(orderNumber: string) {
         discountAmount: Number(order.discountAmount),
         total: Number(order.total),
         currency: order.currency || "ZAR",
+        waybillNumber: order.waybillNumber,
+        trackingUrl: order.trackingUrl,
+        trackingStatus: normalizeUserFacingTrackingStatus(order.trackingStatus),
+        trackingEvents: parseTrackingEvents(order.trackingEvents),
+        shippedAt: order.shippedAt ? order.shippedAt.toISOString() : null,
+        deliveredAt: order.deliveredAt ? order.deliveredAt.toISOString() : null,
         items: order.items.map((i) => ({
           id: i.id,
           productId: i.productId,
@@ -298,6 +305,156 @@ export async function getOrderDetailsAction(orderNumber: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to retrieve order receipt.",
+    };
+  }
+}
+
+export interface TrackingEventDTO {
+  id: string;
+  date: string;
+  status: string;
+  message: string;
+  location?: string | null;
+}
+
+function normalizeUserFacingTrackingStatus(raw?: string | null): string | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase().trim();
+  const internalMap: Record<string, string> = {
+    "collection-unassigned": "collection-assigned",
+    "collection-rejected": "collection-assigned",
+    "delivery-unassigned": "delivery-assigned",
+    "delivery-rejected": "delivery-assigned",
+    "on-hold-internal": "at-hub",
+  };
+  return internalMap[s] || s;
+}
+
+function parseTrackingEvents(raw: unknown): TrackingEventDTO[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .map((item, idx) => ({
+      id: String(item.id ?? idx),
+      date: String(item.date ?? ""),
+      status: normalizeUserFacingTrackingStatus(String(item.status ?? "")) || "",
+      message: String(item.message ?? item.status ?? "Status updated"),
+      location: item.location ? String(item.location) : null,
+    }))
+    .sort((a, b) => {
+      const ta = a.date ? Date.parse(a.date) : 0;
+      const tb = b.date ? Date.parse(b.date) : 0;
+      return (Number.isNaN(tb) ? 0 : tb) - (Number.isNaN(ta) ? 0 : ta);
+    });
+}
+
+/**
+ * Secure public order tracking lookup for `/order-status`.
+ * Authorizes access if EITHER:
+ *  - The signed-in Clerk user owns the order (by `userId` or verified email), OR
+ *  - The submitted `email` matches `order.email` (case-insensitive).
+ */
+export async function lookupOrderTrackingAction(
+  orderNumber: string,
+  email?: string
+) {
+  try {
+    const cleanOrderNumber = (orderNumber || "").trim();
+    const cleanEmail = (email || "").trim().toLowerCase();
+
+    if (!cleanOrderNumber) {
+      return { success: false, error: "Please enter your order number (e.g. DIV-20261120-7959)." };
+    }
+
+    const order = await getOrderByNumber(cleanOrderNumber);
+    if (!order) {
+      return {
+        success: false,
+        error: "We could not find an order matching those details. Please double-check your order number and email address.",
+      };
+    }
+
+    // Check Clerk ownership first
+    let authorizedByClerk = false;
+    try {
+      const clerkUser = await currentUser();
+      if (clerkUser) {
+        const clerkEmails = clerkUser.emailAddresses.map((e) =>
+          e.emailAddress.trim().toLowerCase()
+        );
+        if (
+          (order.userId && order.userId === clerkUser.id) ||
+          clerkEmails.includes(order.email.trim().toLowerCase())
+        ) {
+          authorizedByClerk = true;
+        }
+      }
+    } catch {
+      // Guest lookup continues with email verification
+    }
+
+    if (!authorizedByClerk) {
+      if (!cleanEmail) {
+        return {
+          success: false,
+          requiresEmail: true,
+          error: "Please enter the email address used at checkout to verify your order.",
+        };
+      }
+      if (order.email.trim().toLowerCase() !== cleanEmail) {
+        return {
+          success: false,
+          error: "We could not find an order matching those details. Please double-check your order number and email address.",
+        };
+      }
+    }
+
+    const addr = (order.shippingAddress || {}) as {
+      suburb?: string;
+      city?: string;
+      province?: string;
+      postalCode?: string;
+    };
+
+    return {
+      success: true,
+      order: {
+        orderNumber: order.orderNumber,
+        createdAt: order.createdAt.toISOString(),
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        firstName: order.firstName,
+        email: order.email,
+        shippingMethod: order.shippingMethod || "Door-to-Door Courier",
+        shippingCost: Number(order.shippingCost),
+        subtotal: Number(order.subtotal),
+        discountAmount: Number(order.discountAmount),
+        total: Number(order.total),
+        currency: order.currency || "ZAR",
+        destinationSummary: [addr.suburb, addr.city, addr.province, addr.postalCode]
+          .filter(Boolean)
+          .join(", "),
+        waybillNumber: order.waybillNumber,
+        trackingUrl: order.trackingUrl,
+        trackingStatus: normalizeUserFacingTrackingStatus(order.trackingStatus),
+        trackingEvents: parseTrackingEvents(order.trackingEvents),
+        shippedAt: order.shippedAt ? order.shippedAt.toISOString() : null,
+        deliveredAt: order.deliveredAt ? order.deliveredAt.toISOString() : null,
+        items: order.items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          price: Number(i.price),
+          quantity: i.quantity,
+          total: Number(i.total),
+          image: i.product?.images?.[0] || "/images/marula-baobab-body-lotion.jpg",
+        })),
+      },
+    };
+  } catch (error: unknown) {
+    console.error("Error looking up order tracking:", error);
+    return {
+      success: false,
+      error: "Unable to look up order status right now. Please try again shortly.",
     };
   }
 }

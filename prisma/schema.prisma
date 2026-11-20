@@ -183,9 +183,12 @@ model Order {
   // Courier Guy / Shipping Integration
   waybillNumber       String?
   trackingUrl         String?
-  shiplogicShipmentId String? // Shiplogic shipment `id`, used to re-fetch labels via GET /shipments/label?id=
-  labelUrl            String? // Signed S3 waybill PDF URL (expires ~24h)
+  shiplogicShipmentId String?   // Shiplogic shipment `id`, used to re-fetch labels via GET /shipments/label?id=
+  labelUrl            String?   // Signed S3 waybill PDF URL (expires ~24h)
+  trackingStatus      String?   // Raw Shiplogic status e.g. collection-assigned, collected, at-hub, out-for-delivery, delivered
+  trackingEvents      Json?     // Sorted, deduplicated array of Shiplogic tracking scan events
   shippedAt           DateTime?
+  deliveredAt         DateTime?
 
   // Reseller tracking
   referralCode String?

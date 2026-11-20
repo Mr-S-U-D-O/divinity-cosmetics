@@ -74,6 +74,7 @@ export function Footer() {
             </div>
             <div className="footer-link-group">
               <h4 className="footer-link-heading">Support</h4>
+              <Link href="/order-status" className="footer-link">Track Order</Link>
               <Link href="/contact" className="footer-link">Contact Us</Link>
               <Link href="/shipping" className="footer-link">Shipping & Returns</Link>
               <Link href="/faq" className="footer-link">FAQ</Link>

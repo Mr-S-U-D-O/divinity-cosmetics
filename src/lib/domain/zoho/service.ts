@@ -337,6 +337,14 @@ export async function findOrCreateZohoCustomer(
   return contactId;
 }
 
+export interface ZohoSalesOrderLineItemRef {
+  line_item_id: string;
+  item_id?: string;
+  name?: string;
+  rate?: number;
+  quantity?: number;
+}
+
 /**
  * Creates a Confirmed Sales Order in Zoho Inventory / Books.
  * Note: Do NOT pass an inline `shipping_address` object to `POST /salesorders` — Zoho Books v3
@@ -346,7 +354,11 @@ export async function findOrCreateZohoCustomer(
 export async function createZohoSalesOrder(
   customerId: string,
   order: OrderWithItems
-): Promise<{ salesOrderId: string; salesOrderNumber: string }> {
+): Promise<{
+  salesOrderId: string;
+  salesOrderNumber: string;
+  lineItems: ZohoSalesOrderLineItemRef[];
+}> {
   const orderDate = new Date(order.createdAt).toISOString().slice(0, 10);
   const lineItems = await resolveZohoLineItems(order.items);
   const deliverySummary = formatShippingAddressSummary(order.shippingAddress);
@@ -377,7 +389,11 @@ export async function createZohoSalesOrder(
   );
 
   const result = await zohoFetch<{
-    salesorder: { salesorder_id: string; salesorder_number: string };
+    salesorder: {
+      salesorder_id: string;
+      salesorder_number: string;
+      line_items?: ZohoSalesOrderLineItemRef[];
+    };
   }>("salesorders?ignore_auto_number_generation=true", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -385,6 +401,7 @@ export async function createZohoSalesOrder(
 
   const salesOrderId = result.salesorder.salesorder_id;
   const salesOrderNumber = result.salesorder.salesorder_number;
+  const createdLineItems = result.salesorder.line_items || [];
 
   // Explicitly mark the Sales Order as Confirmed so it enters the Zoho Inventory packing queue
   try {
@@ -401,19 +418,66 @@ export async function createZohoSalesOrder(
     );
   }
 
-  return { salesOrderId, salesOrderNumber };
+  return { salesOrderId, salesOrderNumber, lineItems: createdLineItems };
 }
 
 /**
- * Creates a Tax Invoice linked to the Sales Order in Zoho Books and marks it as Sent.
+ * Fetches an existing Sales Order's line items from Zoho Books (used on retries so
+ * Invoice line items still bind to `salesorder_item_id`).
+ */
+async function fetchZohoSalesOrderLineItems(
+  salesOrderId: string
+): Promise<ZohoSalesOrderLineItemRef[]> {
+  try {
+    const res = await zohoFetch<{
+      salesorder?: { line_items?: ZohoSalesOrderLineItemRef[] };
+    }>(`salesorders/${encodeURIComponent(salesOrderId)}`);
+    return res.salesorder?.line_items || [];
+  } catch (err) {
+    console.warn(`[Zoho Sync] Could not fetch line items for existing SO ${salesOrderId}:`, err);
+    return [];
+  }
+}
+
+/**
+ * Creates a Tax Invoice linked to the Sales Order in Zoho Books (binding each line item
+ * via `salesorder_item_id` so Zoho automatically marks the Sales Order Invoiced & Paid).
  */
 export async function createZohoInvoiceForSalesOrder(
   customerId: string,
   salesOrderId: string,
-  order: OrderWithItems
+  order: OrderWithItems,
+  salesOrderLineItems: ZohoSalesOrderLineItemRef[] = []
 ): Promise<string> {
   const orderDate = new Date(order.createdAt).toISOString().slice(0, 10);
-  const lineItems = await resolveZohoLineItems(order.items);
+  const resolvedLineItems = await resolveZohoLineItems(order.items);
+
+  // Bind each invoice line item to its corresponding Sales Order line_item_id
+  const usedLineItemIds = new Set<string>();
+  const linkedLineItems = resolvedLineItems.map((line, index) => {
+    const matchedByItemId = line.item_id
+      ? salesOrderLineItems.find(
+          (soLine) =>
+            soLine.item_id === line.item_id && !usedLineItemIds.has(soLine.line_item_id)
+        )
+      : undefined;
+    const matchedByIndex =
+      !matchedByItemId &&
+      salesOrderLineItems[index] &&
+      !usedLineItemIds.has(salesOrderLineItems[index].line_item_id)
+        ? salesOrderLineItems[index]
+        : undefined;
+
+    const matched = matchedByItemId || matchedByIndex;
+    if (matched?.line_item_id) {
+      usedLineItemIds.add(matched.line_item_id);
+    }
+
+    return {
+      ...line,
+      ...(matched?.line_item_id ? { salesorder_item_id: matched.line_item_id } : {}),
+    };
+  });
 
   const invoicePayload: ZohoCreateInvoicePayload = {
     customer_id: customerId,
@@ -421,7 +485,7 @@ export async function createZohoInvoiceForSalesOrder(
     reference_number: order.orderNumber,
     date: orderDate,
     due_date: orderDate,
-    line_items: lineItems,
+    line_items: linkedLineItems,
     shipping_charge: Number(order.shippingCost),
     notes: "Thank you for choosing Divinity Cosmetics. Paid in full via Paystack.",
     terms: "Online transaction processed securely via Paystack.",
@@ -569,17 +633,27 @@ export async function syncPaidOrderToZoho(
     customerId = order.zohoContactId || (await findOrCreateZohoCustomer(order));
 
     // Step B: Create Confirmed Sales Order (for Inventory packing queue)
+    let salesOrderLineItems: ZohoSalesOrderLineItemRef[] = [];
     if (order.zohoSalesOrderId) {
       salesOrderId = order.zohoSalesOrderId;
+      if (!order.zohoInvoiceId) {
+        salesOrderLineItems = await fetchZohoSalesOrderLineItems(salesOrderId);
+      }
     } else {
       const so = await createZohoSalesOrder(customerId, order);
       salesOrderId = so.salesOrderId;
+      salesOrderLineItems = so.lineItems;
     }
 
-    // Step C: Create Tax Invoice in Zoho Books
+    // Step C: Create Tax Invoice linked directly to the Sales Order & its line items
     invoiceId =
       order.zohoInvoiceId ||
-      (await createZohoInvoiceForSalesOrder(customerId, salesOrderId, order));
+      (await createZohoInvoiceForSalesOrder(
+        customerId,
+        salesOrderId,
+        order,
+        salesOrderLineItems
+      ));
 
     // Step D: Record payment to mark Invoice as PAID
     const paymentId = await recordZohoInvoicePayment(
@@ -655,3 +729,26 @@ export async function syncPaidOrderToZoho(
     };
   }
 }
+
+/**
+ * Posts a comment directly onto a Zoho Sales Order (`POST /salesorders/{id}/comments`).
+ * Used after Shiplogic waybill booking to attach the tracking number, live tracking URL,
+ * and permanent on-demand A4 waybill PDF print link for Wright Crossing warehouse staff.
+ */
+export async function postZohoSalesOrderComment(
+  salesOrderId: string,
+  description: string
+): Promise<boolean> {
+  if (!salesOrderId || !isZohoConfigured()) {
+    return false;
+  }
+
+  await zohoFetch(`salesorders/${encodeURIComponent(salesOrderId)}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ description }),
+  });
+
+  console.log(`[Zoho Write-Back] Posted courier waybill & A4 print comment on Sales Order ${salesOrderId}.`);
+  return true;
+}
+

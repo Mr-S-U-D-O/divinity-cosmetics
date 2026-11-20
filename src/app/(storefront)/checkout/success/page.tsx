@@ -49,6 +49,11 @@ interface OrderData {
   discountAmount: number;
   total: number;
   currency: string;
+  waybillNumber?: string | null;
+  trackingUrl?: string | null;
+  trackingStatus?: string | null;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
   items: {
     id: string;
     productId: string;
@@ -290,9 +295,9 @@ function SuccessContent() {
           We have received your order and payment. Our apothecary team is carefully preparing your botanical formulations for dispatch.
         </p>
 
-        {/* Order Reference Pill */}
+        {/* Order Reference Pill & Track Order CTA */}
         {displayOrderNumber && (
-          <div className="pt-2 flex items-center justify-center gap-2">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white border border-black shadow-sm text-xs">
               <span className="text-gray-400 font-semibold tracking-wider uppercase text-[10px]">
                 Order Reference
@@ -319,6 +324,19 @@ function SuccessContent() {
                 )}
               </button>
             </div>
+
+            <Link
+              href={
+                order?.email
+                  ? `/order-status?order=${encodeURIComponent(displayOrderNumber)}&email=${encodeURIComponent(order.email)}`
+                  : `/order-status?order=${encodeURIComponent(displayOrderNumber)}`
+              }
+              className="btn-primary !h-9 !py-0 !px-5 text-xs uppercase tracking-[0.14em]"
+            >
+              <Truck size={15} weight="bold" />
+              <span>Track Your Order</span>
+              <ArrowRight size={14} weight="bold" />
+            </Link>
           </div>
         )}
       </div>
@@ -340,74 +358,108 @@ function SuccessContent() {
           </div>
         </div>
 
-        {/* 4-Step Visual Progress Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6">
-          
-          {/* Step 1: Payment Confirmed */}
-          <div className="p-4 rounded-2xl bg-emerald-50/70 border border-black flex items-start gap-3.5">
-            <div className="w-8 h-8 rounded-full bg-green text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-sm">
-              <Check size={16} weight="bold" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-800 block">
-                Step 1 · Completed
-              </span>
-              <h3 className="text-xs font-bold text-gray-900 mt-0.5">Payment Verified</h3>
-              <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                Processed via Paystack PCI-DSS gateway
-              </p>
-            </div>
-          </div>
+        {/* 4-Step Live Visual Progress Grid */}
+        {(() => {
+          const ts = (order?.trackingStatus || "").toLowerCase();
+          const isDelivered = order?.status === "DELIVERED" || ts === "delivered";
+          const isInTransit =
+            isDelivered ||
+            [
+              "collected",
+              "at-hub",
+              "manifested",
+              "ready-for-dispatch",
+              "in-transit",
+              "at-destination-hub",
+              "delivery-scheduled",
+              "delivery-assigned",
+              "out-for-delivery",
+              "in-locker",
+              "ready-for-pickup",
+            ].includes(ts);
+          const isDispatched = isInTransit || Boolean(order?.waybillNumber) || order?.status === "SHIPPED";
+          const liveStep = isDelivered ? 4 : isInTransit ? 3 : isDispatched ? 2 : 1;
 
-          {/* Step 2: Apothecary Preparation */}
-          <div className="p-4 rounded-2xl bg-stone-50 border border-black flex items-start gap-3.5 relative overflow-hidden">
-            <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-sm">
-              <Package size={16} weight="bold" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-wider uppercase text-stone-700 block">
-                Step 2 · In Progress
-              </span>
-              <h3 className="text-xs font-bold text-gray-900 mt-0.5">Apothecary Packaging</h3>
-              <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                Inspected, bottled &amp; gift-wrapped
-              </p>
-            </div>
-          </div>
+          const journeySteps = [
+            {
+              step: 1,
+              title: "Order Confirmed",
+              desc: "Processed via Paystack PCI-DSS gateway",
+              Icon: Check,
+            },
+            {
+              step: 2,
+              title: "Packed & Assigned",
+              desc: order?.waybillNumber
+                ? `Waybill ${order.waybillNumber} issued`
+                : "Inspected, bottled & gift-wrapped at Springs Hub",
+              Icon: Package,
+            },
+            {
+              step: 3,
+              title: "In Transit",
+              desc: order?.waybillNumber
+                ? "Moving via The Courier Guy"
+                : "Waybill tracking issued upon dispatch",
+              Icon: Truck,
+            },
+            {
+              step: 4,
+              title: "Doorstep Delivery",
+              desc: isDelivered ? "Delivered to your address" : "Safely delivered to your address",
+              Icon: MapPin,
+            },
+          ];
 
-          {/* Step 3: Courier Dispatch */}
-          <div className="p-4 rounded-2xl bg-stone-50/50 border border-black/40 flex items-start gap-3.5 opacity-70">
-            <div className="w-8 h-8 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center shrink-0 text-xs font-bold">
-              <Truck size={16} weight="bold" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-wider uppercase text-stone-500 block">
-                Step 3 · Upcoming
-              </span>
-              <h3 className="text-xs font-bold text-gray-700 mt-0.5">Courier Dispatch</h3>
-              <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
-                Waybill tracking issued via SMS
-              </p>
-            </div>
-          </div>
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6">
+              {journeySteps.map(({ step, title, desc, Icon }) => {
+                const isComplete = liveStep > step || (step === 4 && liveStep === 4) || (step === 1 && liveStep >= 1);
+                const isActive = (liveStep === 1 && step === 2) || (liveStep === step && step > 1 && step < 4);
 
-          {/* Step 4: Doorstep Delivery */}
-          <div className="p-4 rounded-2xl bg-stone-50/50 border border-black/40 flex items-start gap-3.5 opacity-70">
-            <div className="w-8 h-8 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center shrink-0 text-xs font-bold">
-              <MapPin size={16} weight="bold" />
+                return (
+                  <div
+                    key={step}
+                    className={`p-4 rounded-2xl border flex items-start gap-3.5 ${
+                      isComplete
+                        ? "bg-emerald-50/70 border-black"
+                        : isActive
+                        ? "bg-stone-50 border-black"
+                        : "bg-stone-50/50 border-black/40 opacity-70"
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold shadow-sm ${
+                        isComplete
+                          ? "bg-green text-white"
+                          : isActive
+                          ? "bg-black text-white"
+                          : "bg-stone-200 text-stone-600"
+                      }`}
+                    >
+                      <Icon size={16} weight="bold" />
+                    </div>
+                    <div>
+                      <span
+                        className={`text-[10px] font-bold tracking-wider uppercase block ${
+                          isComplete
+                            ? "text-emerald-800"
+                            : isActive
+                            ? "text-stone-700"
+                            : "text-stone-500"
+                        }`}
+                      >
+                        Step {step} · {isComplete ? "Completed" : isActive ? "In Progress" : "Upcoming"}
+                      </span>
+                      <h3 className="text-xs font-bold text-gray-900 mt-0.5">{title}</h3>
+                      <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">{desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <span className="text-[10px] font-bold tracking-wider uppercase text-stone-500 block">
-                Step 4 · Final
-              </span>
-              <h3 className="text-xs font-bold text-gray-700 mt-0.5">Doorstep Delivery</h3>
-              <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
-                Safely delivered to your address
-              </p>
-            </div>
-          </div>
-
-        </div>
+          );
+        })()}
       </div>
 
       {/* 3. Detailed Receipt & Destination Grid */}

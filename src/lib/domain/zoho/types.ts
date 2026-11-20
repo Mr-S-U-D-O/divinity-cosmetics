@@ -46,6 +46,7 @@ export interface ZohoCreateContactPayload {
 
 export interface ZohoSalesOrderLineItem {
   item_id?: string;
+  salesorder_item_id?: string;
   name: string;
   description?: string;
   rate: number;

@@ -3,6 +3,8 @@ import { timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { createCourierGuyShipment } from "@/lib/domain/shipping/courierguy";
 import { sendCustomerDispatchNotification } from "@/lib/domain/shipping/notifications";
+import { postZohoSalesOrderComment } from "@/lib/domain/zoho/service";
+import { siteConfig } from "@/lib/config/site";
 
 /**
  * Constant-time comparison of the provided secret against the expected one.
@@ -218,7 +220,40 @@ export async function POST(req: NextRequest) {
 
     console.log(`[💾 DATABASE] Order ${order.orderNumber} updated: status=SHIPPED, waybill=${waybillNumber}`);
 
-    // 8. Trigger Customer Dispatch Notification
+    // 8. Zoho Write-Back: Post Waybill & On-Demand A4 Print Link Comment onto the Zoho Sales Order
+    // Wrapped in try/catch so a Zoho comment failure never rolls back or fails the booked waybill.
+    const baseSiteUrl = (
+      process.env.NEXT_PUBLIC_APP_URL?.trim() || siteConfig.url
+    ).replace(/\/+$/, "");
+    const printableLabelUrl = `${baseSiteUrl}/api/shipping/label/${encodeURIComponent(
+      order.orderNumber
+    )}?token=${encodeURIComponent(webhookSecret)}`;
+
+    const targetZohoSalesOrderId =
+      updatedOrder.zohoSalesOrderId || rawSalesOrderId || null;
+
+    if (targetZohoSalesOrderId) {
+      try {
+        const commentLines = [
+          `The Courier Guy Collection Booked`,
+          `Courier: The Courier Guy (${serviceLevel || "ECO"})`,
+          `Waybill / Tracking Number: ${waybillNumber}`,
+          `Live Tracking URL: ${trackingUrl || `https://thecourierguy.co.za/tracking?tracking_number=${encodeURIComponent(waybillNumber)}`}`,
+          `Print A4 Waybill PDF: ${printableLabelUrl}`,
+        ];
+        await postZohoSalesOrderComment(
+          String(targetZohoSalesOrderId),
+          commentLines.join("\n")
+        );
+      } catch (zohoCommentErr) {
+        console.error(
+          `[Zoho Write-Back Warning] Waybill ${waybillNumber} was booked successfully, but posting the comment to Zoho Sales Order ${targetZohoSalesOrderId} failed:`,
+          zohoCommentErr
+        );
+      }
+    }
+
+    // 9. Trigger Customer Dispatch Notification
     await sendCustomerDispatchNotification(
       updatedOrder,
       waybillNumber,
@@ -237,6 +272,7 @@ export async function POST(req: NextRequest) {
         waybillNumber,
         trackingUrl,
         labelUrl,
+        printableLabelUrl,
         pickupLocation: "Wright Crossing Shopping Centre, Springs, Gauteng",
         dispatchedAt: updatedOrder.shippedAt?.toISOString(),
       },
