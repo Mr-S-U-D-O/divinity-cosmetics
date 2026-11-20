@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/body-lotion-marula-baobab-hero.jpg",
+        url: "/images/marula-baobab-body-lotion.jpg",
         width: 1200,
         height: 900,
         alt: "Divinity Cosmetics Marula & Baobab Body Lotion 400ml — R400",

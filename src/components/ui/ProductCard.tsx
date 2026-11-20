@@ -27,7 +27,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const cartItem = items.find((i) => i.product.id === product.id);
   const quantity = mounted ? cartItem?.quantity || 0 : 0;
 
-  const primaryImage = product.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg";
+  const primaryImage = product.images?.[0] || "/images/marula-baobab-body-lotion.jpg";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();

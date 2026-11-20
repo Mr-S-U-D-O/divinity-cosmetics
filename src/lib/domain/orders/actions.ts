@@ -216,7 +216,7 @@ export async function getOrderDetailsAction(orderNumber: string) {
           price: Number(i.price),
           quantity: i.quantity,
           total: Number(i.total),
-          image: i.product?.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg",
+          image: i.product?.images?.[0] || "/images/marula-baobab-body-lotion.jpg",
           category: i.product?.category,
         })),
       },

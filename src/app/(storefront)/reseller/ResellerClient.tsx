@@ -168,7 +168,7 @@ export function ResellerClient() {
             >
               <div className="relative aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/5] w-full rounded-3xl overflow-hidden border border-black/10 bg-[#f4efe8] shadow-xl shadow-black/[0.03]">
                 <Image
-                  src="/images/body-lotion-marula-baobab-hero.jpg"
+                  src="/images/marula-baobab-body-lotion.jpg"
                   alt="Divinity Cosmetics Flagship 400ml Marula & Baobab Body Lotion for Salons and Stockists"
                   fill
                   priority
@@ -478,7 +478,7 @@ export function ResellerClient() {
               className="md:col-span-2 relative min-h-[320px] rounded-3xl overflow-hidden border border-black bg-[#1a1a1a] text-white p-8 md:p-12 flex flex-col justify-end group"
             >
               <Image
-                src="/images/body-lotion-marula-baobab-detail.jpg"
+                src="/images/marula-baobab-body-lotion.jpg"
                 alt="Full size 400ml lotion bottle tester for stockists"
                 fill
                 sizes="(max-width: 1024px) 100vw, 65vw"

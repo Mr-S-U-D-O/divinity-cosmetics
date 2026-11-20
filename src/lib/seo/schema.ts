@@ -24,7 +24,7 @@ export function buildOrganizationSchema() {
       width: 300,
       height: 170,
     },
-    image: `${siteConfig.url}/images/body-lotion-marula-baobab-hero.jpg`,
+    image: `${siteConfig.url}/images/marula-baobab-body-lotion.jpg`,
     description: siteConfig.description,
     slogan: "Close the Vanity Divide: Facial-Grade Botanical Body Care for South Africa.",
     email: siteConfig.supportEmail,

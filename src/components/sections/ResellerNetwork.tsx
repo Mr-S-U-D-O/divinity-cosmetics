@@ -92,7 +92,7 @@ export function ResellerNetwork() {
           >
             <Image
               data-reseller-img="bottle"
-              src="/images/body-lotion-marula-baobab-detail.jpg"
+              src="/images/marula-baobab-body-lotion.jpg"
               alt="Divinity Cosmetics Marula and Baobab body lotion resting on a swirl of cream"
               fill
               sizes="(max-width: 1024px) 100vw, 40vw"

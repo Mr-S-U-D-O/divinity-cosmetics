@@ -99,7 +99,7 @@ export function CartDrawer() {
                     {/* Item Image */}
                     <div className="relative w-20 h-24 bg-gray-50 rounded-sm overflow-hidden flex-shrink-0 border border-black">
                       <Image
-                        src={item.product.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg"}
+                        src={item.product.images?.[0] || "/images/marula-baobab-body-lotion.jpg"}
                         alt={item.product.name}
                         fill
                         className="object-cover object-center"

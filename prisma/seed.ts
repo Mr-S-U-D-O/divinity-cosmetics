@@ -17,8 +17,7 @@ async function main() {
         "Facial-grade 400ml body lotion with cold-pressed Marula & Baobab oils for 24-hour hydration and 90-day barrier repair.",
       basePrice: 400,
       images: [
-        "/images/body-lotion-marula-baobab-hero.jpg",
-        "/images/body-lotion-marula-baobab-detail.jpg",
+        "/images/marula-baobab-body-lotion.jpg",
       ],
       category: "Body Care",
       status: ProductStatus.ACTIVE,

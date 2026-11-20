@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/body-lotion-marula-baobab-hero.jpg",
+        url: "/images/marula-baobab-body-lotion.jpg",
         width: 1200,
         height: 900,
         alt: "Divinity Cosmetics Marula & Baobab Body Lotion 400ml — Facial-Grade South African Body Care",
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
       "Divinity Cosmetics | Marula & Baobab Body Lotion (400ml) — R400",
     description:
       "Stop settling for watery supermarket lotions that evaporate in 5 seconds. Experience 24-hour hydration and 90-day barrier repair with cold-pressed African botanicals.",
-    images: ["/images/body-lotion-marula-baobab-hero.jpg"],
+    images: ["/images/marula-baobab-body-lotion.jpg"],
   },
 };
 

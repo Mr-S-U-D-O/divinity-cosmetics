@@ -5,9 +5,7 @@ import Link from "next/link";
 import {
   EnvelopeSimple,
   FacebookLogo,
-  InstagramLogo,
   Storefront,
-  TiktokLogo,
   WhatsappLogo,
 } from "@phosphor-icons/react";
 import { siteConfig } from "@/lib/config/site";
@@ -15,25 +13,11 @@ import { animate, createSpring } from "animejs";
 
 const SOCIAL_LINKS = [
   {
-    label: "Instagram",
-    href: siteConfig.social.instagram,
-    Icon: InstagramLogo,
-    color: "#E4405F",
-    hoverBg: "hover:bg-[#E4405F]/10 hover:border-[#E4405F]",
-  },
-  {
     label: "Facebook",
     href: siteConfig.social.facebook,
     Icon: FacebookLogo,
     color: "#1877F2",
     hoverBg: "hover:bg-[#1877F2]/10 hover:border-[#1877F2]",
-  },
-  {
-    label: "TikTok",
-    href: siteConfig.social.tiktok,
-    Icon: TiktokLogo,
-    color: "#000000",
-    hoverBg: "hover:bg-neutral-100 hover:border-black",
   },
 ];
 
@@ -80,7 +64,7 @@ export function Footer() {
           </div>
 
           {/* Tier 2: The Nav */}
-          <div className="footer-nav-grid">
+          <div className="footer-nav-grid lg:col-span-5">
             <div className="footer-link-group">
               <h4 className="footer-link-heading">Explore</h4>
               <Link href="/shop" className="footer-link">Shop Collection</Link>
@@ -105,8 +89,8 @@ export function Footer() {
         >
           <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row lg:items-center lg:justify-between">
             {/* Contact details */}
-            <ul className="m-0 flex list-none flex-col gap-4 sm:gap-5 p-0 sm:flex-row sm:gap-12">
-              <li className="flex items-center gap-3.5">
+            <ul className="m-0 flex list-none flex-col gap-4 sm:gap-5 p-0 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-5 lg:gap-12">
+              <li className="flex min-w-0 max-w-full items-center gap-3.5">
                 <span className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-black text-black transition-all duration-300 hover:border-green hover:bg-green/10 hover:text-green cursor-pointer">
                   <Storefront size={18} weight="regular" aria-hidden="true" />
                 </span>
@@ -115,7 +99,7 @@ export function Footer() {
                   <span className="text-[0.92rem] sm:text-[1rem] break-words">{siteConfig.domain}</span>
                 </span>
               </li>
-              <li className="flex items-center gap-3.5">
+              <li className="flex min-w-0 max-w-full items-center gap-3.5">
                 <span className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-black text-black transition-all duration-300 hover:border-green hover:bg-green/10 hover:text-green cursor-pointer">
                   <EnvelopeSimple size={18} weight="regular" aria-hidden="true" />
                 </span>
@@ -123,7 +107,7 @@ export function Footer() {
                   <span className="text-[0.68rem] uppercase tracking-[0.14em] opacity-60">Support</span>
                   <a
                     href={`mailto:${siteConfig.supportEmail}`}
-                    className="text-[0.92rem] sm:text-[1rem] break-words underline decoration-black/30 underline-offset-4 transition-colors duration-300 hover:text-green hover:decoration-green focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green"
+                    className="text-[0.92rem] sm:text-[1rem] break-all sm:break-words underline decoration-black/30 underline-offset-4 transition-colors duration-300 hover:text-green hover:decoration-green focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green"
                   >
                     {siteConfig.supportEmail}
                   </a>

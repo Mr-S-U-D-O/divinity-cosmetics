@@ -948,24 +948,6 @@ export function ShopClient({ products }: ShopClientProps) {
                   </div>
                 )}
               </div>
-
-              {/* Future Range Roadmap Banner */}
-              <div className="mt-12 rounded-3xl border-2 border-black bg-white p-6 md:p-8 space-y-4 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-green">
-                    Future Botanical Range · In Development
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-stone-100 text-gray-700 border-2 border-black shrink-0 self-start sm:self-auto">
-                    Orders over R500 ship free (2 bottles = R800)
-                  </span>
-                </div>
-                <h2 className="text-xl md:text-2xl font-normal text-black">
-                  One Uncompromising Flagship Today—More Formulations Coming Soon.
-                </h2>
-                <p className="text-xs md:text-sm text-black leading-relaxed">
-                  We are launching exclusively with our <strong>400ml Marula &amp; Baobab Body Lotion (R400)</strong> to establish our facial-grade body standard across South Africa. Upcoming releases in our pipeline include our <em>Cold-Pressed Botanical Body Oil</em>, <em>Targeted Barrier Repair Serums</em>, and <em>90-Day Ritual Refill Bundles</em>.
-                </p>
-              </div>
             </>
           ) : (
             <div className="text-center py-28 px-4 bg-white border border-black rounded-3xl shadow-sm">

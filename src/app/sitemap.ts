@@ -13,15 +13,14 @@ const publicRoutes: Array<{
     priority: 1.0,
     changeFrequency: "weekly",
     images: [
-      `${siteConfig.url}/images/body-lotion-marula-baobab-hero.jpg`,
-      `${siteConfig.url}/images/body-lotion-marula-baobab-detail.jpg`,
+      `${siteConfig.url}/images/marula-baobab-body-lotion.jpg`,
     ],
   },
   {
     route: "/shop",
     priority: 0.95,
     changeFrequency: "weekly",
-    images: [`${siteConfig.url}/images/body-lotion-marula-baobab-hero.jpg`],
+    images: [`${siteConfig.url}/images/marula-baobab-body-lotion.jpg`],
   },
   {
     route: "/about",

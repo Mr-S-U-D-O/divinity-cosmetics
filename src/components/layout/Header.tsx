@@ -176,13 +176,13 @@ export function Header() {
           <div className="top-bar-right">
             <Link 
               href="/shipping" 
-              className="top-bar-link group"
+              className="top-bar-link top-bar-pill group"
               title="View nationwide delivery details"
             >
               <span>Complimentary delivery on orders over R500</span>
               <ArrowRight 
                 size={11} 
-                className="top-bar-arrow text-green" 
+                className="top-bar-arrow" 
                 aria-hidden="true" 
               />
             </Link>
@@ -198,10 +198,10 @@ export function Header() {
               <SAFlag />
               <span>Orders over R500 ship free</span>
               <span className="top-bar-separator" aria-hidden="true">·</span>
-              <span className="text-black/60 font-normal">Nationwide</span>
+              <span className="text-white/85 font-normal">Nationwide</span>
               <ArrowRight 
                 size={10} 
-                className="top-bar-arrow text-green" 
+                className="top-bar-arrow text-white" 
                 aria-hidden="true" 
               />
             </Link>
@@ -211,7 +211,7 @@ export function Header() {
 
       {/* Main Nav (persistent sticky bar) */}
       <nav className="nav-bar relative">
-        {/* Mobile Dedicated Search Overlay (clean, app-like, never obscures logo) */}
+        {/* Mobile & Tablet Dedicated Search Overlay (frosted glass sitting on top of nav) */}
         <AnimatePresence>
           {searchOpen && (
             <motion.div
@@ -219,21 +219,21 @@ export function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 z-50 flex items-center justify-between gap-2 bg-white px-2 sm:hidden"
+              className="absolute inset-0 z-[80] flex items-center justify-between gap-2 bg-white/55 backdrop-blur-md px-2 lg:hidden"
             >
-              <div className="flex flex-1 items-center gap-2 rounded-full border border-black bg-white px-3 py-1.5 shadow-xs">
+              <div className="flex flex-1 items-center gap-2 rounded-full border border-black bg-white/75 backdrop-blur-xl px-3.5 py-1.5 shadow-lg">
                 <MagnifyingGlass size={17} className="text-black shrink-0" weight="bold" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search formulations..."
-                  className="w-full bg-transparent text-xs font-medium text-black outline-none placeholder:text-neutral-400"
+                  className="w-full bg-transparent text-xs font-medium text-black outline-none placeholder:text-neutral-500"
                 />
               </div>
               <button
                 type="button"
                 onClick={() => setSearchOpen(false)}
-                className="flex size-8 shrink-0 items-center justify-center rounded-full border border-black/20 text-black hover:text-green"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full border border-black/25 bg-white/80 backdrop-blur-xl text-black hover:text-green shadow-sm"
                 aria-label="Close search"
               >
                 <X size={17} weight="bold" />
@@ -297,7 +297,7 @@ export function Header() {
         <div className="nav-utils shrink-0">
           <div className="relative flex items-center">
             {/* Desktop Expandable Input */}
-            <div className="hidden sm:flex items-center">
+            <div className="hidden lg:flex items-center">
               <AnimatePresence>
                 {searchOpen && (
                   <motion.input
@@ -331,9 +331,8 @@ export function Header() {
             </div>
           ) : (
             <SignInButton mode="modal">
-              <button className="icon-btn sm:btn-ghost" aria-label="Sign In" title="Sign In">
-                <User size={18} weight="regular" />
-                <span className="hidden sm:inline">Sign In</span>
+              <button className="icon-btn" aria-label="Sign In" title="Sign In">
+                <User size={20} weight="regular" />
               </button>
             </SignInButton>
           )}
@@ -559,7 +558,7 @@ export function Header() {
                       {/* Image Canvas */}
                       <div className="relative w-full h-44 rounded-xl overflow-hidden bg-[#f4f2ee] mb-4">
                         <Image
-                          src="/images/body-lotion-marula-baobab-hero.jpg"
+                          src="/images/marula-baobab-body-lotion.jpg"
                           alt="Divinity Cosmetics Marula & Baobab Body Lotion 400ml"
                           fill
                           className="object-cover object-center group-hover/feature:scale-[1.03] transition-transform duration-700 ease-out"

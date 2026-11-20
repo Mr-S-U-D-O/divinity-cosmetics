@@ -748,7 +748,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                     <div key={item.product.id} className="flex items-center gap-3.5 py-2 border-b-2 border-black/10 last:border-0">
                       <div className="w-14 h-16 relative bg-gray-50 rounded-lg overflow-hidden shrink-0 border-2 border-black">
                         <Image
-                          src={item.product.images?.[0] || "/images/body-lotion-marula-baobab-hero.jpg"}
+                          src={item.product.images?.[0] || "/images/marula-baobab-body-lotion.jpg"}
                           alt={item.product.name}
                           fill
                           sizes="56px"

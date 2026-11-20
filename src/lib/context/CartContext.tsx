@@ -28,12 +28,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load from local storage on mount
+  // Load from local storage on mount and self-heal stale product snapshots (e.g. old R300 price or deleted image paths)
   useEffect(() => {
     try {
       const storedCart = localStorage.getItem("divinity_cart");
       if (storedCart) {
-        setItems(JSON.parse(storedCart));
+        const parsed: CartItem[] = JSON.parse(storedCart);
+        const sanitized = Array.isArray(parsed)
+          ? parsed.map((item) => {
+              if (!item?.product) return item;
+              const isFlagshipLotion =
+                item.product.slug === "marula-baobab-body-lotion" ||
+                item.product.name?.toLowerCase().includes("marula");
+              return {
+                ...item,
+                product: {
+                  ...item.product,
+                  basePrice:
+                    isFlagshipLotion && Number(item.product.basePrice) !== 400
+                      ? 400
+                      : Number(item.product.basePrice),
+                  images: ["/images/marula-baobab-body-lotion.jpg"],
+                },
+              };
+            })
+          : [];
+        setItems(sanitized);
       }
     } catch (e) {
       console.error("Failed to parse cart from local storage", e);
@@ -64,7 +84,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, product, quantity: item.quantity + 1 }
             : item
         );
       }
