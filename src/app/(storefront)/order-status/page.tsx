@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import React, { Suspense } from "react";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { OrderStatusClient } from "./OrderStatusClient";
 
-export const metadata: Metadata = {
-  title: "Track Your Order | Divinity Cosmetics South Africa",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Track Your Order",
   description:
     "Track your Divinity Cosmetics order in real time—view packing status, your Courier Guy waybill number, and live nationwide delivery milestones.",
-  robots: { index: false, follow: true },
-};
+  path: "/order-status",
+  noIndex: true,
+  follow: true,
+});
 
 export default function OrderStatusPage() {
   return (

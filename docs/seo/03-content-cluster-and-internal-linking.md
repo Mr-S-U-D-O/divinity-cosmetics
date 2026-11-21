@@ -8,7 +8,7 @@
 
 ## 1. Hub-and-spoke architecture overview
 
-Divinity Cosmetics currently indexes 10 public routes: `/` (brand overview), `/shop` (catalog), `/products/marula-baobab-body-lotion` (primary transactional PDP), `/rituals` (90-day application protocol), `/about` (The Vanity Divide and Founder's Note), `/faq` (Q&A support), `/reseller` (B2B wholesale), `/shipping`, `/contact`, and `/privacy`. No `/guides/` editorial hub exists in `src/app/` today.
+Divinity Cosmetics currently indexes 10 public routes: `/` (brand overview), `/shop` (catalogue), `/products/marula-baobab-body-lotion` (primary transactional PDP), `/rituals` (90-day application protocol), `/about` (The Vanity Divide and Founder's Note), `/faq` (Q&A support), `/reseller` (B2B wholesale), `/shipping`, `/contact`, and `/privacy`. No `/guides/` editorial hub exists in `src/app/` today.
 
 Targeting problem-aware and climate-specific queries directly on the single product page or `/shop` would dilute transactional focus and trigger keyword cannibalization. Creating a dedicated `/guides/` editorial authority hub isolates informational education while routing qualified internal link equity (`Contextual Boost`) into `/products/marula-baobab-body-lotion`, `/rituals`, `/about`, and `/reseller`.
 
@@ -36,13 +36,13 @@ Targeting problem-aware and climate-specific queries directly on the single prod
 
 ---
 
-## 3. Prioritized cluster articles (12 articles across P1, P2, P3)
+## 3. Prioritised cluster articles (12 articles across P1, P2, P3)
 
 Articles flagged **★ AEO** are top extraction targets for AI Overviews, ChatGPT Search, Perplexity, and Claude due to question framing, 40–60 word definitions, and structured comparison tables.
 
 ### 3.1 Priority 1 cluster articles (publish first)
 
-#### Article 1 — ★ AEO Priority
+#### Article 1 (★ AEO Priority)
 - **URL:** `/guides/why-body-lotion-evaporates-5-second-myth`
 - **Title:** *Why Does Fast-Absorbing Body Lotion Leave Skin Dry? The 5-Second Myth Explained*
 - **Content type:** Explainer
@@ -53,7 +53,7 @@ Articles flagged **★ AEO** are top extraction targets for AI Overviews, ChatGP
 - **Outline:** `H2` Why instant-dry lotions feel light then fail by 1 PM -> `H2` Reading the first five ingredients on a supermarket pump -> `H2` Volatile vs. lipid-rich emulsion comparison -> `H2` How to test absorption density at home.
 - **Differentiation:** Focuses on cosmetic chemistry and evaporation kinetics; `/rituals` covers Divinity's morning and evening shower routine.
 
-#### Article 2 — ★ AEO Priority
+#### Article 2 (★ AEO Priority)
 - **URL:** `/guides/marula-vs-baobab-oil-body-care-comparison`
 - **Title:** *Cold-Pressed Marula vs. Wild-Harvested Baobab Oil: Which Does Mature Body Skin Need?*
 - **Content type:** Ingredient Comparison
@@ -95,7 +95,7 @@ Articles flagged **★ AEO** are top extraction targets for AI Overviews, ChatGP
 - **Primary keyword:** `trans-epidermal water loss body skin`
 - **Secondary keywords:** `how to seal moisture barrier on body`, `occlusive vs humectant body lotion`
 - **AEO question target & 40–60w lead:** *"What is trans-epidermal water loss (TEWL) and how do cold-pressed oils stop it?"* Define TEWL as passive water evaporation through a weakened stratum corneum, showing why humectants alone pull moisture out in dry air unless paired with breathable botanical occlusives and emollients.
-- **Required table:** *Humectants vs. Emollients vs. Botanical Lipid Seals* (mechanism, behavior in low-humidity air, key examples).
+- **Required table:** *Humectants vs. Emollients vs. Botanical Lipid Seals* (mechanism, behaviour in low-humidity air, key examples).
 - **Outline:** `H2` Trans-epidermal water loss defined in plain language -> `H2` Why humectant-only lotions backfire in dry climates -> `H2` Emollients vs. occlusives comparison -> `H2` Building a 24-hour breathable seal.
 - **Differentiation:** Pure skin-barrier physiology explainer not covered in depth anywhere on the storefront.
 
@@ -167,7 +167,7 @@ Articles flagged **★ AEO** are top extraction targets for AI Overviews, ChatGP
 - **Outline:** `H2` Why treatment-room revenue caps clinic growth -> `H2` Post-peel and wrap aftercare demand -> `H2` Comparing 30%, 38%, and 45% South African stockist tiers -> `H2` Territory protection and fixed R400 RRP integrity.
 - **Differentiation:** B2B margin strategy feeding `/reseller` and `/reseller/apply` without competing with the commercial application page.
 
-#### Article 12 — ★ AEO Priority
+#### Article 12 (★ AEO Priority)
 - **URL:** `/guides/marula-baobab-body-lotion-buyers-faq`
 - **Title:** *Marula & Baobab Body Care Buyer's Guide: Texture, Absorption, 90-Day Yield & Gifting*
 - **Content type:** Buyer's FAQ & Yield Guide
@@ -207,11 +207,11 @@ Every public page is reachable via `Header.tsx` and `Footer.tsx`, **but body-lev
 
 | Source Route / Component | Immediate Target Links to Add / Fix | Purpose |
 |---|---|---|
-| `Footer.tsx:145–152` | Replace `/checkout` with `https://wa.me/27664859011?...` | Fix broken WhatsApp concierge link (**M3**) |
+| `Footer.tsx:145–152` | Replace `/checkout` with a `wa.me` link derived from `siteConfig.whatsappNumber` (matching `faq/page.tsx:106` and `contact/page.tsx:32`), avoiding hardcoded phone digits | Fix broken WhatsApp concierge link (**M3**) |
 | `Header.tsx:308–312, 441–459` | Wire search input to `/shop?q=...` and point Curated links to `/shop?q=...` or `/rituals` / PDP | Activate `SearchAction` and deep links (**M3**) |
 | `Hero.tsx` & `Story.tsx` | Link Story's 5-Second Myth card to `/rituals`; keep `/about` link | Connect homepage narrative to protocol hub (**M3**) |
 | `/products/[slug]` (`page.tsx` & `AddToCart.tsx`) | Link to `/rituals`, `/about#founders-note`, `/shipping`, `/faq`, and `/reseller` | Eliminate PDP isolation and pass authority (**M3**) |
-| `/shop` (`ShopClient.tsx`) | Add contextual links to `/rituals`, `/shipping`, and `/faq` | Support catalog shoppers before checkout (**M3**) |
+| `/shop` (`ShopClient.tsx`) | Add contextual links to `/rituals`, `/shipping`, and `/faq` | Support catalogue shoppers before checkout (**M3**) |
 | `/about` | Add links outside Founder's Note (in S.T.O.R.Y. / Beliefs sections) to `/rituals`, `/faq`, `/shipping`, `/reseller` | Distribute brand-story equity without altering Founder's Note (**M4**) |
 | `/rituals` | Add links to `/faq`, `/shipping`, `/shop`, `/reseller` | Connect 90-day protocol to buyer logistics (**M4**) |
 | `/faq` | Add links to `/rituals`, `/shipping`, `/reseller`, `/order-status` | Turn plain-text policy mentions into crawlable paths (**M4**) |
@@ -219,6 +219,8 @@ Every public page is reachable via `Header.tsx` and `Footer.tsx`, **but body-lev
 | `/contact` | Add links to `/shipping`, `/order-status`, `/faq`, `/reseller` | Reduce support friction (**M4**) |
 | `/privacy` | Add outbound links to `/shipping`, `/contact`, `/faq`, `/shop` | Fix confirmed 0-outbound-link dead end (**M4**) |
 | `/reseller` | Add links to `/products/marula-baobab-body-lotion`, `/rituals`, `/shipping` | Let clinic buyers inspect retail formula and courier logistics (**M4**) |
+
+> **Operational Safety Guard (M3 / M4):** **DO NOT insert `/guides/*` links into live storefront pages during M3 or M4 until the Phase 2 `/guides/*` routes actually exist.** Adding `/guides/*` links prematurely before Phase 2 builds `/guides` and `/guides/[slug]` will produce broken 404 internal links during M5 verification.
 
 ### 4.3 Planned Cluster ↔ Pillar ↔ Commercial link matrix (Phase 2+)
 
@@ -235,7 +237,7 @@ Following `seo-aeo-internal-linking/SKILL.md`, every link is assigned one of fou
 4. **`Contextual Boost` (Commercial equity transfer):**
    - Articles 1–10 and 12 each place 1 contextual link to `/products/marula-baobab-body-lotion` and 1 contextual link to `/rituals`.
    - Article 11 places contextual links to `/reseller` and `/reseller/apply`.
-   - Existing `/rituals`, `/faq`, and `/about` (outside the locked Founder's Note) add contextual links into the Pillar and top P1 guides once `/guides/` ships.
+   - **Phase 2+ only (guarded):** Existing `/rituals`, `/faq`, and `/about` (outside the locked Founder's Note) add contextual links into the Pillar and top P1 guides **only after** Phase 2 `/guides/*` routes ship (never during M3/M4).
 
 ### 4.4 Anchor-text rules, sample placements, and orphan/cannibalization checks
 
@@ -248,7 +250,7 @@ Following `seo-aeo-internal-linking/SKILL.md`, every link is assigned one of fou
   - *Existing `/privacy` -> `/shipping` & `/contact`:* `For parcel handling and return windows, review our [South African courier and 14-day return policy](/shipping), or reach our Information Officer through the [Divinity Cosmetics contact page](/contact).`
   - *Cluster Article 1 -> Pillar (`Cluster -> Pillar`):* `To see how lipid replenishment fits into a full seasonal routine, read our [South African guide to body skin barrier repair](/guides/skin-barrier-repair-body-care-south-africa).`
   - *Cluster Article 4 -> PDP (`Contextual Boost`):* `Pair lukewarm showers with a dense lipid emulsion such as [Divinity Marula & Baobab Body Lotion (400ml)](/products/marula-baobab-body-lotion) to seal moisture for 24 hours.`
-  - *Cluster Article 11 -> B2B (`/reseller`):* `Clinics and salons looking for 30% to 45% retail margins can review wholesale tiers on the [South African skincare stockist program](/reseller) page.`
+  - *Cluster Article 11 -> B2B (`/reseller`):* `Clinics and salons looking for 30% to 45% retail margins can review wholesale tiers on the [South African skincare stockist programme](/reseller) page.`
 - **Orphan prevention & cannibalization verification:**
   - Every existing public route receives inbound links from `Header.tsx`/`Footer.tsx` plus contextual body links after M3/M4.
   - Every future `/guides/*` URL receives at least 3 inbound links (from `/guides` index, from the Pillar page, and from 1–2 sibling cluster articles) and appears in `src/app/sitemap.ts` and `public/llms.txt` at launch.

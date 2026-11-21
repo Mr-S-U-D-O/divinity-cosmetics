@@ -5,11 +5,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Package, Truck, User } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "My Account & Orders | Divinity Cosmetics",
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "My Account & Orders",
+  description:
+    "View your Divinity Cosmetics order history, courier waybill references, and delivery updates.",
+  path: "/account",
+  noIndex: true,
+  follow: false,
+});
 
 function formatStatusBadge(status: string, trackingStatus?: string | null) {
   if (trackingStatus) {

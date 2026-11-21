@@ -1,7 +1,22 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { ZohoAuthConfig, ZohoTokenResponse } from "./types";
 
 let cachedAccessToken: string | null = null;
 let tokenExpiresAt: number = 0;
+
+const zohoRevalidateStorage = new AsyncLocalStorage<number>();
+
+/**
+ * Executes an async operation in a context where read-only Zoho GET calls
+ * (and OAuth token refreshes needed for them) use Next.js `next: { revalidate }`
+ * instead of `cache: "no-store"`, keeping storefront ISR pages statically cacheable.
+ */
+export function runWithZohoRevalidate<T>(
+  seconds: number,
+  fn: () => Promise<T>
+): Promise<T> {
+  return zohoRevalidateStorage.run(seconds, fn);
+}
 
 /**
  * Validates and retrieves Zoho configuration from environment variables.
@@ -61,13 +76,16 @@ export async function getZohoAccessToken(): Promise<string> {
     grant_type: "refresh_token",
   });
 
+  const revalidateSeconds = zohoRevalidateStorage.getStore();
   const response = await fetch(tokenUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params.toString(),
-    cache: "no-store",
+    ...(revalidateSeconds !== undefined
+      ? { next: { revalidate: revalidateSeconds } }
+      : { cache: "no-store" }),
   });
 
   const data = (await response.json()) as ZohoTokenResponse;
@@ -91,7 +109,7 @@ export async function getZohoAccessToken(): Promise<string> {
  * Generic HTTP client for Zoho Books / Inventory REST APIs.
  * Automatically injects the OAuth bearer token, organization ID, and validates responses.
  */
-export async function zohoFetch<T = any>(
+export async function zohoFetch<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -103,7 +121,7 @@ export async function zohoFetch<T = any>(
   const accessToken = await getZohoAccessToken();
   const cleanEndpoint = endpoint.replace(/^\/+/, "");
   const separator = cleanEndpoint.includes("?") ? "&" : "?";
-  
+
   // Organization ID is required both as a query parameter and header by Zoho Books & Inventory
   const fullUrl = `${config.apiBaseUrl.replace(/\/+$/, "")}/${cleanEndpoint}${separator}organization_id=${encodeURIComponent(
     config.organizationId
@@ -114,16 +132,27 @@ export async function zohoFetch<T = any>(
   headers.set("X-com-zoho-books-organizationid", config.organizationId);
   headers.set("Content-Type", "application/json;charset=UTF-8");
 
+  const method = (options.method || "GET").toUpperCase();
+  const revalidateSeconds = zohoRevalidateStorage.getStore();
+  const useRevalidate =
+    method === "GET" &&
+    options.cache !== "no-store" &&
+    revalidateSeconds !== undefined;
+
   const response = await fetch(fullUrl, {
     ...options,
     headers,
-    cache: "no-store",
+    ...(useRevalidate
+      ? { next: { revalidate: revalidateSeconds } }
+      : { cache: "no-store" }),
   });
 
   const rawText = await response.text().catch(() => "");
-  let json: any = null;
+  let json: { code?: number; message?: string } | null = null;
   try {
-    json = rawText ? JSON.parse(rawText) : null;
+    json = rawText
+      ? (JSON.parse(rawText) as { code?: number; message?: string })
+      : null;
   } catch {
     json = null;
   }
@@ -140,4 +169,3 @@ export async function zohoFetch<T = any>(
 
   return json as T;
 }
-

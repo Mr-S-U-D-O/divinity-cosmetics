@@ -2,11 +2,12 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/config/site";
 
 const disallowedPrivatePaths = [
-  "/account/",
-  "/checkout/",
-  "/sign-in/",
-  "/sign-up/",
-  "/reseller/apply/",
+  "/account",
+  "/checkout",
+  "/sign-in",
+  "/sign-up",
+  "/reseller/apply",
+  "/order-status",
   "/api/",
 ];
 

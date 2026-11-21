@@ -1,7 +1,18 @@
+import { cache } from "react"
 import { prisma } from "@/lib/prisma"
 import { Product, ProductStatus } from "./types"
 import { Prisma, Product as PrismaProduct } from "@prisma/client"
 import { syncProductsStockFromZoho } from "@/lib/domain/zoho/service"
+import { runWithZohoRevalidate } from "@/lib/domain/zoho/client"
+import { siteConfig } from "@/lib/config/site"
+
+export interface SitemapProduct {
+  slug: string
+  updatedAt: Date
+  images: string[]
+}
+
+const SITEMAP_FALLBACK_DATE = new Date("2026-11-20T00:00:00.000Z")
 
 // Helper to convert Prisma Decimal to number
 function toNumber(value: Prisma.Decimal | number | null | undefined): number {
@@ -40,7 +51,9 @@ function mapProduct(product: PrismaProduct, liveStock?: number): Product {
 
 async function hydrateWithZohoStock(products: PrismaProduct[]): Promise<Product[]> {
   if (products.length === 0) return []
-  const stockMap = await syncProductsStockFromZoho(products)
+  const stockMap = await runWithZohoRevalidate(60, () =>
+    syncProductsStockFromZoho(products)
+  )
   return products.map((p) => mapProduct(p, stockMap.get(p.id)))
 }
 
@@ -64,7 +77,7 @@ export async function getAllProducts(options?: {
   return hydrateWithZohoStock(products)
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
   const product = await prisma.product.findUnique({
     where: { slug },
   })
@@ -72,7 +85,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   if (!product) return null
   const [hydrated] = await hydrateWithZohoStock([product])
   return hydrated
-}
+})
 
 export async function getProductById(id: string): Promise<Product | null> {
   const product = await prisma.product.findUnique({
@@ -117,4 +130,35 @@ export async function getFeaturedCount(): Promise<number> {
       isFeatured: true,
     },
   })
+}
+
+export async function getSitemapProducts(): Promise<SitemapProduct[]> {
+  try {
+    const products = await prisma.product.findMany({
+      where: { status: "ACTIVE" },
+      select: {
+        slug: true,
+        updatedAt: true,
+        images: true,
+      },
+      orderBy: { sortOrder: "asc" },
+    })
+
+    if (products.length > 0) {
+      return products
+    }
+  } catch (error) {
+    console.warn(
+      "[Sitemap] Falling back to flagship product because database is unreachable:",
+      error
+    )
+  }
+
+  return [
+    {
+      slug: siteConfig.flagshipProduct.slug,
+      updatedAt: SITEMAP_FALLBACK_DATE,
+      images: [siteConfig.flagshipProduct.image],
+    },
+  ]
 }

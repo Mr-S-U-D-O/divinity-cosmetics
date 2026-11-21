@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getAllProducts } from "@/lib/domain/products/service";
+import { getSitemapProducts } from "@/lib/domain/products/service";
 import { siteConfig } from "@/lib/config/site";
+
+export const revalidate = 3600;
+
+const STATIC_LAST_MODIFIED = new Date("2026-11-20T00:00:00.000Z");
 
 const publicRoutes: Array<{
   route: string;
@@ -12,9 +16,7 @@ const publicRoutes: Array<{
     route: "",
     priority: 1.0,
     changeFrequency: "weekly",
-    images: [
-      `${siteConfig.url}/images/marula-baobab-body-lotion.jpg`,
-    ],
+    images: [`${siteConfig.url}/images/marula-baobab-body-lotion.jpg`],
   },
   {
     route: "/shop",
@@ -62,25 +64,31 @@ const publicRoutes: Array<{
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await getAllProducts({ onlyActive: true });
-  const now = new Date();
+  const products = await getSitemapProducts();
 
   return [
     ...publicRoutes.map(({ route, priority, changeFrequency, images }) => ({
       url: `${siteConfig.url}${route}`,
-      lastModified: now,
+      lastModified: STATIC_LAST_MODIFIED,
       changeFrequency,
       priority,
       ...(images ? { images } : {}),
     })),
     ...products.map((product) => ({
       url: `${siteConfig.url}/products/${product.slug}`,
-      lastModified: product.updatedAt || now,
+      lastModified: product.updatedAt || STATIC_LAST_MODIFIED,
       changeFrequency: "weekly" as const,
       priority: 0.95,
-      images: (product.images || []).map((img) =>
-        img.startsWith("http") ? img : `${siteConfig.url}${img}`
-      ),
+      images: (product.images || [])
+        .map((img) => img.trim())
+        .filter(Boolean)
+        .map((img) => {
+          if (/^https?:\/\//i.test(img)) {
+            return img;
+          }
+          const normalized = img.startsWith("/") ? img : `/${img}`;
+          return `${siteConfig.url}${normalized}`;
+        }),
     })),
   ];
 }

@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/lib/context/CartContext";
 import { siteConfig } from "@/lib/config/site";
-import { buildOrganizationSchema, buildWebSiteSchema } from "@/lib/seo/schema";
+import {
+  buildOrganizationSchema,
+  buildWebSiteSchema,
+  serializeJsonLd,
+} from "@/lib/seo/schema";
 import { chloe, codeNext } from "./fonts";
 import "./tailwind.css";
 import "./globals.css";
@@ -10,12 +14,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default:
-      "Divinity Cosmetics | Marula & Baobab Body Lotion (400ml) | Facial-Grade Body Care South Africa",
-    template: "%s | Divinity Cosmetics South Africa",
+    default: "Divinity Cosmetics | Facial-Grade Botanical Body Care",
+    template: "%s | Divinity Cosmetics",
   },
   description:
-    "Close the Vanity Divide. Shop Divinity Cosmetics Marula & Baobab Body Lotion (400ml, R400)—formulated with cold-pressed South African botanical oils for 24-hour hydration, crepey skin smoothing, and 90-day barrier repair.",
+    "Facial-grade South African body care with cold-pressed Marula and Baobab oils for 24-hour hydration, smoother skin, and 90-day barrier repair.",
   applicationName: "Divinity Cosmetics",
   keywords: [
     "Divinity Cosmetics",
@@ -34,12 +37,6 @@ export const metadata: Metadata = {
   creator: siteConfig.name,
   publisher: siteConfig.legalName,
   category: "Beauty & Skincare",
-  alternates: {
-    canonical: "/",
-    languages: {
-      "en-ZA": "/",
-    },
-  },
   robots: {
     index: true,
     follow: true,
@@ -60,22 +57,6 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     locale: "en_ZA",
     type: "website",
-    images: [
-      {
-        url: "/images/marula-baobab-body-lotion.jpg",
-        width: 1200,
-        height: 900,
-        alt: "Divinity Cosmetics Marula & Baobab Body Lotion 400ml — Facial-Grade South African Body Care",
-      },
-    ],
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.png", type: "image/png", sizes: "512x512" },
-      { url: "/favicon.png", type: "image/png", sizes: "192x192" },
-    ],
-    shortcut: [{ url: "/favicon.png", type: "image/png" }],
-    apple: [{ url: "/favicon.png", type: "image/png", sizes: "180x180" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -83,7 +64,6 @@ export const metadata: Metadata = {
       "Divinity Cosmetics | Marula & Baobab Body Lotion (400ml) — R400",
     description:
       "Stop settling for watery supermarket lotions that evaporate in 5 seconds. Experience 24-hour hydration and 90-day barrier repair with cold-pressed African botanicals.",
-    images: ["/images/marula-baobab-body-lotion.jpg"],
   },
 };
 
@@ -102,7 +82,7 @@ export default function RootLayout({
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify([organizationJsonLd, webSiteJsonLd]),
+              __html: serializeJsonLd([organizationJsonLd, webSiteJsonLd]),
             }}
           />
           <CartProvider>{children}</CartProvider>
