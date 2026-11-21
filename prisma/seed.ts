@@ -14,9 +14,9 @@ async function main() {
       sku: "DIV-MBL-400",
       zohoItemId: "1612725000000147076",
       description:
-        "A facial-grade botanical body treatment formulated with high concentrations of cold-pressed South African Marula and wild-harvested Baobab seed oils. Unlike watery supermarket pump lotions that evaporate in five seconds, this nutrient-dense emulsion takes a few minutes to sink in—forming a physical 24-hour seal against Highveld winters, harsh UV, hard municipal water, and coastal humidity shifts. Applied consistently over a 90-day cycle, it rebuilds a thinning moisture barrier, eliminates midday ashiness, and softens crepey texture on arms, legs, and décolletage.",
+        "A facial-grade 400ml botanical body lotion crafted in South Africa with 10% cold-pressed Limpopo Marula oil and 10% wild-harvested Mpumalanga Baobab seed oil. Designed to sink in over 2 to 3 minutes, it forms a physical 24-hour moisture seal against Highveld winters, harsh UV, and hard municipal water across a 90-day skin barrier renewal cycle.",
       shortDescription:
-        "Facial-grade 400ml body lotion with cold-pressed Marula & Baobab oils for 24-hour hydration and 90-day barrier repair.",
+        "Facial-grade 400ml body lotion with 10% cold-pressed Marula & 10% Baobab oils for 24-hour hydration and 90-day barrier repair.",
       basePrice: 400,
       images: [
         "/images/marula-baobab-body-lotion.jpg",
@@ -35,10 +35,9 @@ async function main() {
       trackInventory: true,
       isFeatured: true,
       sortOrder: 1,
-      metaTitle:
-        "Marula & Baobab Body Lotion (400ml) | Facial-Grade Barrier Repair | Divinity Cosmetics",
+      metaTitle: "Marula & Baobab Body Lotion (400ml)",
       metaDescription:
-        "Replace watery supermarket lotions with Divinity Cosmetics Marula & Baobab Body Lotion (400ml, R400). Cold-pressed African botanical oils for 24-hour hydration and 90-day barrier repair.",
+        "Shop Marula & Baobab Body Lotion (400ml, R400) by Divinity Cosmetics. Cold-pressed Marula & Baobab oils for 24-hour hydration and 90-day barrier repair.",
     },
   });
 

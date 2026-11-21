@@ -154,7 +154,7 @@ async function startNextServer(port) {
   const logs = [];
   const child = spawn(
     process.execPath,
-    [nextBin, "start", "-H", "127.0.0.1", "-p", String(port)],
+    [nextBin, "start", "-p", String(port)],
     {
       cwd: REPO_ROOT,
       env: serverEnv,

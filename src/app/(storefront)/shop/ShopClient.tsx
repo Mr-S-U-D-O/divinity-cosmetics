@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { Suspense, useState, useMemo, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   MagnifyingGlass, 
   CaretDown, 
@@ -17,6 +18,17 @@ import { animate, stagger } from "animejs";
 
 interface ShopClientProps {
   products: Product[];
+}
+
+function ShopSearchParamSync({ onQuery }: { onQuery: (q: string) => void }) {
+  const searchParams = useSearchParams();
+  const q = searchParams.get("q") || "";
+
+  useEffect(() => {
+    onQuery(q);
+  }, [q, onQuery]);
+
+  return null;
 }
 
 export function ShopClient({ products }: ShopClientProps) {
@@ -284,6 +296,9 @@ export function ShopClient({ products }: ShopClientProps) {
 
   return (
     <main className="min-h-screen bg-[#faf9f6]/40 pt-28 pb-32 font-sans text-[#1a1a1a]">
+      <Suspense fallback={null}>
+        <ShopSearchParamSync onQuery={setSearchQuery} />
+      </Suspense>
       {/* Header Banner */}
       <section className="px-6 md:px-12 lg:px-16 pt-8 pb-6 max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-black pb-6">
@@ -292,7 +307,7 @@ export function ShopClient({ products }: ShopClientProps) {
               Shop Formulations
             </h1>
             <p className="text-xs md:text-sm text-black mt-2 max-w-2xl font-sans leading-relaxed">
-              Launching with our signature <strong>400ml Marula &amp; Baobab Body Lotion (R400)</strong>—formulated with high-concentration, cold-pressed South African botanical oils to physically seal your moisture barrier for 24 hours and rebuild thinning, crepey skin over a 90-day cycle.
+              Browse facial-grade South African body care crafted in small batches. Our flagship <strong>400ml Marula &amp; Baobab Body Lotion (R400)</strong> seals moisture for 24 hours and supports 90-day barrier repair.
             </p>
           </div>
           <div className="text-xs text-gray-500 font-medium">
@@ -665,9 +680,9 @@ export function ShopClient({ products }: ShopClientProps) {
               {/* Mobile Categories */}
               {categoriesList.length > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-[11px] font-bold tracking-widest uppercase text-gray-900 mb-3">
+                  <h3 className="text-[11px] font-bold tracking-widest uppercase text-gray-900 mb-3">
                     Categories
-                  </h4>
+                  </h3>
                   <div className="space-y-2">
                     {categoriesList.map((cat) => {
                       const isChecked = selectedCategories.includes(cat.name);
@@ -698,9 +713,9 @@ export function ShopClient({ products }: ShopClientProps) {
               {/* Mobile Concerns */}
               {concernsList.length > 0 && (
                 <div className="mb-6 border-t border-black pt-4">
-                  <h4 className="text-[11px] font-bold tracking-widest uppercase text-gray-900 mb-3">
+                  <h3 className="text-[11px] font-bold tracking-widest uppercase text-gray-900 mb-3">
                     Concerns
-                  </h4>
+                  </h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {concernsList.map((concern) => {
                       const isChecked = selectedConcerns.includes(concern.name);
@@ -892,6 +907,7 @@ export function ShopClient({ products }: ShopClientProps) {
           )}
 
           {/* Product Grid */}
+          <h2 className="sr-only">Botanical Product Catalogue</h2>
           {paginatedProducts.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

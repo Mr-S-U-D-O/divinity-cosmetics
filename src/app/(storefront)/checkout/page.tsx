@@ -245,7 +245,7 @@ export default function CheckoutPage() {
       .join("\n");
 
     const shippingText =
-      shippingCost === 0 ? "FREE (Orders over R500)" : `R${shippingCost.toFixed(2)}`;
+      shippingCost === 0 ? "FREE" : `R${shippingCost.toFixed(2)}`;
 
     return `🌿 *MANUAL ORDER REQUEST - DIVINITY COSMETICS*
 🌐 Website: ${siteConfig.domain}

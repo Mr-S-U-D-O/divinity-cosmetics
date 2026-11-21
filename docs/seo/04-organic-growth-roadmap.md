@@ -37,7 +37,7 @@ All phase actions below use operational completion gates (shipped fixes, indexed
   - Fix single mobile/desktop `<h1>` (`Hero.tsx`), heading order (`Header`, `Footer`, `ShopClient`, `ResellerForm`, `checkout/verify`), SSR DOM visibility (`FAQAccordion`, `AddToCart`, PDP `PRODUCT_FAQS` and `product.description`), `?q=` `SearchAction` wiring, `alt` attributes, `Footer.tsx` WhatsApp link, `checkout/success` phone number, and `/privacy` outbound links.
 - **Factual & business-logic reconciliation:**
   - Fix `pricing.md` SKU (`DIV-MBL-400`) and 3 wholesale tiers (30%/38%/45%); sync `10%` Marula and `10%` Baobab concentrations across `llms*.txt` and `pricing.md`; standardise Limpopo Marula / Mpumalanga Baobab and Wright Crossing Springs hub (`1559`); remove unverified `"14 days"` and `"78%"` reseller stats; keep Founder's Note (`about/page.tsx:155–157, 181–237`; `llms-full.txt:26–56`) verbatim.
-  - Reconcile checkout shipping logic (`freeShippingThreshold = 500` / `R100` vs live Shiplogic `R142+` rates) so checkout totals match advertised store policy and schema.
+  - Align storefront copy, JSON-LD schema, and AI markdown assets with live Shiplogic / Courier Guy checkout rates (economy from ~R142, no `>= R500` free-shipping waiver) so advertised policy matches checkout totals.
 - **Newsletter & telemetry activation:**
   - Connect `Footer.tsx` email signup to a real API route / Zoho Campaign or ESP list to capture non-ready organic visitors for a 90-day barrier-education welcome sequence.
   - Install Google Search Console verification, Bing Webmaster Tools verification, and consent-aware GA4 event tracking (detailed in Section 3).

@@ -29,7 +29,7 @@ export function ProductGallery({
       <div className="relative w-full aspect-[4/5] sm:aspect-[5/5] lg:aspect-[4/4.6] max-h-[620px] overflow-hidden rounded-2xl border-2 border-black bg-[#f4f1ea]">
         <Image
           src={currentImage}
-          alt={`${productName} — Botanical Skincare`}
+          alt={`${productName} (400ml) — Facial-Grade Marula and Baobab Body Lotion by Divinity Cosmetics`}
           fill
           className="object-cover object-center transition-opacity duration-300"
           priority

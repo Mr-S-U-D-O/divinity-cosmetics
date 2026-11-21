@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/lib/context/CartContext";
 import { siteConfig } from "@/lib/config/site";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo/metadata";
 import {
   buildOrganizationSchema,
   buildWebSiteSchema,
@@ -14,11 +15,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Divinity Cosmetics | Facial-Grade Botanical Body Care",
+    default: "Divinity Cosmetics | Facial-Grade Body Care South Africa",
     template: "%s | Divinity Cosmetics",
   },
   description:
-    "Facial-grade South African body care with cold-pressed Marula and Baobab oils for 24-hour hydration, smoother skin, and 90-day barrier repair.",
+    "Facial-grade South African body care with 10% cold-pressed Marula and 10% Baobab oils for 24-hour hydration, smoother skin, and 90-day barrier repair.",
   applicationName: "Divinity Cosmetics",
   keywords: [
     "Divinity Cosmetics",
@@ -49,21 +50,21 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title:
-      "Divinity Cosmetics | Facial-Grade Marula & Baobab Body Lotion (400ml)",
+    title: "Divinity Cosmetics | Facial-Grade Body Care South Africa",
     description:
-      "Your body deserves the exact same botanical standard you demand for your face. Cold-pressed South African Marula & Baobab seed oils for 24-hour climate protection and 90-day barrier repair.",
+      "Your body deserves the same botanical standard as your face. Cold-pressed South African Marula and Baobab seed oils for 24-hour climate protection.",
     url: siteConfig.url,
     siteName: siteConfig.name,
     locale: "en_ZA",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title:
-      "Divinity Cosmetics | Marula & Baobab Body Lotion (400ml) — R400",
+    title: "Divinity Cosmetics | Marula & Baobab Body Lotion (400ml)",
     description:
-      "Stop settling for watery supermarket lotions that evaporate in 5 seconds. Experience 24-hour hydration and 90-day barrier repair with cold-pressed African botanicals.",
+      "Replace water-heavy supermarket lotions with cold-pressed African Marula and Baobab oils for 24-hour hydration and 90-day barrier repair.",
+    images: ["/twitter-image"],
   },
 };
 

@@ -144,7 +144,7 @@ export function ResellerForm() {
       className="bg-white rounded-3xl p-8 md:p-12 border border-black shadow-xl shadow-black/[0.02] flex flex-col gap-6"
     >
       <div className="border-b border-black pb-6 mb-2">
-        <h3 className="text-xl font-bold text-black mb-2">Your Details</h3>
+        <h2 className="text-xl font-bold text-black mb-2">Your Details</h2>
         <p className="text-sm text-gray-500">Your basic information is pulled securely from your account.</p>
       </div>
 
@@ -181,7 +181,7 @@ export function ResellerForm() {
       </div>
 
       <div className="border-b border-black pb-6 pt-4 mb-2 mt-2">
-        <h3 className="text-xl font-bold text-black mb-2">Business Details</h3>
+        <h2 className="text-xl font-bold text-black mb-2">Business Details</h2>
         <p className="text-sm text-gray-500">Tell us about your retail channels.</p>
       </div>
 
@@ -193,7 +193,7 @@ export function ResellerForm() {
           name="phoneNumber"
           value={formData.phoneNumber}
           onChange={handleInputChange}
-          placeholder="+1 (555) 000-0000"
+          placeholder="+27 82 000 0000"
           required
           className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors" 
         />

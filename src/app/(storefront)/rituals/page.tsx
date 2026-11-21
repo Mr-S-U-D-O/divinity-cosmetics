@@ -1,95 +1,55 @@
 import type { Metadata } from "next";
 import React from "react";
 import Link from "next/link";
+import { Sun, Moon } from "@phosphor-icons/react/dist/ssr";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
-  Sun,
-  Moon,
-} from "@phosphor-icons/react/dist/ssr";
-import { siteConfig } from "@/lib/config/site";
-import { buildBreadcrumbSchema } from "@/lib/seo/schema";
+  buildBreadcrumbSchema,
+  buildRitualItemListSchema,
+  serializeJsonLd,
+} from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
-  title:
-    "Ingredients & The 90-Day Barrier Repair Ritual | Cold-Pressed Marula & Baobab",
+export const metadata: Metadata = buildPageMetadata({
+  title: "90-Day Barrier Ritual & Oils",
   description:
-    "Learn why watery commercial lotions evaporate in 5 seconds and how Divinity Cosmetics' cold-pressed South African Marula and Baobab seed oils rebuild a thinning moisture barrier over a 90-day cycle.",
+    "How cold-pressed 10% Limpopo Marula and 10% Mpumalanga Baobab oils rebuild a thinning moisture barrier over a 90-day South African body care ritual.",
+  path: "/rituals",
+  ogType: "article",
   keywords: [
-    "Marula and Baobab skin benefits",
-    "90-day skin barrier repair ritual",
-    "why body lotion evaporates",
-    "how to fix crepey skin on arms and legs naturally",
-    "Highveld winter dry skin routine South Africa",
-    "cold-pressed Marula oil vs commercial lotion",
+    "90-day skin barrier repair body ritual",
+    "how to apply Marula and Baobab body lotion",
+    "cold-pressed Marula and Baobab oil skin benefits",
+    "how to improve crepey skin naturally South Africa",
+    "Highveld winter dry skin body care routine",
   ],
-  alternates: {
-    canonical: "/rituals",
-  },
-  openGraph: {
-    title:
-      "The 90-Day Barrier Repair Ritual & Botanical Science | Divinity Cosmetics",
-    description:
-      "Dismantling the 5-Second Evaporation Myth. Discover how undiluted cold-pressed Marula & Baobab seed oils physically seal South African skin for 24 hours.",
-    url: `${siteConfig.url}/rituals`,
-    type: "article",
-  },
-};
+});
 
 export default function RitualsPage() {
   const breadcrumbJsonLd = buildBreadcrumbSchema([
     { name: "Home", path: "/" },
     { name: "Ingredients & 90-Day Rituals", path: "/rituals" },
   ]);
-
-  const ritualListSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "The Divinity Cosmetics 90-Day Barrier Repair Protocol",
-    description:
-      "A three-phase daily body care protocol using cold-pressed South African Marula and Baobab seed oils to restore a thinning skin barrier over 90 days.",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Days 1–14: The 24-Hour Physical Climate Seal",
-        description:
-          "Apply Divinity Marula & Baobab Body Lotion (400ml) within 3 minutes of stepping out of a warm shower. Allow 2–3 minutes for the dense oils to absorb and halt midday ashiness.",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Days 15–45: Deep Epidermal Lipid Replenishment",
-        description:
-          "Consistent daily application of oleic acid (Marula) and Omegas 3, 6, and 9 (Baobab) replenishes intercellular lipids stripped by hard municipal water and Highveld dry air.",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: "Days 46–90: Structural Barrier Renewal & Softened Crepey Texture",
-        description:
-          "Across a full 90-day epidermal turnover cycle, the moisture barrier rebuilds its natural thickness and bounce, softening crepey skin on arms, knees, elbows, and décolletage.",
-      },
-    ],
-  };
+  const ritualListSchema = buildRitualItemListSchema();
 
   return (
     <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-[#1a1a1a]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([breadcrumbJsonLd, ritualListSchema]),
+          __html: serializeJsonLd([breadcrumbJsonLd, ritualListSchema]),
         }}
       />
       <div className="max-w-5xl mx-auto space-y-20">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold tracking-[0.2em] uppercase text-green block">
-            Botanical Science &amp; The 90-Day Standard
+            Botanical Science &amp; The 90-Day Protocol
           </span>
           <h1 className="font-chloe text-4xl md:text-6xl font-normal tracking-tight text-black leading-tight">
-            Dismantling the 5-Second Myth.
+            The 90-Day Barrier Repair Ritual.
           </h1>
           <p className="text-black text-base md:text-lg leading-relaxed">
-            A lotion that vanishes in five seconds isn&apos;t &ldquo;fast-absorbing&rdquo;—it is simply evaporating into thin air. Real 24-hour hydration requires dense, cold-pressed African botanical oils that take two to three minutes to sink in and physically seal your skin against the South African climate.
+            A 90-day skin barrier ritual pairs daily damp-skin application with concentrated African lipids so moisture stays locked in for 24 hours. Instead of evaporating in five seconds like water-heavy supermarket lotions, 10% cold-pressed Marula and 10% Baobab oils sink in over 2 to 3 minutes to support full epidermal renewal.
           </p>
         </div>
 
@@ -97,32 +57,32 @@ export default function RitualsPage() {
         <section aria-labelledby="botanicals-heading" className="space-y-8">
           <div className="max-w-2xl">
             <h2 id="botanicals-heading" className="text-3xl md:text-4xl font-normal text-black">
-              Why Cold-Pressed Marula &amp; Baobab Outperform Watery Fillers
+              10% Marula &amp; 10% Baobab Lipid Science
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="rounded-3xl border-2 border-black bg-white p-8 md:p-10 space-y-4">
               <p className="text-xs italic text-black/75">
-                Sclerocarya birrea · Limpopo Harvest
+                Sclerocarya birrea · 10% Cold-Pressed Limpopo Harvest
               </p>
               <h3 className="text-2xl md:text-3xl font-normal text-black">
                 Cold-Pressed Marula Seed Oil
               </h3>
               <p className="text-sm md:text-base text-black leading-relaxed">
-                Containing 70–78% oleic acid alongside potent catechins, flavonoids, and Vitamins C and E, cold-pressed Marula oil mimics the skin&apos;s natural sebum. It penetrates beneath the surface to restore suppleness where age-related lipid loss causes paper-thin, crepey texture.
+                With 70–78% oleic acid alongside catechins, flavonoids, and Vitamins C and E, cold-pressed Marula oil closely mirrors natural skin sebum. It absorbs steadily beneath the surface to replenish dry, paper-thin skin on arms, legs, and décolletage.
               </p>
             </div>
 
             <div className="rounded-3xl border-2 border-black bg-white p-8 md:p-10 space-y-4">
               <p className="text-xs italic text-black/75">
-                Adansonia digitata · Wild-Harvested
+                Adansonia digitata · 10% Wild-Harvested Mpumalanga Seeds
               </p>
               <h3 className="text-2xl md:text-3xl font-normal text-black">
                 Wild-Harvested Baobab Seed Oil
               </h3>
               <p className="text-sm md:text-base text-black leading-relaxed">
-                Pressed from the seeds of the resilient African &ldquo;Tree of Life,&rdquo; Baobab oil delivers a balanced triad of Omega 3, 6, and 9 fatty acids and plant sterols. It forms a breathable, 24-hour physical seal that prevents trans-epidermal water loss during dry Highveld winters and coastal wind shifts.
+                Pressed from Baobab seeds, this lipid-rich oil provides Omega 3, 6, and 9 fatty acids and phytosterols. It forms a breathable 24-hour surface seal that limits trans-epidermal water loss (TEWL) in dry Highveld winters and coastal winds.
               </p>
             </div>
           </div>
@@ -132,7 +92,7 @@ export default function RitualsPage() {
         <section aria-labelledby="daily-sequence-heading" className="space-y-8">
           <div className="max-w-2xl">
             <h2 id="daily-sequence-heading" className="text-3xl md:text-4xl font-normal text-black">
-              How to Apply for 24-Hour Wardrobe Freedom
+              How to Apply for 24-Hour Hydration
             </h2>
           </div>
 
@@ -146,31 +106,31 @@ export default function RitualsPage() {
                 <Sun size={20} weight="regular" className="text-black" aria-hidden="true" />
               </div>
               <h3 className="text-2xl font-medium text-black">
-                Seal Against Midday Ashiness
+                Stop Midday Ashiness Before It Starts
               </h3>
               <div className="space-y-4 text-sm text-black leading-relaxed">
                 <div className="border-l-2 border-black pl-4 space-y-1">
                   <p className="font-semibold text-black">
-                    Step 1: Warm Water Only (Skip Boiling Showers)
+                    Step 1: Shower in Warm Water (Avoid Scalding Heat)
                   </p>
                   <p>
-                    Steaming hot municipal water strips your skin&apos;s remaining lipid mantle. Rinse with warm water and pat gently with a towel so skin remains slightly damp.
+                    Boiling-hot hard municipal water strips surface sebum. Rinse with warm water and pat lightly with a towel so skin stays slightly damp.
                   </p>
                 </div>
                 <div className="border-l-2 border-black pl-4 space-y-1">
                   <p className="font-semibold text-black">
-                    Step 2: The 3-Minute Damp-Skin Application
+                    Step 2: Apply Within 3 Minutes on Damp Skin
                   </p>
                   <p>
-                    Within 3 minutes of stepping out of the shower, massage Divinity Marula &amp; Baobab Body Lotion generously over arms, elbows, knees, legs, and décolletage.
+                    Massage our 400ml Marula &amp; Baobab Body Lotion over arms, elbows, knees, shins, and décolletage while pores are still warm.
                   </p>
                 </div>
                 <div className="border-l-2 border-black pl-4 space-y-1">
                   <p className="font-semibold text-black">
-                    Step 3: The 2-Minute Absorption Window
+                    Step 3: Allow 2 to 3 Minutes to Seal
                   </p>
                   <p>
-                    Give the dense botanical oils 2 to 3 minutes to sink in before dressing. This forms your 24-hour physical climate seal—eliminating 1 PM ashiness and wardrobe anxiety.
+                    Give the cold-pressed oils two to three minutes to sink in before dressing. That short pause is what locks in comfort past 1 PM.
                   </p>
                 </div>
               </div>
@@ -180,36 +140,36 @@ export default function RitualsPage() {
             <div className="bg-white border-2 border-black p-8 md:p-10 rounded-3xl space-y-6">
               <div className="flex items-center justify-between border-b border-black pb-4">
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-green">
-                  Evening · 90-Day Renewal
+                  90-Day Cycle · Lipid Renewal
                 </span>
                 <Moon size={20} weight="regular" className="text-black" aria-hidden="true" />
               </div>
               <h3 className="text-2xl font-medium text-black">
-                Feed the 90-Day Renewal Cycle
+                Three Phases of Barrier Restoration
               </h3>
               <div className="space-y-4 text-sm text-black leading-relaxed">
                 <div className="border-l-2 border-black pl-4 space-y-1">
                   <p className="font-semibold text-black">
-                    Days 1–14: Immediate Comfort &amp; Relief
+                    Days 1–14: Immediate Surface Comfort
                   </p>
                   <p>
-                    Surface tightness, winter itchiness, and midday dry patches subside as Baobab omegas seal micro-fissures in the stratum corneum.
+                    Tightness after showering and winter itchiness ease as Baobab omegas slow moisture loss across the stratum corneum.
                   </p>
                 </div>
                 <div className="border-l-2 border-black pl-4 space-y-1">
                   <p className="font-semibold text-black">
-                    Days 15–45: Deep Lipid Replenishment
+                    Days 15–45: Steady Lipid Replenishment
                   </p>
                   <p>
-                    Cold-pressed Marula oleic acid restores intercellular lipid density on high-exposure zones like forearms, shins, and chest.
+                    Daily oleic acid from cold-pressed Marula oil rebuilds lipid density on sun-exposed forearms, shins, and chest.
                   </p>
                 </div>
                 <div className="border-l-2 border-black pl-4 space-y-1">
                   <p className="font-semibold text-black">
-                    Days 46–90: Visibly Softened Crepey Texture
+                    Days 46–90: Softer Crepey Texture
                   </p>
                   <p>
-                    As your epidermis completes a full 90-day cellular turnover nourished by clean botanical oils, thinning, crepey texture looks smoother, firmer, and more resilient.
+                    Across a full 90-day cellular turnover cycle, mature skin holds moisture more evenly and crepey texture looks smoother.
                   </p>
                 </div>
               </div>
@@ -223,10 +183,22 @@ export default function RitualsPage() {
           className="rounded-3xl border-2 border-black bg-[#faf8f5] p-8 md:p-10 space-y-4"
         >
           <h2 id="roadmap-heading" className="text-2xl md:text-3xl font-normal text-black">
-            Launching with One Uncompromising Essential—Expanding Soon.
+            Launching With One Core Formulation — Expanding Soon.
           </h2>
           <p className="text-sm md:text-base text-black leading-relaxed max-w-3xl">
-            We chose to launch Divinity Cosmetics with a single, perfected flagship formulation: our <strong>400ml Marula &amp; Baobab Body Lotion (R400)</strong>. Additional facial-grade African botanical treatments—including our pure botanical lipid oil, targeted barrier serums, and 90-day refill bundles—are currently in small-batch stability testing for upcoming release.
+            Divinity Cosmetics launches with one perfected daily treatment: our{" "}
+            <Link href="/products/marula-baobab-body-lotion" className="font-semibold underline underline-offset-4 hover:text-green">
+              400ml Marula &amp; Baobab Body Lotion (R400)
+            </Link>
+            . Pure botanical body oils, facial-grade barrier serums, and 90-day refill bundles are in stability testing for upcoming release. Have questions about texture or delivery? Check our{" "}
+            <Link href="/faq" className="underline underline-offset-4 hover:text-green">
+              FAQ
+            </Link>{" "}
+            or{" "}
+            <Link href="/shipping" className="underline underline-offset-4 hover:text-green">
+              South African shipping guide
+            </Link>
+            .
           </p>
         </section>
 
@@ -236,7 +208,7 @@ export default function RitualsPage() {
             Start Your 90-Day Barrier Repair Today
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-black max-w-xl mx-auto leading-relaxed">
-            Replace the watery supermarket pump bottle on your bathroom counter with 400ml of cold-pressed Marula &amp; Baobab nutrition for R400. Order two bottles (R800) for free nationwide courier delivery.
+            Replace your bathroom pump bottle with 400ml of cold-pressed Marula &amp; Baobab nutrition for R400 (R1.00/ml), or order two bottles (R800) to cover a full 90-day cycle.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link

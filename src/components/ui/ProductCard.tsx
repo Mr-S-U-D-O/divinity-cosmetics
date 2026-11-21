@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         <Image
           src={primaryImage}
-          alt={product.name}
+          alt={`${product.name} (400ml) — Facial-Grade South African Body Lotion by Divinity Cosmetics`}
           fill
           className="object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

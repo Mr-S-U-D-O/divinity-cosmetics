@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import React from "react";
 import { siteConfig } from "@/lib/config/site";
-import { buildBreadcrumbSchema, buildFAQPageSchema } from "@/lib/seo/schema";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  buildBreadcrumbSchema,
+  buildFAQPageSchema,
+  serializeJsonLd,
+} from "@/lib/seo/schema";
 import { FAQClient } from "./FAQClient";
 
-export const metadata: Metadata = {
-  title:
-    "Frequently Asked Questions | Marula & Baobab Body Lotion, 90-Day Barrier Repair & Delivery",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Frequently Asked Questions",
   description:
-    "Direct answers on why commercial lotions evaporate in 5 seconds, how Divinity Cosmetics' 400ml Marula & Baobab Body Lotion (R400) repairs crepey mature skin over 90 days, Paystack & WhatsApp checkout, and nationwide South African delivery.",
+    "Direct answers on cold-pressed Marula & Baobab absorption, 90-day barrier repair for crepey skin, Paystack checkout, and Courier Guy delivery across SA.",
+  path: "/faq",
   keywords: [
     "Divinity Cosmetics FAQ",
     "why does body lotion evaporate in 5 seconds",
@@ -17,88 +22,77 @@ export const metadata: Metadata = {
     "body lotion for Highveld winter dry skin",
     "Divinity Cosmetics delivery South Africa",
   ],
-  alternates: {
-    canonical: "/faq",
-  },
-  openGraph: {
-    title:
-      "Frequently Asked Questions | Divinity Cosmetics South Africa",
-    description:
-      "Straight-talking answers on cold-pressed Marula & Baobab oils, the 5-Second Myth, the 90-Day Barrier Repair cycle, and nationwide delivery.",
-    url: `${siteConfig.url}/faq`,
-    type: "website",
-  },
-};
+});
 
 const FAQS = [
   {
     category: "Formulation" as const,
     question:
-      "Why does a commercial supermarket lotion vanish in 5 seconds and leave my skin ashy by midday?",
+      "Why does supermarket lotion vanish in 5 seconds and leave my skin ashy by midday?",
     answer:
-      "A lotion that disappears in five seconds isn't 'fast-absorbing'—it is simply evaporating into thin air. Standard R100 supermarket pump lotions are up to 80–85% water, alcohol, and synthetic slip fillers. Once that water evaporates, your thinning skin barrier is left unsealed against dry air, causing tightness, itching, and visible ashiness by 1 PM.",
+      "Lotions that disappear in five seconds are typically 80–85% water, alcohol, and synthetic slip carriers. Once that moisture evaporates, a thinning skin barrier is exposed to dry South African air, leaving elbows, knees, and legs tight and ashy by 1 PM.",
   },
   {
     category: "Formulation" as const,
     question:
       "Why does Divinity Cosmetics Marula & Baobab Body Lotion take 2 to 3 minutes to sink in?",
     answer:
-      "Real 24-hour hydration requires dense, cold-pressed African botanical seed oils that physically seal the stratum corneum. Our 400ml formulation uses high concentrations of unrefined Marula and Baobab oils rather than watery fillers. Taking two to three minutes to absorb is deliberate proof of active lipid density locking moisture in for a full 24 hours.",
+      "This 400ml lotion contains 10% cold-pressed Limpopo Marula seed oil and 10% wild-harvested Mpumalanga Baobab seed oil rather than volatile fillers. Those two to three minutes allow dense oleic and omega fatty acids to seal the stratum corneum for 24 hours.",
   },
   {
     category: "90-Day Care" as const,
     question:
-      "How does the 90-Day Barrier Repair cycle help with crepey skin on arms, legs, and décolletage?",
+      "How does the 90-day barrier repair cycle improve crepey skin on arms and legs?",
     answer:
-      "Healthy, resilient mature skin is not built by overnight miracle claims. Crepey texture develops when age-related lipid depletion, UV exposure, and harsh winters thin the skin barrier. By feeding your skin cold-pressed Marula (oleic acid and Vitamins C & E) and Baobab (Omegas 3, 6 & 9) daily over a 90-day epidermal turnover cycle, your barrier rebuilds its structural resilience and visibly softens paper-thin texture.",
+      "Crepey texture develops as age-related lipid depletion, UV exposure, and dry air thin the outer skin barrier. Daily application of cold-pressed Marula (oleic acid and Vitamins C & E) and Baobab (Omegas 3, 6 & 9) across a 90-day cellular turnover cycle helps smooth texture and restore suppleness.",
   },
   {
     category: "Formulation" as const,
     question:
       "Why is the 400ml Marula & Baobab Body Lotion priced at R400?",
     answer:
-      "Most women willingly invest R300 to R1,000 in facial serums because they refuse to put synthetic fillers on their face, yet settle for R100 supermarket pumps on the other 90% of their body. At R400 for a generous 400ml bottle (R1.00 per ml), Divinity closes that 'Vanity Divide'—giving your body facial-grade, cold-pressed South African botanical nutrition without the R1,500+ price tag of imported luxury creams.",
+      "Many South African women spend R300 to R1,000 on facial serums while buying R80 to R150 supermarket body pumps, yet avoid R1,200+ imported luxury creams. At R400 for 400ml (R1.00 per ml), Divinity brings facial-grade botanical concentrations to everyday body care.",
   },
   {
     category: "90-Day Care" as const,
     question:
-      "How does this lotion protect against South African Highveld winters, hard water, and UV stress?",
+      "How does it protect against Highveld winters, hard municipal water, and UV stress?",
     answer:
-      "South African skin battles severe environmental stressors: biting Highveld winter dryness, hard municipal water that strips natural sebum, intense UV exposure, and coastal humidity shifts. Applying Divinity within 3 minutes of a warm shower traps hydration beneath an occlusive Baobab omega shield that prevents trans-epidermal water loss all day.",
+      "Dry Highveld air and mineral-heavy municipal tap water strip protective sebum during hot showers. Applying Divinity within 3 minutes of stepping out of a warm shower locks residual hydration beneath an occlusive Baobab omega barrier.",
   },
   {
     category: "90-Day Care" as const,
     question:
       "Do you have other products besides the Marula & Baobab Body Lotion?",
     answer:
-      "We are launching exclusively with our flagship 400ml Marula & Baobab Body Lotion (R400) first so you can experience our foundational 90-day barrier repair standard. We are actively preparing a full range of complementary facial-grade botanical body oils, barrier serums, and refill bundles for future rollout.",
+      "We launched with our flagship 400ml Marula & Baobab Body Lotion (R400, SKU DIV-MBL-400) first. Complementary cold-pressed botanical body oils, facial-grade barrier serums, and 90-day refill bundles are currently in testing for upcoming release.",
   },
   {
     category: "Orders & Stockists" as const,
     question:
-      "How do I place an order and what payment methods do you accept?",
-    answer: `Add the 400ml Marula & Baobab Body Lotion to your cart on ${siteConfig.domain} and proceed to checkout. You can pay instantly online via our PCI-DSS Level 1 certified Paystack gateway (supporting Visa, Mastercard, Capitec Pay, Ozow Instant EFT, and Apple Pay) or choose our direct WhatsApp Concierge for assisted EFT ordering.`,
+      "How do I place an order and which South African payment methods are accepted?",
+    answer: `Add the 400ml Marula & Baobab Body Lotion to your bag on ${siteConfig.domain} and proceed to checkout. Pay online via our PCI-DSS Level 1 Paystack gateway (Visa, Mastercard, Capitec Pay, Ozow Instant EFT, Apple Pay) or arrange assisted EFT via our WhatsApp Concierge (${siteConfig.whatsappNumber}).`,
   },
   {
     category: "Orders & Stockists" as const,
     question:
-      "How much is courier delivery across South Africa and how long does it take?",
+      "How are courier delivery rates calculated across South Africa and how long does shipping take?",
     answer:
-      "Door-to-door courier delivery is a flat R100 anywhere in South Africa across all 9 provinces, and completely FREE on all orders of R500 or more (for example, ordering two 400ml bottles at R800 for your 90-day cycle ships free). Main metropolitan centers (Johannesburg, Pretoria, Cape Town, Durban) arrive in 2 to 4 business days; regional areas take 3 to 5 business days.",
+      "Door-to-door courier delivery across all 9 provinces is dispatched from Springs, Gauteng via The Courier Guy. Live rates are calculated at checkout by suburb, with economy road freight starting around R142 (2 to 4 business days for main centres, 3 to 5 days regional) plus overnight and Gauteng same-day options.",
   },
   {
     category: "Formulation" as const,
     question:
       "Are Divinity Cosmetics formulations cruelty-free and free from synthetic fillers?",
     answer:
-      "Yes, 100%. Divinity Cosmetics is proudly cruelty-free and handcrafted in South Africa. We never test on animals and strictly exclude parabens, drying sulfates, mineral oil/petrolatum, and heavy artificial perfumes.",
+      "Yes. Every batch is handcrafted in South Africa, 100% cruelty-free, and formulated without parabens, drying sulfates, mineral oil, petrolatum, or heavy artificial perfume.",
   },
   {
     category: "Orders & Stockists" as const,
     question:
       "Can my salon, boutique, or aesthetics clinic become an authorized stockist?",
     answer:
-      "Yes. We partner with selected boutiques, salons, spas, and dermatology practices across Southern Africa with 30% to 45% retail margins and exclusive territory protection. Visit our Reseller page to review wholesale tiers and apply.",
+      "Yes. Selected salons, day spas, somatologists, boutiques, and dermal clinics across South Africa qualify for 30% to 45% wholesale margins starting at a 12-unit opening order, with 3km to 5km territory protection.",
   },
 ];
 
@@ -120,7 +114,7 @@ export default function FAQPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([faqJsonLd, breadcrumbJsonLd]),
+          __html: serializeJsonLd([faqJsonLd, breadcrumbJsonLd]),
         }}
       />
       <FAQClient faqs={FAQS} whatsappUrl={whatsappUrl} />

@@ -10,7 +10,7 @@ export const siteConfig = {
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+27 66 485 9011",
   tagline: "Facial-Grade Botanical Body Care for South African Skin",
   description:
-    "Divinity Cosmetics formulates facial-grade body treatments using cold-pressed South African Marula and wild-harvested Baobab seed oils. Replace watery supermarket lotions with dense, 24-hour barrier repair built for Highveld winters, harsh UV, and mature skin.",
+    "Divinity Cosmetics crafts facial-grade body treatments in South Africa using cold-pressed Marula and wild-harvested Baobab seed oils for 24-hour skin barrier hydration.",
   founderSignOff: "The Founder, Divinity Cosmetics",
   flagshipProduct: {
     name: "Marula & Baobab Body Lotion",
@@ -24,8 +24,7 @@ export const siteConfig = {
     heroModelImage: "/images/divinity-hero-model-showcase.jpg",
     detailImage: "/images/marula-baobab-body-lotion.jpg",
   },
-  freeShippingThreshold: 500.0,
-  standardShippingCost: 100.0,
+  standardShippingCost: 142.0,
   location: "South Africa",
   social: {
     instagram: "https://instagram.com/divinitycosmetics",

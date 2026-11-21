@@ -9,24 +9,24 @@ import {
   CheckCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
-import { buildBreadcrumbSchema } from "@/lib/seo/schema";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  buildBreadcrumbSchema,
+  buildContactPageSchema,
+  serializeJsonLd,
+} from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
-  title:
-    "Contact Us & WhatsApp Skincare Concierge | Customer Care & Stockist Inquiries",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Contact & WhatsApp Concierge",
   description:
-    "Connect directly with Divinity Cosmetics in South Africa via WhatsApp Concierge (+27 66 485 9011) or email (support@shopdivinitycosmetics.co.za) for Marula & Baobab Body Lotion orders, barrier repair guidance, and stockist inquiries.",
-  alternates: {
-    canonical: "/contact",
-  },
-  openGraph: {
-    title: "Contact Divinity Cosmetics South Africa | Direct WhatsApp Concierge",
-    description:
-      "Personal assistance for orders, 90-day skin barrier repair questions, and wholesale stockist partnerships across South Africa.",
-    url: `${siteConfig.url}/contact`,
-    type: "website",
-  },
-};
+    "Reach Divinity Cosmetics South Africa via WhatsApp Concierge (+27 66 485 9011) or email for 400ml lotion orders, routine advice, and stockist inquiries.",
+  path: "/contact",
+  keywords: [
+    "Divinity Cosmetics WhatsApp concierge",
+    "Divinity Cosmetics contact South Africa",
+    "support@shopdivinitycosmetics.co.za",
+  ],
+});
 
 export default function ContactPage() {
   const whatsappUrl = `https://wa.me/${siteConfig.whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
@@ -37,23 +37,14 @@ export default function ContactPage() {
     { name: "Home", path: "/" },
     { name: "Contact Us", path: "/contact" },
   ]);
-
-  const contactPageSchema = {
-    "@context": "https://schema.org",
-    "@type": "ContactPage",
-    name: "Contact Divinity Cosmetics South Africa",
-    url: `${siteConfig.url}/contact`,
-    mainEntity: {
-      "@id": `${siteConfig.url}/#organization`,
-    },
-  };
+  const contactPageSchema = buildContactPageSchema();
 
   return (
     <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([breadcrumbJsonLd, contactPageSchema]),
+          __html: serializeJsonLd([breadcrumbJsonLd, contactPageSchema]),
         }}
       />
       <div className="max-w-5xl mx-auto">
@@ -63,10 +54,14 @@ export default function ContactPage() {
             Direct South African Concierge
           </span>
           <h1 className="font-chloe text-4xl md:text-5xl font-normal tracking-tight text-black mb-4">
-            We&apos;re Here to Assist You
+            We&apos;re Here to Help
           </h1>
           <p className="text-black text-base leading-relaxed">
-            Whether you have questions about our 400ml Marula &amp; Baobab Body Lotion (R400), want advice on starting your 90-day barrier repair cycle, or are inquiring about stockist territories, our team responds directly.
+            Questions about our 400ml Marula &amp; Baobab Body Lotion (R400), your 90-day barrier repair routine, courier tracking, or{" "}
+            <Link href="/reseller" className="underline underline-offset-4 hover:text-green">
+              salon stockist territories
+            </Link>
+            ? Reach our South African team directly.
           </p>
         </div>
 
@@ -82,7 +77,7 @@ export default function ContactPage() {
                 Direct WhatsApp Concierge
               </h2>
               <p className="text-sm text-black leading-relaxed">
-                Connect instantly with our team for priority orders, assisted EFT checkout, skin barrier consultations, and real-time courier tracking across South Africa.
+                Message our team for priority orders, assisted EFT checkout, skin barrier guidance, and courier tracking across South Africa.
               </p>
               <div className="pt-2 space-y-2 text-xs text-black">
                 <div className="flex items-center gap-2">
@@ -119,12 +114,12 @@ export default function ContactPage() {
                 Official Email Support
               </h2>
               <p className="text-sm text-black leading-relaxed">
-                For formal inquiries, order receipts, authorized stockist verification, press, and customer service documentation.
+                For order receipts, returns, authorized stockist verification, press, and POPIA privacy requests.
               </p>
               <div className="pt-2 space-y-2 text-xs text-black">
                 <div className="flex items-center gap-2">
                   <MapPin size={16} className="text-black" weight="bold" />
-                  <span>Proudly Handcrafted &amp; Dispatched in South Africa</span>
+                  <span>Handcrafted in South Africa · Dispatched from Springs, Gauteng</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <EnvelopeSimple size={16} className="text-black" weight="bold" />
@@ -152,7 +147,15 @@ export default function ContactPage() {
             Ready to Start Your 90-Day Barrier Repair?
           </h2>
           <p className="text-sm text-black max-w-xl mx-auto leading-relaxed">
-            Order our flagship <strong>400ml Marula &amp; Baobab Body Lotion (R400)</strong> online at <strong>{siteConfig.domain}</strong> with instant Paystack checkout (Visa, Mastercard, Capitec Pay, Ozow, Apple Pay) or direct WhatsApp assistance. Free courier shipping on orders over R500.
+            Order our <strong>400ml Marula &amp; Baobab Body Lotion (R400)</strong> online at <strong>{siteConfig.domain}</strong> with Paystack (Visa, Mastercard, Capitec Pay, Ozow, Apple Pay) or WhatsApp assistance. Live Courier Guy{" "}
+            <Link href="/shipping" className="underline underline-offset-4 hover:text-green">
+              shipping rates
+            </Link>{" "}
+            are calculated at checkout, or{" "}
+            <Link href="/order-status" className="underline underline-offset-4 hover:text-green">
+              track an existing order
+            </Link>
+            .
           </p>
           <div className="pt-2">
             <Link

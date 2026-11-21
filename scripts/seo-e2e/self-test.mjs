@@ -94,7 +94,7 @@ function makeValidPdpHtml({
       a: "Unrefined botanical lipids require three full minutes to penetrate deeply without volatile silicone carriers.",
     },
     { q: "Is this lotion safe for mature skin?", a: "Yes, it avoids synthetic fragrance and mineral oils." },
-    { q: "How much is courier shipping in South Africa?", a: "R100 flat rate or free shipping on orders over R500." },
+    { q: "How much is courier shipping in South Africa?", a: "Courier Guy rates are calculated live at checkout, from around R142 economy." },
   ];
   const ldPayload =
     jsonLdRaw ??
@@ -170,7 +170,7 @@ function makeValidPdpHtml({
       <button aria-controls="panel-ritual">The 90-Day Barrier Ritual</button>
       <div id="panel-ritual">Apply daily over 90 days.</div>
       <button aria-controls="panel-delivery">Shipping &amp; Checkout</button>
-      <div id="panel-delivery">R100 flat courier or free over R500.</div>
+      <div id="panel-delivery">Live Courier Guy rates at checkout from around R142.</div>
     </div>
     <section>
       ${faqItems.map((f) => `<p>${f.q} ${f.a}</p>`).join("\n")}

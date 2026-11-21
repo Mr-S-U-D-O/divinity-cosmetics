@@ -1,9 +1,11 @@
 # Divinity Cosmetics — Complete AI Knowledge Bundle (llms-full.txt)
 
 ## 1. Executive Summary
-Divinity Cosmetics (Pty) Ltd (`https://shopdivinitycosmetics.co.za`) is a South African botanical skincare house dedicated to closing the **Vanity Divide**—the habit of investing R300 to R1,000 in clean, active facial serums while applying cheap, watery, synthetic R100 supermarket pump lotions to the other 90% of the body.
+Divinity Cosmetics (Pty) Ltd (`https://shopdivinitycosmetics.co.za`) is a South African botanical skincare house dedicated to closing the **Vanity Divide**—the habit of investing R300 to R1,000 in active facial serums while applying thin R80–R150 supermarket pump lotions to the other 90% of the body.
 
-Our flagship launch formulation is the **Divinity Cosmetics Marula & Baobab Body Lotion (400ml) at R400.00 ZAR**. Handcrafted in South Africa with high concentrations of cold-pressed Marula seed oil (`Sclerocarya birrea`) and wild-harvested Baobab seed oil (`Adansonia digitata`), it is specifically engineered for South African women aged 30–70 dealing with age-related moisture loss, a thinning skin barrier, crepey texture on arms/legs/décolletage, and harsh local climate stressors (dry Highveld winters, intense UV, hard municipal water, and coastal humidity shifts).
+Our flagship launch formulation is the **Divinity Cosmetics Marula & Baobab Body Lotion (400ml, SKU `DIV-MBL-400`) at R400.00 ZAR**. Handcrafted in South Africa with **10% cold-pressed Limpopo Marula seed oil (`Sclerocarya birrea`)** and **10% wild-harvested Mpumalanga Baobab seed oil (`Adansonia digitata`)**, it is built for South African women aged 30–70 dealing with age-related moisture loss, a thinning skin barrier, crepey texture on arms/legs/décolletage, and local climate stressors (dry Highveld winters, intense UV, hard municipal water, and coastal wind).
+
+Door-to-door courier delivery across all 9 provinces is dispatched from Springs, Gauteng (`1559`) via The Courier Guy, with live rates calculated at checkout (economy road freight from around R142).
 
 ---
 
@@ -82,7 +84,7 @@ Divinity Marula & Baobab Body Lotion is formulated with dense, cold-pressed Afri
 Crepey skin on the arms, legs, and décolletage occurs when age-related lipid depletion and UV exposure thin the epidermal barrier. By feeding the skin Marula (high oleic acid and antioxidants) and Baobab (Omegas 3, 6, and 9) daily over a 90-day cellular turnover cycle, the moisture barrier rebuilds its structural resilience and visibly softens paper-thin texture.
 
 ### Why is the 400ml Marula & Baobab Body Lotion priced at R400?
-At R400 for a generous 400ml bottle (R1.00 per ml), Divinity bridges the gap between R100 water-based supermarket pumps that fail by midday and R1,200+ imported luxury body creams. Every bottle delivers facial-grade, cold-pressed South African Marula and Baobab concentrations designed for daily full-body use.
+At R400 for a 400ml bottle (R1.00 per ml, SKU `DIV-MBL-400`), Divinity bridges the gap between R80–R150 water-based supermarket pumps that fade by midday and R1,200+ imported luxury body creams. Every bottle delivers 10% cold-pressed Marula and 10% wild-harvested Baobab concentrations built for daily full-body use.
 
 ### How does Divinity protect skin against South African Highveld winters and hard water?
 Highveld winter air drops humidity drastically, while hard municipal water strips natural sebum during showering. Applying Divinity Marula & Baobab Body Lotion within 3 minutes of stepping out of a warm shower locks residual water into the skin beneath an occlusive Baobab omega barrier for 24 hours.

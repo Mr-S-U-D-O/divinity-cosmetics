@@ -2,7 +2,7 @@
 
 import React, { useId, useState } from "react";
 import { Plus, Minus } from "@phosphor-icons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
 export interface FAQAccordionItem {
   question: string;
@@ -57,24 +57,22 @@ export function FAQAccordion({
               </span>
             </button>
 
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="pb-6 pr-6 sm:pr-12 text-sm sm:text-[15px] leading-relaxed text-black/80 max-w-[62ch]">
-                    {item.answer}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Always rendered in SSR DOM so search & AI crawlers index full answers; collapsed visually via height: 0 */}
+            <motion.div
+              id={panelId}
+              role="region"
+              aria-labelledby={buttonId}
+              aria-hidden={!isOpen}
+              inert={!isOpen || undefined}
+              initial={false}
+              animate={isOpen ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="pb-6 pr-6 sm:pr-12 text-sm sm:text-[15px] leading-relaxed text-black/80 max-w-[62ch]">
+                {item.answer}
+              </div>
+            </motion.div>
           </div>
         );
       })}

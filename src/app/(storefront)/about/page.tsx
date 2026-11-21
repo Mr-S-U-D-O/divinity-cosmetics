@@ -8,69 +8,53 @@ import {
   Leaf,
 } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
+  buildAboutPageSchema,
   buildBreadcrumbSchema,
   buildFounderNoteArticleSchema,
+  serializeJsonLd,
 } from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
-  title:
-    "Our Story & A Personal Note from the Founder | Closing the Vanity Divide",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Our Story & Founder's Note",
   description:
-    "Read 'A Personal Note from the Founder' of Divinity Cosmetics. Discover why South African women who invest R1,000 in facial serums are replacing watery R100 supermarket lotions with our 400ml Marula & Baobab Body Lotion for 90-day barrier repair.",
+    "Read the Divinity Cosmetics Founder's Note on closing the Vanity Divide with cold-pressed Marula & Baobab body care crafted for South African skin.",
+  path: "/about",
+  ogType: "article",
   keywords: [
     "Divinity Cosmetics story",
     "A Personal Note from the Founder Divinity Cosmetics",
-    "The Vanity Divide skincare",
+    "The Vanity Divide skincare South Africa",
     "The 5-Second Myth body lotion",
     "90-day skin barrier repair South Africa",
-    "Marula and Baobab body lotion founder story",
   ],
-  alternates: {
-    canonical: "/about",
-  },
-  openGraph: {
-    title:
-      "A Personal Note from the Founder | Divinity Cosmetics South Africa",
-    description:
-      "The skin on your body faces the exact same harsh South African elements as your face—and it deserves the exact same facial-grade botanical standard.",
-    url: `${siteConfig.url}/about`,
-    type: "article",
-    images: [
-      {
-        url: "/images/divinity-our-story.jpg",
-        width: 1200,
-        height: 900,
-        alt: "Hands holding Divinity Cosmetics Marula & Baobab Body Lotion (400ml)",
-      },
-    ],
-  },
-};
+});
 
 const CORE_BELIEFS = [
   {
     number: "01",
     title: "The Ingredient Belief",
-    subtitle: "Pure Botanical Density vs. Water Fillers",
-    body: "Commercial supermarket lotions are mostly water, cheap emulsifying fillers, and synthetic fragrance. Real barrier repair requires high concentrations of pure, undiluted cold-pressed African botanical seed oils.",
+    subtitle: "Botanical Density vs. Water Fillers",
+    body: "Standard supermarket lotions are mostly water, cheap emulsifiers, and heavy perfume. A thinning skin barrier needs concentrated, cold-pressed African seed oils.",
   },
   {
     number: "02",
     title: "The Texture Belief (The 5-Second Myth)",
     subtitle: "Absorption vs. Evaporation",
-    body: "A lotion that disappears in five seconds isn't 'fast-absorbing'—it is evaporating into thin air. A rich, nutrient-dense formula that takes a few minutes to sink in is deliberate proof that it is physically sealing your skin barrier against climate stress.",
+    body: "A lotion that disappears in five seconds is evaporating off the surface. Taking 2 to 3 minutes to sink in shows active plant oils are sealing the barrier.",
   },
   {
     number: "03",
     title: "The Consistency Belief",
     subtitle: "The 90-Day Barrier Repair Cycle",
-    body: "Healthy, resilient mature skin is not built by overnight miracle claims. Restoring a thinning moisture barrier and softening crepey texture requires clean, honest lipid nutrition applied consistently over a 90-day cycle.",
+    body: "Skin barrier renewal takes patience, not overnight claims. Feeding mature skin daily lipids over a 90-day turnover cycle helps soften crepey texture.",
   },
   {
     number: "04",
     title: "The Body-Equals-Face Belief",
-    subtitle: "Eliminating the Vanity Divide",
-    body: "The skin on your body faces the exact same harsh elements and biological aging process as your face—and it deserves the exact same clean, facial-grade botanical standard.",
+    subtitle: "Closing the Vanity Divide",
+    body: "The skin on your arms, legs, and chest endures the same UV rays and dry South African air as your face. It deserves the same facial-grade care.",
   },
 ];
 
@@ -79,31 +63,31 @@ const STORY_ARC_STEPS = [
     letter: "S",
     stage: "Stage — The Vanity Divide",
     description:
-      "You stand in your bathroom investing R300 to R1,000 in advanced facial serums because you demand quality—yet turn to the other 90% of your body and apply a watery, heavily perfumed supermarket pump lotion simply because a trustworthy local alternative didn't exist.",
+      "You invest R300 to R1,000 in facial serums because quality matters on your face, then reach for a thin supermarket pump lotion for the other 90% of your skin.",
   },
   {
     letter: "T",
-    stage: "Tension — The Midday Betrayal & Wardrobe Anxiety",
+    stage: "Tension — Midday Ashiness & Wardrobe Anxiety",
     description:
-      "South African climate stress—biting Highveld winters, harsh UV, hard municipal water, and coastal humidity shifts—attacks a thinning skin barrier. Because commercial lotion evaporates, by 1 PM your skin is tight, itchy, and visibly ashy, quietly dictating whether you wear short sleeves or dresses.",
+      "Dry Highveld winters, strong UV, hard municipal water, and coastal wind wear down a thinning barrier. When thin lotion evaporates, ashiness returns by 1 PM and dictates what sleeves or hemlines you wear.",
   },
   {
     letter: "O",
     stage: "Opportunity — Breaking the 5-Second Myth",
     description:
-      "You discover the truth about commercial lotions: they vanish in five seconds because they are mostly water and alcohol. True 24-hour hydration requires dense, cold-pressed Marula and Baobab nutrition that takes a couple of minutes to sink in and form a physical climate seal.",
+      "Once you see why five-second lotions fail, you stop chasing momentary perfume. Dense 10% Marula and 10% Baobab seed oils take 2 to 3 minutes to settle into a lasting climate seal.",
   },
   {
     letter: "R",
     stage: "Resolution — The 90-Day Barrier Repair",
     description:
-      "Instead of a momentary fragrance illusion, you feed your skin honest, cold-pressed African botanical oils day after day. Over a 90-day cellular renewal cycle, your moisture barrier rebuilds, crepey texture softens, and your skin regains lasting resilience.",
+      "Consistent daily lipid care supports your natural 90-day epidermal turnover. Over twelve weeks, skin feels calmer after showering and crepey texture looks smoother.",
   },
   {
     letter: "Y",
     stage: "Yes — Total Wardrobe Freedom",
     description:
-      "You move through your entire day with 24-hour physical comfort and open your wardrobe every morning wearing whatever you want with absolute confidence—permanently closing the vanity divide.",
+      "With 24-hour physical comfort, you dress for the weather and the occasion instead of hiding dry elbows, knees, or shins—closing the Vanity Divide for good.",
   },
 ];
 
@@ -112,6 +96,7 @@ export default function AboutPage() {
     { name: "Home", path: "/" },
     { name: "Our Story & Founder's Note", path: "/about" },
   ]);
+  const aboutPageJsonLd = buildAboutPageSchema();
   const articleJsonLd = buildFounderNoteArticleSchema();
 
   return (
@@ -119,7 +104,11 @@ export default function AboutPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([breadcrumbJsonLd, articleJsonLd]),
+          __html: serializeJsonLd([
+            breadcrumbJsonLd,
+            aboutPageJsonLd,
+            articleJsonLd,
+          ]),
         }}
       />
       <div className="mx-auto max-w-6xl space-y-24">
@@ -131,7 +120,7 @@ export default function AboutPage() {
             </h1>
           </div>
           <p className="max-w-md text-base leading-relaxed text-black md:text-lg">
-            Why do we invest heavily in clean serums for the 10% of skin on our face, while settling for watery, synthetic supermarket lotions on the other 90% of our body? Divinity Cosmetics was founded to end that compromise.
+            Facial serums protect 10% of your skin, while cheap supermarket pumps leave the other 90% exposed. Divinity Cosmetics exists to give your body the same South African botanical standard.
           </p>
         </div>
 
@@ -256,10 +245,18 @@ export default function AboutPage() {
               id="beliefs-heading"
               className="text-3xl md:text-5xl font-normal text-black leading-tight"
             >
-              Four Truths the Commercial Skincare Industry Won&apos;t Tell You.
+              Four Realities Behind Every Bottle.
             </h2>
             <p className="text-base text-black leading-relaxed">
-              We don&apos;t use marketing gimmicks, overnight miracle claims, or synthetic perfume clouds. Every formulation decision at Divinity Cosmetics is anchored in four biological realities.
+              No miracle claims and no heavy synthetic perfume. Every Divinity formulation is guided by four practical skin principles—explore the science in our{" "}
+              <Link href="/rituals" className="underline underline-offset-4 hover:text-green">
+                90-day barrier ritual
+              </Link>{" "}
+              or read direct answers in our{" "}
+              <Link href="/faq" className="underline underline-offset-4 hover:text-green">
+                FAQ
+              </Link>
+              .
             </p>
           </div>
 
@@ -337,7 +334,7 @@ export default function AboutPage() {
               Cold-Pressed Indigenous Oils
             </h3>
             <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
-              High concentrations of unrefined South African Marula and wild-harvested Baobab seed oils—never diluted with cheap mineral oil or petrolatum.
+              10% cold-pressed Limpopo Marula and 10% wild-harvested Mpumalanga Baobab seed oils, without mineral oil or petrolatum fillers.
             </p>
           </div>
 
@@ -347,17 +344,21 @@ export default function AboutPage() {
               Built for the South African Climate
             </h3>
             <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
-              Engineered to physically seal your moisture barrier against biting Highveld winters, harsh UV, hard municipal water, and coastal humidity shifts.
+              Formulated to protect your moisture barrier against dry Highveld winters, strong UV, hard municipal water, and coastal wind.
             </p>
           </div>
 
           <div className="space-y-3 bg-white p-8 md:p-10">
             <Heart size={22} weight="regular" className="text-black/80" aria-hidden="true" />
             <h3 className="text-xl font-normal text-gray-900">
-              Cruelty-Free &amp; Future-Ready
+              Cruelty-Free &amp; Stockist Ready
             </h3>
             <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
-              100% cruelty-free and handcrafted in South Africa. Launching with our flagship 400ml Body Lotion, with our extended botanical range in development.
+              100% cruelty-free and crafted in South Africa. Shop online or apply to join our{" "}
+              <Link href="/reseller" className="underline underline-offset-4 hover:text-green">
+                authorized stockist network
+              </Link>
+              .
             </p>
           </div>
         </div>

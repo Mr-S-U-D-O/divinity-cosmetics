@@ -7,37 +7,40 @@ import {
   ArrowClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { siteConfig } from "@/lib/config/site";
-import { buildBreadcrumbSchema } from "@/lib/seo/schema";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  buildBreadcrumbSchema,
+  buildShippingWebPageSchema,
+  serializeJsonLd,
+} from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
-  title:
-    "Shipping & Returns Policy | Nationwide South African Courier Delivery",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Shipping & Returns Policy",
   description:
-    "Door-to-door courier delivery across all 9 South African provinces for Divinity Cosmetics. Flat R100 shipping, FREE delivery on orders over R500 (such as two 400ml Marula & Baobab Body Lotions), and our 14-day purity guarantee.",
-  alternates: {
-    canonical: "/shipping",
-  },
-  openGraph: {
-    title:
-      "Shipping & Returns Across South Africa | Divinity Cosmetics",
-    description:
-      "Fast 2–4 day metropolitan courier dispatch across South Africa. Free nationwide shipping on orders over R500.",
-    url: `${siteConfig.url}/shipping`,
-    type: "website",
-  },
-};
+    "Nationwide courier delivery across all 9 South African provinces via The Courier Guy from Springs, Gauteng. Live rates at checkout and 14-day returns.",
+  path: "/shipping",
+  keywords: [
+    "Divinity Cosmetics shipping",
+    "The Courier Guy South Africa skincare delivery",
+    "Divinity Cosmetics returns policy",
+    "Springs Gauteng dispatch skincare",
+  ],
+});
 
 export default function ShippingPage() {
   const breadcrumbJsonLd = buildBreadcrumbSchema([
     { name: "Home", path: "/" },
     { name: "Shipping & Returns", path: "/shipping" },
   ]);
+  const shippingWebPageJsonLd = buildShippingWebPageSchema();
 
   return (
     <main className="min-h-screen bg-[#fcfbf9] pt-32 md:pt-40 pb-24 px-6 md:px-12 lg:px-24 font-sans text-black">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd([breadcrumbJsonLd, shippingWebPageJsonLd]),
+        }}
       />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
@@ -49,7 +52,7 @@ export default function ShippingPage() {
             Shipping &amp; Returns
           </h1>
           <p className="text-black text-base leading-relaxed">
-            Every 400ml bottle of our Marula &amp; Baobab Body Lotion is freshly prepared in small batches and carefully packed for door-to-door courier delivery across South Africa.
+            Every 400ml bottle of our Marula &amp; Baobab Body Lotion is prepared in small batches and dispatched from Springs, Gauteng via The Courier Guy to addresses across South Africa.
           </p>
         </div>
 
@@ -57,23 +60,23 @@ export default function ShippingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <div className="bg-white border-2 border-black p-6 rounded-2xl text-center space-y-2">
             <span className="text-2xl font-bold text-green block">
-              Free Delivery
+              From ~R142
             </span>
             <p className="text-xs text-black uppercase tracking-wider font-semibold">
-              Orders Over R500
+              Live Courier Guy Rates
             </p>
             <p className="text-xs text-black">
-              Flat R100 under R500. Two 400ml bottles (R800) ship free nationwide.
+              Calculated live at checkout by suburb. Economy, Overnight Express, and Gauteng Same-Day options.
             </p>
           </div>
 
           <div className="bg-white border-2 border-black p-6 rounded-2xl text-center space-y-2">
             <span className="text-2xl font-bold text-green block">2–4 Days</span>
             <p className="text-xs text-black uppercase tracking-wider font-semibold">
-              Fast Courier Dispatch
+              Springs, Gauteng Dispatch
             </p>
             <p className="text-xs text-black">
-              Dispatched via registered door-to-door South African courier services.
+              Door-to-door delivery via The Courier Guy across all 9 South African provinces.
             </p>
           </div>
 
@@ -97,17 +100,24 @@ export default function ShippingPage() {
             </h2>
             <div className="text-sm text-black leading-relaxed space-y-3">
               <p>
-                We deliver to all residential and business addresses across South Africa, covering Gauteng, Western Cape, KwaZulu-Natal, Eastern Cape, Free State, Mpumalanga, Limpopo, North West, and Northern Cape.
+                We deliver to residential and business addresses across Gauteng, Western Cape, KwaZulu-Natal, Eastern Cape, Free State, Mpumalanga, Limpopo, North West, and Northern Cape. Live courier pricing is calculated at checkout based on your suburb and service tier:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-black">
                 <li>
-                  <strong>Main Metropolitan Centers (JHB, PTA, CPT, DBN):</strong> 2 to 4 business days.
+                  <strong>Main Metropolitan Centres (JHB, PTA, CPT, DBN):</strong> 2 to 4 business days via Economy Road Freight (from around R142) or 1–2 days via Overnight Express.
                 </li>
                 <li>
-                  <strong>Regional &amp; Outlying Areas:</strong> 3 to 5 business days.
+                  <strong>Regional &amp; Outlying Areas:</strong> 3 to 5 business days nationwide.
                 </li>
                 <li>
-                  <strong>Tracking:</strong> Real-time courier tracking link sent via email and WhatsApp upon dispatch.
+                  <strong>Gauteng Same-Day Express:</strong> Available for qualifying Gauteng suburbs on orders placed before 11:00.
+                </li>
+                <li>
+                  <strong>Tracking:</strong> Follow your parcel anytime on our{" "}
+                  <Link href="/order-status" className="underline underline-offset-4 hover:text-green">
+                    order tracking page
+                  </Link>{" "}
+                  or via email and WhatsApp notifications.
                 </li>
               </ul>
             </div>
@@ -121,7 +131,11 @@ export default function ShippingPage() {
               <span>Priority Orders &amp; WhatsApp Concierge</span>
             </h2>
             <p className="text-sm text-black leading-relaxed">
-              Need priority dispatch or assistance combining bottles to qualify for free delivery over R500? Message our WhatsApp Concierge directly upon placing your order and our dispatch team will prioritize your parcel.
+              Need priority dispatch, delivery instructions added to your waybill, or EFT checkout help? Message our{" "}
+              <Link href="/contact" className="underline underline-offset-4 hover:text-green">
+                WhatsApp Concierge ({siteConfig.whatsappNumber})
+              </Link>{" "}
+              with your order number.
             </p>
           </section>
 
@@ -134,10 +148,15 @@ export default function ShippingPage() {
             </h2>
             <div className="text-sm text-black leading-relaxed space-y-3">
               <p>
-                Because our formulations contain active, unrefined cold-pressed Marula and Baobab oils without harsh synthetic preservatives, items must remain unopened and in their original tamper-evident seal to be eligible for standard 14-day returns under South African hygiene regulations.
+                Because our formulations contain unrefined cold-pressed Marula and Baobab oils without harsh synthetic preservatives, items must remain unopened with their tamper-evident seal intact to qualify for standard 14-day returns under South African hygiene rules.
               </p>
               <p>
-                If your parcel arrived damaged in transit or you received an incorrect item, notify us within 48 hours of delivery at <strong>{siteConfig.supportEmail}</strong> or via WhatsApp with a photo for an immediate free replacement or full refund.
+                If your parcel arrived damaged in transit or you received the wrong item, email{" "}
+                <strong>{siteConfig.supportEmail}</strong> or message WhatsApp within 48 hours of delivery with a photo for a free replacement or full refund. See our{" "}
+                <Link href="/faq" className="underline underline-offset-4 hover:text-green">
+                  FAQ
+                </Link>{" "}
+                for more order answers.
               </p>
             </div>
           </section>

@@ -32,32 +32,32 @@ const stockistFAQs: FAQItem[] = [
   {
     question: "What is the minimum opening order quantity (MOQ)?",
     answer:
-      "Our opening minimum order is just 12 units (one carton) of the flagship 400ml Marula & Baobab Body Lotion (R3,360 total wholesale investment). This low-barrier commitment allows you to test client demand with zero risk before scaling up.",
+      "Our opening minimum order is 12 units (one carton) of the flagship 400ml Marula & Baobab Body Lotion (R3,360 total wholesale investment). This allows salons and clinics to gauge client demand before scaling up.",
   },
   {
     question: "How do you protect our local territory from competing stockists?",
     answer:
-      "We enforce a strict geographic territory radius (typically 3km to 5km in metropolitan areas). Once your account is active and maintaining consistent quarterly volume, no other salon or boutique within your protected perimeter will be approved to retail Divinity.",
+      "We enforce a strict geographic territory radius (3km for Studio Partners and 5km for Premier Stockists in metropolitan areas). Active accounts maintaining quarterly orders receive perimeter protection in their area.",
   },
   {
     question: "Do you supply tester bottles and marketing collateral?",
     answer:
-      "Yes. Every initial opening order includes a complimentary full-size 400ml tester bottle, luxury counter display tent cards, and therapist formulation guides. Partner and Premier tiers also receive client sample trial sachets for your treatment rooms.",
+      "Yes. Every opening order includes a complimentary full-size 400ml tester bottle, counter display tent cards, and therapist formulation guides. Partner and Premier tiers also receive client trial sachets.",
   },
   {
     question: "What is the recommended retail price (RRP) policy?",
     answer:
-      "The flagship 400ml Marula & Baobab Body Lotion retails at a strictly enforced R400 incl. VAT nationwide. We strictly prohibit discounting below RRP to protect partner margins and preserve the brand's luxury positioning across South Africa.",
+      "The flagship 400ml Marula & Baobab Body Lotion retails at a fixed R400 incl. VAT nationwide. Discounting below RRP is prohibited to protect stockist margins across South Africa.",
   },
   {
-    question: "How fast is wholesale courier fulfillment?",
+    question: "How fast is wholesale courier fulfilment?",
     answer:
-      "All wholesale orders dispatch within 24 hours from our South African fulfillment hub via insured, door-to-door courier. Delivery takes 2 to 4 business days across all 9 provinces with real-time SMS and email tracking.",
+      "Wholesale orders dispatch within 24 hours from our Springs, Gauteng fulfilment hub via insured door-to-door courier. Delivery takes 2 to 4 business days across all 9 provinces with tracking updates.",
   },
   {
     question: "Can home-based therapists or mobile aesthetic practitioners apply?",
     answer:
-      "Yes. We welcome qualified somatologists, clinical dermal therapists, and registered beauty professionals operating private practices. You will simply need to provide proof of professional qualification or trade registration during application.",
+      "Yes. Qualified somatologists, clinical dermal therapists, and registered beauty professionals running private practices are welcome to apply with proof of qualification or trade registration.",
   },
 ];
 
@@ -230,11 +230,11 @@ export function ResellerClient() {
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-2">Low-Risk 12-Unit MOQ</h3>
                 <p className="text-black/80 text-sm leading-relaxed mb-6">
-                  Test your client appetite with a manageable 12-bottle carton (R3,360 total investment). No R10,000+ opening commitments or slow-moving stock gathering dust on your shelves.
+                  Start with a single 12-bottle carton (R3,360 wholesale investment) rather than tying up capital in R10,000+ opening minimums.
                 </p>
               </div>
               <div className="pt-4 border-t border-black text-xs text-black/75 font-medium">
-                Fast turn: Most salons sell through 12 units in <strong className="text-black font-semibold">under 14 days</strong>
+                Opening carton: <strong className="text-black font-semibold">12 × 400ml bottles + 1 free tester</strong>
               </div>
             </motion.div>
 
@@ -250,13 +250,13 @@ export function ResellerClient() {
                 <div className="size-12 rounded-full border-2 border-black text-black flex items-center justify-center mb-6">
                   <Clock size={22} weight="regular" />
                 </div>
-                <h3 className="font-chloe text-2xl font-normal text-black mb-2">60–90 Day Refill Habit</h3>
+                <h3 className="font-chloe text-2xl font-normal text-black mb-2">90-Day Refill Cadence</h3>
                 <p className="text-black/80 text-sm leading-relaxed mb-6">
-                  400ml delivers 60 to 90 days of daily full-body barrier repair. Once clients experience lasting relief from Highveld winter dryness and crepey skin, they return to your salon for repeat purchases.
+                  With daily full-body use, a 400ml bottle typically lasts 30 to 45 days. Clients following the 90-day barrier cycle naturally return to restock.
                 </p>
               </div>
               <div className="pt-4 border-t border-black text-xs text-black/75 font-medium">
-                High retention: <strong className="text-black font-semibold">Over 78% of clients repurchase</strong> within 90 days
+                Built-in repeat cycle: <strong className="text-black font-semibold">Two 400ml bottles per 90-day ritual</strong>
               </div>
             </motion.div>
           </div>
@@ -299,7 +299,7 @@ export function ResellerClient() {
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Day Spas &amp; Wellness Sanctuaries</h3>
                 <p className="text-xs text-black/80 leading-relaxed">
-                  Elevate treatment wrap rituals and offer clients a sensorial, cold-pressed African botanical keepsake that extends the spa experience at home.
+                  Complement body wrap treatments and offer clients a cold-pressed African botanical take-home lotion that continues barrier care between bookings.
                 </p>
               </div>
               <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
@@ -315,11 +315,11 @@ export function ResellerClient() {
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Boutique Salons &amp; Studios</h3>
                 <p className="text-xs text-black/80 leading-relaxed">
-                  Effortless impulse conversion at reception. Clients test the non-greasy silk texture while settling accounts and add a bottle to their appointment ticket.
+                  Easy counter sampling at reception. Clients feel the rich cold-pressed finish while settling accounts and add a 400ml bottle to their visit.
                 </p>
               </div>
               <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
-                Reception Upsell Hero
+                Reception Retail Hero
               </p>
             </div>
 
@@ -331,11 +331,11 @@ export function ResellerClient() {
                 </div>
                 <h3 className="font-chloe text-xl font-normal text-black mb-2">Safari Lodges &amp; Luxury Boutiques</h3>
                 <p className="text-xs text-black/80 leading-relaxed">
-                  Provide international and local guests with authentic South African botanical skincare crafted from certified Marula and wild-harvested Baobab.
+                  Provide local and international guests with South African botanical skincare crafted from cold-pressed Limpopo Marula and wild-harvested Mpumalanga Baobab.
                 </p>
               </div>
               <p className="mt-6 pt-3 border-t border-black text-[11px] font-semibold text-black">
-                Authentic Cape Provenance
+                South African Botanicals
               </p>
             </div>
           </div>
@@ -349,7 +349,7 @@ export function ResellerClient() {
         <div className="max-w-[1400px] mx-auto">
           <div className="max-w-2xl mb-16">
             <h2 className="font-chloe text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-black leading-tight">
-              Everything you need to sell out your first carton within 14 days.
+              Everything you need to launch your first carton smoothly.
             </h2>
           </div>
 
@@ -365,7 +365,7 @@ export function ResellerClient() {
             >
               <Image
                 src="/images/bento-story-hands.jpg"
-                alt="Therapist hands applying Divinity Marula and Baobab Body Lotion"
+                alt="Therapist hands holding Divinity Cosmetics 400ml Marula and Baobab Body Lotion"
                 fill
                 sizes="(max-width: 1024px) 100vw, 65vw"
                 className="object-cover object-center opacity-40 mix-blend-overlay"
@@ -377,7 +377,7 @@ export function ResellerClient() {
                   Guaranteed Geographic Exclusivity
                 </h3>
                 <p className="text-white/80 text-sm md:text-base leading-relaxed">
-                  We protect our stockists by enforcing strict perimeter boundaries (3km to 5km radius in metropolitan areas). Your business remains the singular destination for Divinity in your neighborhood—preventing retail price wars and safeguarding your margins.
+                  We protect our stockists by enforcing strict perimeter boundaries (3km to 5km radius in metropolitan areas). Your business stays the dedicated destination for Divinity in your neighbourhood—preventing retail price wars and safeguarding your margins.
                 </p>
               </div>
             </motion.div>
@@ -396,7 +396,7 @@ export function ResellerClient() {
                 </div>
                 <h3 className="font-chloe text-2xl font-normal text-black mb-3">2–4 Day Courier Dispatch</h3>
                 <p className="text-black/80 text-sm leading-relaxed">
-                  Reliable tracked delivery from our Johannesburg fulfillment center directly to your reception desk across all 9 provinces. Free courier shipping on Partner and Premier orders.
+                  Reliable tracked delivery from our Springs, Gauteng fulfilment hub directly to your reception desk across all 9 provinces. Free courier shipping on Partner and Premier orders.
                 </p>
               </div>
               <div className="pt-6 border-t border-black text-xs font-semibold text-black flex items-center gap-1.5">
@@ -517,7 +517,7 @@ export function ResellerClient() {
                   </li>
                   <li className="flex items-center gap-2 text-black/65">
                     <span className="w-4 h-4 rounded-full border border-black flex items-center justify-center shrink-0">·</span>
-                    <span>Standard courier delivery (R100)</span>
+                    <span>Courier delivery calculated at checkout</span>
                   </li>
                 </ul>
               </div>
@@ -696,7 +696,7 @@ export function ResellerClient() {
               <span className="font-chloe text-5xl font-normal text-[#3d7b32]/40 mb-3">02</span>
               <h3 className="font-chloe text-xl font-normal text-black mb-2">Territory Vetting</h3>
               <p className="text-xs text-black/70 leading-relaxed">
-                Our team reviews your application within 24 to 48 hours and confirms geographic exclusivity for your neighborhood.
+                Our team reviews your application within 24 to 48 hours and confirms geographic exclusivity for your neighbourhood.
               </p>
             </div>
 

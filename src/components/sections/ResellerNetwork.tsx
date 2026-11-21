@@ -133,7 +133,7 @@ export function ResellerNetwork() {
                 Exclusive territory
               </h3>
               <p className="mt-3 mb-0 max-w-[30ch] text-[1.05rem] leading-relaxed">
-                Curated partners only, so your boutique stays exclusive in your area.
+                Approved partners only, with 3km to 5km territory protection around your clinic or boutique.
               </p>
             </div>
           </div>
@@ -148,8 +148,7 @@ export function ResellerNetwork() {
                 Bring Divinity to your shelves.
               </h3>
               <p className="mt-4 mb-0 max-w-[46ch] text-[1.05rem] leading-relaxed text-black/80">
-                Partner with us to offer premium, sustainably sourced African botanicals to
-                your clientele, with favorable margins for our authorized stockists.
+                Stock South African cold-pressed Marula and Baobab body care with 30% to 45% wholesale margins and a 12-unit opening order.
               </p>
             </div>
 

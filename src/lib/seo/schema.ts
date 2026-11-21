@@ -165,10 +165,7 @@ function buildProductEntity(overrides?: ProductSchemaInput) {
   const productUrl = overrides?.url
     ? toAbsoluteUrl(overrides.url)
     : toAbsoluteUrl(`/products/${slug}`);
-  const shippingRate =
-    price >= siteConfig.freeShippingThreshold
-      ? "0.00"
-      : siteConfig.standardShippingCost.toFixed(2);
+  const shippingRate = siteConfig.standardShippingCost.toFixed(2);
 
   const images = (
     overrides?.images && overrides.images.length > 0
@@ -347,47 +344,57 @@ export function buildProductListSchema(products: ProductListItemInput[]) {
           },
         ];
 
+  const itemListId = `${siteConfig.url}/shop#itemlist`;
+
   return {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "@id": `${siteConfig.url}/shop#webpage`,
-    url: toAbsoluteUrl("/shop"),
-    name: "Shop Facial-Grade Botanical Body Care | Divinity Cosmetics",
-    description:
-      "Shop Divinity Cosmetics facial-grade Marula & Baobab body care formulated in South Africa for 24-hour skin barrier hydration.",
-    inLanguage: "en-ZA",
-    isPartOf: {
-      "@id": `${siteConfig.url}/#website`,
-    },
-    about: {
-      "@id": `${siteConfig.url}/#organization`,
-    },
-    mainEntity: {
-      "@type": "ItemList",
-      numberOfItems: items.length,
-      itemListElement: items.map((product, index) => {
-        const productUrl = toAbsoluteUrl(`/products/${product.slug}`);
-        return {
-          "@type": "ListItem",
-          position: index + 1,
-          url: productUrl,
-          item: buildProductEntity({
-            name: product.name,
-            slug: product.slug,
-            sku: product.sku,
-            description:
-              product.description || product.shortDescription || undefined,
-            price: product.basePrice,
-            compareAtPrice: product.compareAtPrice,
-            ingredients: product.ingredients,
-            concerns: product.concerns,
-            inStock: product.inStock ?? true,
-            images: product.images,
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${siteConfig.url}/shop#webpage`,
+        url: toAbsoluteUrl("/shop"),
+        name: "Shop Botanical Body Care | Divinity Cosmetics",
+        description:
+          "Shop Divinity Cosmetics facial-grade Marula & Baobab body care formulated in South Africa for 24-hour skin barrier hydration.",
+        inLanguage: "en-ZA",
+        isPartOf: {
+          "@id": `${siteConfig.url}/#website`,
+        },
+        about: {
+          "@id": `${siteConfig.url}/#organization`,
+        },
+        mainEntity: {
+          "@id": itemListId,
+        },
+      },
+      {
+        "@type": "ItemList",
+        "@id": itemListId,
+        numberOfItems: items.length,
+        itemListElement: items.map((product, index) => {
+          const productUrl = toAbsoluteUrl(`/products/${product.slug}`);
+          return {
+            "@type": "ListItem",
+            position: index + 1,
             url: productUrl,
-          }),
-        };
-      }),
-    },
+            item: buildProductEntity({
+              name: product.name,
+              slug: product.slug,
+              sku: product.sku,
+              description:
+                product.description || product.shortDescription || undefined,
+              price: product.basePrice,
+              compareAtPrice: product.compareAtPrice,
+              ingredients: product.ingredients,
+              concerns: product.concerns,
+              inStock: product.inStock ?? true,
+              images: product.images,
+              url: productUrl,
+            }),
+          };
+        }),
+      },
+    ],
   };
 }
 
@@ -526,7 +533,7 @@ export function buildShippingWebPageSchema() {
     url: toAbsoluteUrl("/shipping"),
     name: "Shipping & Returns Policy | Divinity Cosmetics",
     description:
-      "Nationwide South African courier delivery across all 9 provinces: flat R100 shipping under R500, free delivery over R500, and a 14-day purity guarantee.",
+      "Nationwide South African courier delivery across all 9 provinces via The Courier Guy, calculated live at checkout (economy from around R142), with a 14-day return policy.",
     inLanguage: "en-ZA",
     isPartOf: {
       "@id": `${siteConfig.url}/#website`,
@@ -538,21 +545,9 @@ export function buildShippingWebPageSchema() {
       {
         "@type": "OfferShippingDetails",
         shippingRate: {
-          "@type": "ShippingRateSettings",
-          shippingRate: {
-            "@type": "MonetaryAmount",
-            value: siteConfig.standardShippingCost.toFixed(2),
-            currency: "ZAR",
-          },
-          freeShippingThreshold: {
-            "@type": "MonetaryAmount",
-            value: siteConfig.freeShippingThreshold.toFixed(2),
-            currency: "ZAR",
-          },
-          shippingDestination: {
-            "@type": "DefinedRegion",
-            addressCountry: "ZA",
-          },
+          "@type": "MonetaryAmount",
+          value: siteConfig.standardShippingCost.toFixed(2),
+          currency: "ZAR",
         },
         shippingDestination: {
           "@type": "DefinedRegion",
@@ -607,46 +602,56 @@ export function buildPrivacyWebPageSchema() {
 }
 
 export function buildResellerPageSchema() {
+  const serviceId = `${siteConfig.url}/reseller#wholesale-service`;
+
   return {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    "@id": `${siteConfig.url}/reseller#webpage`,
-    url: toAbsoluteUrl("/reseller"),
-    name: "Authorized Stockist & Wholesale Program | Divinity Cosmetics",
-    description:
-      "South African wholesale stockist program for salons, aesthetic clinics, spas, and boutiques offering 30%–45% margins and protected local territories.",
-    inLanguage: "en-ZA",
-    isPartOf: {
-      "@id": `${siteConfig.url}/#website`,
-    },
-    about: {
-      "@id": `${siteConfig.url}/#organization`,
-    },
-    mainEntity: {
-      "@type": "Service",
-      name: "Divinity Cosmetics Authorized Stockist & Wholesale Program",
-      serviceType: "Wholesale Botanical Skincare Supply",
-      provider: {
-        "@id": `${siteConfig.url}/#organization`,
-      },
-      areaServed: {
-        "@type": "Country",
-        name: "South Africa",
-      },
-      offers: {
-        "@type": "AggregateOffer",
-        priceCurrency: "ZAR",
-        lowPrice: "220.00",
-        highPrice: "280.00",
-        offerCount: 3,
-        eligibleQuantity: {
-          "@type": "QuantitativeValue",
-          minValue: 12,
-          unitCode: "EA",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${siteConfig.url}/reseller#webpage`,
+        url: toAbsoluteUrl("/reseller"),
+        name: "Stockist & Wholesale Program | Divinity Cosmetics",
+        description:
+          "South African wholesale stockist program for salons, aesthetic clinics, spas, and boutiques offering 30%–45% margins and protected local territories.",
+        inLanguage: "en-ZA",
+        isPartOf: {
+          "@id": `${siteConfig.url}/#website`,
         },
-        url: toAbsoluteUrl("/reseller/apply"),
+        about: {
+          "@id": `${siteConfig.url}/#organization`,
+        },
+        mainEntity: {
+          "@id": serviceId,
+        },
       },
-    },
+      {
+        "@type": "Service",
+        "@id": serviceId,
+        name: "Divinity Cosmetics Authorized Stockist & Wholesale Program",
+        serviceType: "Wholesale Botanical Skincare Supply",
+        provider: {
+          "@id": `${siteConfig.url}/#organization`,
+        },
+        areaServed: {
+          "@type": "Country",
+          name: "South Africa",
+        },
+        offers: {
+          "@type": "AggregateOffer",
+          priceCurrency: "ZAR",
+          lowPrice: "220.00",
+          highPrice: "280.00",
+          offerCount: 3,
+          eligibleQuantity: {
+            "@type": "QuantitativeValue",
+            minValue: 12,
+            unitCode: "EA",
+          },
+          url: toAbsoluteUrl("/reseller/apply"),
+        },
+      },
+    ],
   };
 }
 

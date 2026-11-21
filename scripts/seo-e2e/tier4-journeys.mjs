@@ -345,10 +345,10 @@ export async function runTier4Live(baseUrl, collector) {
     const shippingDoc = parseHtml(await shippingRes.text());
     if (
       shippingRes.status !== 200 ||
-      !/R100/.test(shippingDoc.visibleText) ||
-      !/R500/.test(shippingDoc.visibleText)
+      !/R142/.test(shippingDoc.visibleText) ||
+      !/Courier Guy/i.test(shippingDoc.visibleText)
     ) {
-      funnelFailures.push("/shipping missing R100/R500 delivery clarity");
+      funnelFailures.push("/shipping missing Courier Guy / R142 delivery clarity");
     }
 
     const orderStatusRes = await fetchWithTimeout(`${baseUrl}/order-status`);

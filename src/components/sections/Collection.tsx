@@ -12,7 +12,7 @@ export async function Collection() {
           Close the Vanity Divide.
         </h2>
         <p className="collection-subtext">
-          You refuse to put cheap synthetic fillers on your face—stop settling for watery supermarket pump lotions on the other 90% of your body. Formulated with high concentrations of cold-pressed South African Marula and wild-harvested Baobab seed oils to physically seal your skin barrier for 24 hours.
+          You put real money into facial serums for 10% of your skin, then settle for thin supermarket pumps on the other 90%. Our 400ml lotion pairs 10% cold-pressed Limpopo Marula oil with 10% wild-harvested Mpumalanga Baobab oil for a physical 24-hour moisture seal.
         </p>
       </div>
 

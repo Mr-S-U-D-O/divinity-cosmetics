@@ -135,7 +135,7 @@ export function validatePdpSsrVisibility(html, collector) {
   const invariantFacts = {
     marula: /\bmarula\b/i.test(doc.visibleText),
     baobab: /\bbaobab\b/i.test(doc.visibleText),
-    freeShipping500: /\bR\s?500\b/i.test(doc.visibleText),
+    courierShipping: /\b(?:R\s?142|Courier Guy)\b/i.test(doc.visibleText),
     volume400: /\b400\s?ml\b/i.test(doc.visibleText),
   };
   const missingFacts = Object.entries(invariantFacts)
@@ -147,7 +147,7 @@ export function validatePdpSsrVisibility(html, collector) {
     tier,
     "/products/marula-baobab-body-lotion: >= 3 detail panels + invariant facts in raw SSR DOM",
     (accordionMatches.length >= 3 || detailHeadingHits >= 3) && missingFacts.length === 0,
-    `sections=${Math.max(accordionMatches.length, detailHeadingHits)}, facts=Marula,Baobab,R500,400ml`,
+    `sections=${Math.max(accordionMatches.length, detailHeadingHits)}, facts=Marula,Baobab,CourierGuy/R142,400ml`,
     `Detail sections=${Math.max(accordionMatches.length, detailHeadingHits)} (need >=3), missing facts=[${missingFacts.join(", ")}]`
   );
 
@@ -253,15 +253,15 @@ export async function runTier2Static(repoRoot, collector) {
     `SKU mismatch: ${skuMissing.join(", ")}`
   );
 
-  // 4. Formulation & pricing constants (10% Marula & 10% Baobab, 400ml, R400, R100 / free >= R500)
+  // 4. Formulation, pricing & live Courier Guy shipping constants (10% Marula & 10% Baobab, 400ml, R400, R142, no stale R500 free-shipping promise)
   const shippingPageSrc = readIfExists(
     path.join(repoRoot, "src", "app", "(storefront)", "shipping", "page.tsx")
   );
-  const ratesSrc = readIfExists(
-    path.join(repoRoot, "src", "lib", "domain", "shipping", "rates.ts")
+  const faqPageSrc = readIfExists(
+    path.join(repoRoot, "src", "app", "(storefront)", "faq", "page.tsx")
   );
-  const checkoutPageSrc = readIfExists(
-    path.join(repoRoot, "src", "app", "(storefront)", "checkout", "page.tsx")
+  const headerSrc = readIfExists(
+    path.join(repoRoot, "src", "components", "layout", "Header.tsx")
   );
 
   const factIssues = [];
@@ -272,25 +272,26 @@ export async function runTier2Static(repoRoot, collector) {
   ]) {
     if (!/400\s?ml/i.test(txt)) factIssues.push(`${label} missing 400ml`);
     if (!/R400/i.test(txt)) factIssues.push(`${label} missing R400`);
-    if (!/R100/i.test(txt)) factIssues.push(`${label} missing R100`);
-    if (!/R500/i.test(txt)) factIssues.push(`${label} missing R500`);
     if (!/10%/.test(txt)) factIssues.push(`${label} missing 10% concentration`);
+    if (/orders?\s+(?:over|of)\s+R500|free\s+(?:nationwide\s+)?(?:courier\s+)?(?:delivery|shipping)\s+(?:over|on\s+orders)/i.test(txt)) {
+      factIssues.push(`${label} still has stale free-over-R500 shipping claim`);
+    }
   }
-  if (!/R100/.test(shippingPageSrc) || !/R500/.test(shippingPageSrc)) {
-    factIssues.push("shipping/page.tsx missing R100/R500");
+  if (!/R142/.test(llmsTxt) || !/R142/.test(pricingMd)) {
+    factIssues.push("llms.txt/pricing.md missing R142 live Courier Guy rate");
   }
-  if (/\b142\.0\b|R142\b/.test(ratesSrc)) {
-    factIssues.push("src/lib/domain/shipping/rates.ts still has 142.0 fallback rate");
+  if (!/R142/.test(shippingPageSrc) || /over R500/i.test(shippingPageSrc)) {
+    factIssues.push("shipping/page.tsx missing R142 or still has stale R500 waiver");
   }
-  if (/\b142\.0\b|R142\b/.test(checkoutPageSrc)) {
-    factIssues.push("src/app/(storefront)/checkout/page.tsx still has 142.0 shipping rate");
+  if (/over R500/i.test(faqPageSrc) || /over R500/i.test(headerSrc)) {
+    factIssues.push("faq/page.tsx or Header.tsx still has stale R500 free shipping text");
   }
   collector.assert(
     "T2.FACTS.PRICING_SHIPPING_ACTIVES",
     tier,
-    "10% Marula/Baobab, 400ml, R400, R100/free>=R500 consistent (no R142 mismatch)",
+    "10% Marula/Baobab, 400ml, R400, live Courier Guy (R142) consistent across site & AI files",
     factIssues.length === 0,
-    "All formulation, pricing, and shipping facts consistent",
+    "All formulation, pricing, and live shipping facts consistent",
     `Fact inconsistencies: ${factIssues.join("; ")}`
   );
 

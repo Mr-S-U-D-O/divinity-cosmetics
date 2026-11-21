@@ -17,7 +17,9 @@ function VerifySkeletonCard() {
 
       {/* Headings & copy skeletons */}
       <div className="space-y-3">
-        <div className="h-7 w-48 bg-stone-200 rounded-lg mx-auto" />
+        <h1 className="text-xl font-medium tracking-tight text-gray-900">
+          Verifying Payment
+        </h1>
         <div className="h-3.5 w-72 max-w-full bg-stone-200 rounded-md mx-auto" />
         <div className="h-3.5 w-60 max-w-full bg-stone-200 rounded-md mx-auto" />
       </div>
@@ -93,9 +95,9 @@ function VerifyContent() {
           <div className="flex justify-center text-green">
             <CheckCircle size={64} weight="fill" />
           </div>
-          <h2 className="text-2xl font-medium tracking-tight text-gray-900">
+          <h1 className="text-2xl font-medium tracking-tight text-gray-900">
             Payment Verified!
-          </h2>
+          </h1>
           <p className="text-sm text-gray-500">
             Order <span className="font-semibold text-gray-900">{orderNumber}</span> has been confirmed. Redirecting you to your order summary...
           </p>
@@ -107,9 +109,9 @@ function VerifyContent() {
           <div className="flex justify-center text-red-500">
             <XCircle size={64} weight="fill" />
           </div>
-          <h2 className="text-2xl font-medium tracking-tight text-gray-900">
+          <h1 className="text-2xl font-medium tracking-tight text-gray-900">
             Payment Incomplete
-          </h2>
+          </h1>
           <p className="text-sm text-gray-600 bg-red-50 border border-red-500 p-4 rounded-xl">
             {errorMessage}
           </p>

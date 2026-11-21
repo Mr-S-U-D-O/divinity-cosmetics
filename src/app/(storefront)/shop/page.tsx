@@ -1,47 +1,29 @@
 import type { Metadata } from "next";
 import React from "react";
 import { getAllProducts } from "@/lib/domain/products/service";
-import { siteConfig } from "@/lib/config/site";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   buildBreadcrumbSchema,
-  buildFlagshipProductSchema,
+  buildProductListSchema,
+  serializeJsonLd,
 } from "@/lib/seo/schema";
 import { ShopClient } from "./ShopClient";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title:
-    "Shop Marula & Baobab Body Lotion (400ml) | Facial-Grade Botanical Catalog",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Shop Botanical Body Care",
   description:
-    "Shop the Divinity Cosmetics flagship Marula & Baobab Body Lotion (400ml, R400)—cold-pressed South African botanical nutrition for 24-hour hydration, crepey skin smoothing, and 90-day barrier repair. Free nationwide delivery over R500.",
+    "Browse Divinity Cosmetics facial-grade body lotions crafted in South Africa. Shop our 400ml Marula & Baobab Body Lotion (R400) for 24-hour barrier hydration.",
+  path: "/shop",
   keywords: [
+    "shop botanical body lotion South Africa",
     "buy Marula and Baobab body lotion South Africa",
     "Divinity Cosmetics shop",
     "400ml Marula body lotion R400",
-    "facial-grade body care South Africa",
-    "best lotion for dry Highveld winter skin",
+    "cold-pressed African botanical body care",
   ],
-  alternates: {
-    canonical: "/shop",
-  },
-  openGraph: {
-    title:
-      "Shop Divinity Cosmetics | Marula & Baobab Body Lotion (400ml) — R400",
-    description:
-      "Replace watery R100 supermarket pump lotions with facial-grade, cold-pressed South African Marula & Baobab nutrition.",
-    url: `${siteConfig.url}/shop`,
-    type: "website",
-    images: [
-      {
-        url: "/images/marula-baobab-body-lotion.jpg",
-        width: 1200,
-        height: 900,
-        alt: "Divinity Cosmetics Marula & Baobab Body Lotion 400ml — R400",
-      },
-    ],
-  },
-};
+});
 
 export default async function ShopPage() {
   const products = await getAllProducts({ onlyActive: true });
@@ -49,14 +31,28 @@ export default async function ShopPage() {
     { name: "Home", path: "/" },
     { name: "Shop Botanical Formulations", path: "/shop" },
   ]);
-  const flagshipProductJsonLd = buildFlagshipProductSchema();
+  const productListJsonLd = buildProductListSchema(
+    products.map((p) => ({
+      name: p.name,
+      slug: p.slug,
+      sku: p.sku,
+      description: p.description,
+      shortDescription: p.shortDescription,
+      basePrice: p.basePrice,
+      compareAtPrice: p.compareAtPrice,
+      ingredients: p.ingredients,
+      concerns: p.concerns,
+      inStock: !p.trackInventory || p.stock > 0,
+      images: p.images,
+    }))
+  );
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([breadcrumbJsonLd, flagshipProductJsonLd]),
+          __html: serializeJsonLd([breadcrumbJsonLd, productListJsonLd]),
         }}
       />
       <ShopClient products={products} />

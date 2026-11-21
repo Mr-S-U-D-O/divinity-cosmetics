@@ -618,7 +618,7 @@ function SuccessContent() {
             </p>
             <div className="pt-1 flex flex-col sm:flex-row gap-2">
               <a
-                href={`https://wa.me/27821234567?text=Hi%20Divinity%20Cosmetics%20Team!%20I%20have%20an%20inquiry%20regarding%20my%20Order%20${encodeURIComponent(displayOrderNumber)}`}
+                href={`https://wa.me/${siteConfig.whatsappNumber.replace(/[^0-9]/g, "")}?text=Hi%20Divinity%20Cosmetics%20Team!%20I%20have%20an%20inquiry%20regarding%20my%20Order%20${encodeURIComponent(displayOrderNumber)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ backgroundColor: "#25D366", color: "#ffffff", borderColor: "#1a1a1a" }}

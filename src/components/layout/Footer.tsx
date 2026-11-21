@@ -66,14 +66,14 @@ export function Footer() {
           {/* Tier 2: The Nav */}
           <div className="footer-nav-grid lg:col-span-5">
             <div className="footer-link-group">
-              <h4 className="footer-link-heading">Explore</h4>
+              <h3 className="footer-link-heading">Explore</h3>
               <Link href="/shop" className="footer-link">Shop Collection</Link>
               <Link href="/about" className="footer-link">Our Story</Link>
               <Link href="/reseller" className="footer-link">Reseller Program</Link>
               <Link href="/rituals" className="footer-link">Formulations</Link>
             </div>
             <div className="footer-link-group">
-              <h4 className="footer-link-heading">Support</h4>
+              <h3 className="footer-link-heading">Support</h3>
               <Link href="/order-status" className="footer-link">Track Order</Link>
               <Link href="/contact" className="footer-link">Contact Us</Link>
               <Link href="/shipping" className="footer-link">Shipping & Returns</Link>
@@ -142,14 +142,16 @@ export function Footer() {
                 className="will-change-transform"
                 onMouseEnter={handleSocialEnter}
               >
-                <Link
-                  href="/checkout"
+                <a
+                  href={`https://wa.me/${siteConfig.whatsappNumber.replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label="WhatsApp Concierge"
                   title="WhatsApp Concierge"
                   className="flex size-10 sm:size-11 items-center justify-center rounded-full border border-[#25D366] bg-transparent text-[#25D366] transition-all duration-300 hover:bg-[#25D366]/15 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green active:scale-95"
                 >
                   <WhatsappLogo size={18} weight="fill" style={{ color: "#25D366" }} aria-hidden="true" />
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

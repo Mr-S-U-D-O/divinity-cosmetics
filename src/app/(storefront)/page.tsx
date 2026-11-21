@@ -4,26 +4,31 @@ import { Collection } from "@/components/sections/Collection";
 import { Story } from "@/components/sections/Story";
 import { ResellerNetwork } from "@/components/sections/ResellerNetwork";
 import { FAQSection, HOMEPAGE_FAQ_ITEMS } from "@/components/sections/FAQSection";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   buildFlagshipProductSchema,
   buildFAQPageSchema,
   buildBreadcrumbSchema,
   buildHeroImageSchema,
+  serializeJsonLd,
 } from "@/lib/seo/schema";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: {
-    absolute:
-      "Divinity Cosmetics | Marula & Baobab Body Lotion (400ml) | Facial-Grade Body Care South Africa",
-  },
+export const metadata: Metadata = buildPageMetadata({
+  title: "Divinity Cosmetics | Facial-Grade Body Care South Africa",
+  absoluteTitle: true,
   description:
-    "Why invest R1,000 in facial serums and settle for watery R100 supermarket body lotions? Discover Divinity Cosmetics Marula & Baobab Body Lotion (400ml, R400)—cold-pressed South African botanical oils for 24-hour hydration and 90-day barrier repair.",
-  alternates: {
-    canonical: "/",
-  },
-};
+    "Close the Vanity Divide with Divinity Cosmetics. Cold-pressed Marula & Baobab Body Lotion (400ml, R400) for 24-hour hydration and 90-day barrier repair.",
+  path: "/",
+  keywords: [
+    "Divinity Cosmetics South Africa",
+    "facial-grade botanical body care South Africa",
+    "Marula and Baobab body lotion 400ml",
+    "24-hour skin barrier repair South Africa",
+    "body lotion for dry Highveld winter skin",
+  ],
+});
 
 export default function Home() {
   const productJsonLd = buildFlagshipProductSchema();
@@ -36,7 +41,12 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([productJsonLd, heroImageJsonLd, faqJsonLd, breadcrumbJsonLd]),
+          __html: serializeJsonLd([
+            productJsonLd,
+            heroImageJsonLd,
+            faqJsonLd,
+            breadcrumbJsonLd,
+          ]),
         }}
       />
       <Hero />

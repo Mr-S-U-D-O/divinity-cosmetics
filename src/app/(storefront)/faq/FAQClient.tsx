@@ -41,8 +41,23 @@ export function FAQClient({ faqs, whatsappUrl }: FAQClientProps) {
           <h1 className="font-chloe text-4xl sm:text-5xl font-normal leading-[1.04] tracking-tight text-black m-0 mb-5">
             Frequently Asked Questions
           </h1>
-          <div className="text-sm sm:text-[15px] leading-relaxed text-black/80 max-w-[34ch] mb-8">
-            Clear answers on cold-pressed Marula &amp; Baobab oils, the 90-day barrier cycle, and nationwide South African delivery.
+          <div className="text-sm sm:text-[15px] leading-relaxed text-black/80 max-w-[34ch] mb-6">
+            Clear answers on cold-pressed Marula &amp; Baobab oils, the 90-day barrier cycle, and South African delivery.
+          </div>
+
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] mb-7">
+            <Link href="/rituals" className="text-black/80 hover:text-green underline underline-offset-4">
+              90-Day Ritual
+            </Link>
+            <Link href="/shipping" className="text-black/80 hover:text-green underline underline-offset-4">
+              Shipping
+            </Link>
+            <Link href="/about#founders-note" className="text-black/80 hover:text-green underline underline-offset-4">
+              Founder&apos;s Note
+            </Link>
+            <Link href="/reseller" className="text-black/80 hover:text-green underline underline-offset-4">
+              Stockists
+            </Link>
           </div>
 
           {/* Minimalist Topic Tabs */}

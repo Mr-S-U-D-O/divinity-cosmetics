@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MagnifyingGlass, ShoppingCart, ArrowRight, X, User, List } from "@phosphor-icons/react";
 import { useCart } from "@/lib/context/CartContext";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
@@ -31,9 +32,11 @@ const SAFlag = () => (
 );
 
 export function Header() {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -172,14 +175,14 @@ export function Header() {
             <span className="text-black/60 font-normal">Cruelty-Free</span>
           </div>
 
-          {/* Desktop Right: Complimentary Delivery offer */}
+          {/* Desktop Right: Nationwide Courier Delivery */}
           <div className="top-bar-right">
             <Link 
               href="/shipping" 
               className="top-bar-link top-bar-pill group"
               title="View nationwide delivery details"
             >
-              <span>Complimentary delivery on orders over R500</span>
+              <span>Nationwide delivery via The Courier Guy</span>
               <ArrowRight 
                 size={11} 
                 className="top-bar-arrow" 
@@ -196,7 +199,7 @@ export function Header() {
               title="View nationwide delivery details"
             >
               <SAFlag />
-              <span>Orders over R500 ship free</span>
+              <span>The Courier Guy</span>
               <span className="top-bar-separator" aria-hidden="true">·</span>
               <span className="text-white/85 font-normal">Nationwide</span>
               <ArrowRight 
@@ -226,6 +229,15 @@ export function Header() {
                 <input
                   ref={searchInputRef}
                   type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && searchTerm.trim()) {
+                      setSearchOpen(false);
+                      router.push(`/shop?q=${encodeURIComponent(searchTerm.trim())}`);
+                    }
+                  }}
+                  aria-label="Search formulations"
                   placeholder="Search formulations..."
                   className="w-full bg-transparent text-xs font-medium text-black outline-none placeholder:text-neutral-500"
                 />
@@ -307,6 +319,15 @@ export function Header() {
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     ref={searchInputRef}
                     type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && searchTerm.trim()) {
+                        setSearchOpen(false);
+                        router.push(`/shop?q=${encodeURIComponent(searchTerm.trim())}`);
+                      }
+                    }}
+                    aria-label="Search formulations"
                     placeholder="Search..."
                     className="absolute right-8 h-8 px-3 text-sm bg-white border border-black rounded-full outline-none text-black placeholder:text-gray-400 font-medium"
                   />
@@ -481,12 +502,12 @@ export function Header() {
                         onClick={() => setActiveMenu(null)}
                         className="group/ritual block"
                       >
-                        <h4 className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
+                        <p className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
                           <span>90-Day Barrier Repair</span>
                           <ArrowRight size={14} className="text-black group-hover/ritual:text-green-dark group-hover/ritual:translate-x-1 transition-all" />
-                        </h4>
+                        </p>
                         <p className="text-xs text-black/75 leading-relaxed font-normal">
-                          Restoring lipid density against dry Highveld winds and harsh municipal tap water.
+                          Restoring lipid density against dry Highveld winds and hard municipal tap water.
                         </p>
                       </Link>
 
@@ -495,12 +516,12 @@ export function Header() {
                         onClick={() => setActiveMenu(null)}
                         className="group/ritual block pt-5 border-t border-black"
                       >
-                        <h4 className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
+                        <p className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
                           <span>South African Lineage</span>
                           <ArrowRight size={14} className="text-black group-hover/ritual:text-green-dark group-hover/ritual:translate-x-1 transition-all" />
-                        </h4>
+                        </p>
                         <p className="text-xs text-black/75 leading-relaxed font-normal">
-                          Wild-harvested Limpopo Marula and cold-pressed Mpumalanga Baobab seed oils.
+                          Cold-pressed Limpopo Marula and wild-harvested Mpumalanga Baobab seed oils.
                         </p>
                       </Link>
 
@@ -509,10 +530,10 @@ export function Header() {
                         onClick={() => setActiveMenu(null)}
                         className="group/ritual block pt-5 border-t border-black"
                       >
-                        <h4 className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
+                        <p className="font-chloe text-xl text-black group-hover/ritual:text-green-dark transition-colors mb-1.5 flex items-center justify-between">
                           <span>The Facial-Grade Thesis</span>
                           <ArrowRight size={14} className="text-black group-hover/ritual:text-green-dark group-hover/ritual:translate-x-1 transition-all" />
-                        </h4>
+                        </p>
                         <p className="text-xs text-black/75 leading-relaxed font-normal">
                           Extending the biological standards of facial serums to full-body care.
                         </p>
@@ -548,9 +569,9 @@ export function Header() {
                       <span className="inline-block text-[9.5px] font-bold tracking-[0.18em] uppercase text-green mb-1.5">
                         Botanical Flagship
                       </span>
-                      <h4 className="font-chloe text-xl xl:text-2xl text-black font-normal leading-snug tracking-tight mb-1 group-hover/flagship:text-green-dark transition-colors">
+                      <p className="font-chloe text-xl xl:text-2xl text-black font-normal leading-snug tracking-tight mb-1 group-hover/flagship:text-green-dark transition-colors">
                         Marula &amp; Baobab Body Lotion
-                      </h4>
+                      </p>
                       <p className="text-xs font-semibold text-black tracking-tight mb-2.5">
                         400ml · R400
                       </p>
@@ -576,7 +597,7 @@ export function Header() {
                   <span>Cruelty-Free Botanical Formulation</span>
                 </div>
                 <div className="flex items-center gap-2 text-black">
-                  <span>Complimentary delivery over R500</span>
+                  <span>Live courier rates at checkout</span>
                   <span>·</span>
                   <Link
                     href="/shipping"

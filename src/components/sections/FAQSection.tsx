@@ -6,23 +6,23 @@ import { FAQAccordion } from "@/components/ui/FAQAccordion";
 
 export const HOMEPAGE_FAQ_ITEMS = [
   {
-    question: "Why does Divinity take a few minutes to sink in instead of vanishing in 5 seconds?",
+    question: "Why does Divinity take 2 to 3 minutes to sink in instead of vanishing in 5 seconds?",
     answer:
-      "A lotion that vanishes in five seconds isn't 'fast-absorbing'—it is mostly water, alcohol, and synthetic slip evaporating into thin air, which is why ashiness returns by midday. Divinity Marula & Baobab Body Lotion is formulated with dense, cold-pressed African botanical seed oils that take 2 to 3 minutes to sink in, forming a physical 24-hour seal against the South African climate.",
+      "Lotions that vanish in five seconds are up to 80–85% water, alcohol, and volatile carriers that evaporate quickly, leaving skin ashy by midday. Divinity Marula & Baobab Body Lotion uses dense, cold-pressed African botanical seed oils that take 2 to 3 minutes to absorb and form a 24-hour barrier seal.",
   },
   {
-    question: "How does the 90-Day Barrier Repair cycle improve crepey, mature skin?",
+    question: "How does the 90-day barrier repair cycle improve crepey, mature skin?",
     answer:
-      "Healthy, resilient skin is not built by overnight miracle claims. Age-related moisture loss and a thinning skin barrier on your arms, legs, and décolletage require consistent lipid nutrition. Feeding your skin high concentrations of cold-pressed Marula (oleic acid & Vitamin E) and Baobab (Omegas 3, 6 & 9) daily over a 90-day cellular turnover cycle visibly softens crepey texture and restores lasting elasticity.",
+      "Age-related moisture loss and a thinning moisture barrier on arms, legs, and décolletage respond to steady lipid nutrition rather than overnight promises. Daily use of cold-pressed Marula oil (70–78% oleic acid, Vitamins C and E) and Baobab oil (Omegas 3, 6, and 9) softens crepey texture over a 90-day turnover cycle.",
   },
   {
     question: "Why is the 400ml Marula & Baobab Body Lotion priced at R400?",
     answer:
-      "You already invest R300 to R1,000 in facial serums because you refuse to put cheap fillers on your face. Your body faces the exact same UV, dry Highveld winters, and hard municipal water. At R400 for a generous 400ml bottle (R1.00 per ml), Divinity replaces ineffective R100 supermarket pumps with undiluted, facial-grade botanical nutrition you can use every day.",
+      "Many South African women spend R300 to R1,000 on facial serums while settling for R80 to R150 water-based supermarket pumps for the rest of their body. At R400 for 400ml (R1.00 per ml), Divinity delivers undiluted, facial-grade botanical nutrition built for daily full-body use.",
   },
   {
-    question: "How do I order and how much is nationwide delivery in South Africa?",
-    answer: `Order online at ${siteConfig.domain} via instant Paystack checkout (Visa, Mastercard, Capitec Pay, Ozow Instant EFT, Apple Pay) or through our personal WhatsApp Concierge. Door-to-door courier delivery is R100 nationwide across all 9 provinces, and completely FREE on orders over R500 (such as two 400ml bottles for your 90-day cycle).`,
+    question: "How do I order and how are courier delivery rates calculated in South Africa?",
+    answer: `Order online at ${siteConfig.domain} with Paystack (Visa, Mastercard, Capitec Pay, Ozow Instant EFT, Apple Pay) or via our WhatsApp Concierge. Door-to-door shipping across all 9 provinces is handled by The Courier Guy from Springs, Gauteng, with live rates calculated at checkout (economy from around R142 in 2–4 business days for main centres).`,
   },
 ];
 
@@ -47,7 +47,7 @@ export function FAQSection() {
             <em className="italic text-[#3d7b32]">unfiltered.</em>
           </h2>
           <div className="text-sm sm:text-[15px] leading-relaxed text-black/80 max-w-[34ch] mb-7">
-            The science behind cold-pressed African botanicals, 24-hour barrier protection, and nationwide delivery.
+            Cold-pressed African seed oils, 24-hour barrier protection, and nationwide South African delivery.
           </div>
           <Link
             href="/faq"

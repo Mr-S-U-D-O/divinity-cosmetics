@@ -198,20 +198,23 @@ export function Hero() {
       <div className="mx-auto my-auto hidden h-full max-h-[590px] min-h-0 w-full max-w-[1440px] lg:grid lg:grid-cols-[1.48fr_0.68fr_0.84fr] lg:items-stretch lg:gap-6 xl:grid-cols-[1.46fr_0.7fr_0.84fr] xl:gap-8">
         {/* LEFT COLUMN: Staggered Heading + 5-Circle Stack + 2 Bento Containers */}
         <div className="relative z-10 flex h-full min-h-0 min-w-0 flex-col justify-between gap-3.5 xl:gap-4">
-          <h1 className="hero-heading m-0 flex shrink-0 flex-col gap-3.5 xl:gap-4">
+          <div className="hero-heading m-0 flex shrink-0 flex-col gap-3.5 xl:gap-4">
             {/* Row 1: Heading Line 1 ("Natural") + Floating Headshot Avatars + Social Proof */}
-            <span className="flex items-center gap-2.5 xl:gap-3 flex-nowrap">
-              <span
+            <div className="flex items-center gap-2.5 xl:gap-3 flex-nowrap">
+              <h1
                 data-anime="hero-word-1"
-                className="font-chloe block shrink-0 text-[clamp(2.2rem,3.2vw,3.5rem)] leading-[0.95] font-normal tracking-tight text-black select-none will-change-transform"
+                className="font-chloe m-0 block shrink-0 text-[clamp(2.2rem,3.2vw,3.5rem)] leading-[0.95] font-normal tracking-tight text-black select-none will-change-transform"
               >
                 Natural
-              </span>
+                <span className="sr-only">
+                  {" "}Restoration — Divinity Cosmetics Facial-Grade Marula &amp; Baobab Body Lotion (400ml) for 24-Hour Barrier Repair in South Africa
+                </span>
+              </h1>
 
               {/* Floating Headshots Stack: Women aged 40-70, diverse skin tones */}
               <span
                 className="flex shrink-0 items-center -space-x-3 xl:-space-x-3.5"
-                aria-label="Community of 88+ women across South Africa"
+                aria-hidden="true"
               >
                 {communityAvatars.map((avatar, index) => (
                   <span
@@ -234,8 +237,9 @@ export function Hero() {
               </span>
 
               {/* Social Proof Micro-Copy: Proportionate, non-overlapping lockup */}
-              <div
+              <span
                 data-anime="hero-proof"
+                aria-hidden="true"
                 className="hero-social-proof flex flex-col justify-center min-w-0 pl-1.5 xl:pl-2 select-none will-change-transform"
               >
                 <span className="hero-social-proof-title whitespace-nowrap">
@@ -244,11 +248,11 @@ export function Hero() {
                 <span className="hero-social-proof-subtitle whitespace-nowrap mt-0.5">
                   Across South Africa
                 </span>
-              </div>
-            </span>
+              </span>
+            </div>
 
             {/* Row 2: Wide Inline Bento Container (Cream Texture) + Heading Line 2 ("Restoration") */}
-            <span className="grid grid-cols-[1fr_auto] items-center gap-3.5 xl:gap-5">
+            <div className="grid grid-cols-[1fr_auto] items-center gap-3.5 xl:gap-5">
               <span
                 data-anime="hero-swirl"
                 className="relative block h-[78px] w-full min-w-[130px] xl:h-[92px] rounded-2xl overflow-hidden border-2 border-black bg-[#2d5a27] shadow-sm origin-left will-change-transform"
@@ -256,7 +260,7 @@ export function Hero() {
                 <Image
                   data-anime="hero-swirl-img"
                   src="/images/hero-cream-swirl.webp"
-                  alt="Divinity restorative cream formula"
+                  alt="Rich botanical cream swirl texture of Divinity Cosmetics Marula and Baobab Body Lotion"
                   fill
                   sizes="(max-width: 1024px) 160px, 280px"
                   className="object-cover will-change-transform"
@@ -266,15 +270,13 @@ export function Hero() {
 
               <span
                 data-anime="hero-word-2"
+                aria-hidden="true"
                 className="font-chloe block shrink-0 text-[clamp(2.3rem,3.45vw,3.6rem)] leading-[0.95] font-normal tracking-tight text-black select-none will-change-transform"
               >
                 Restoration
               </span>
-              <span className="sr-only">
-                {" "}— Divinity Cosmetics Facial-Grade Marula &amp; Baobab Body Lotion (400ml) for 24-Hour Barrier Repair in South Africa
-              </span>
-            </span>
-          </h1>
+            </div>
+          </div>
 
           {/* Row 3: Left Column Bottom Section (Reduced ~65% Bento Container + ~35% Botanical Proofs) */}
           <div className="relative flex min-h-0 w-full flex-1 flex-col justify-between gap-3">
@@ -403,10 +405,9 @@ export function Hero() {
               Natural
             </span>
 
-            <div className="flex items-center gap-2 sm:gap-2.5">
+            <span className="flex items-center gap-2 sm:gap-2.5" aria-hidden="true">
               <span
                 className="flex shrink-0 items-center -space-x-2 sm:-space-x-2.5"
-                aria-label="Community of 88+ women across South Africa"
               >
                 {communityAvatars.map((avatar, index) => (
                   <span
@@ -426,7 +427,7 @@ export function Hero() {
                 ))}
               </span>
 
-              <div
+              <span
                 data-anime="hero-proof"
                 className="hero-social-proof flex flex-col justify-center min-w-0 pl-1 select-none will-change-transform"
               >
@@ -436,8 +437,8 @@ export function Hero() {
                 <span className="hero-social-proof-subtitle whitespace-nowrap mt-0.5">
                   Across South Africa
                 </span>
-              </div>
-            </div>
+              </span>
+            </span>
           </span>
 
           {/* Row 2: Inline Bento Container (Cream Texture) + "Restoration" */}
@@ -449,7 +450,7 @@ export function Hero() {
               <Image
                 data-anime="hero-swirl-img"
                 src="/images/hero-cream-swirl.webp"
-                alt="Divinity restorative cream formula"
+                alt="Rich botanical cream swirl texture of Divinity Cosmetics Marula and Baobab Body Lotion"
                 fill
                 sizes="160px"
                 className="object-cover will-change-transform"

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Minus,
@@ -90,11 +91,10 @@ export function AddToCart({ product }: { product: Product }) {
   };
 
   const lineTotal = product.basePrice * selectedQty;
-  const qualifiesFreeDelivery = lineTotal >= 500;
   const ingredientsList =
     product.ingredients && product.ingredients.length > 0
       ? product.ingredients.join(" · ")
-      : "10% Cold-Pressed Limpopo Marula Oil, 10% Wild-Harvested Baobab Seed Oil, Botanical Emulsifiers. 0% parabens, mineral oil, sulfates, or synthetic perfume.";
+      : "10% Cold-Pressed Limpopo Marula Oil, 10% Wild-Harvested Mpumalanga Baobab Seed Oil, Botanical Emulsifiers. 0% parabens, mineral oil, sulfates, or synthetic perfume.";
 
   const detailRows: { id: DetailSection; title: string; content: string }[] = [
     {
@@ -106,13 +106,13 @@ export function AddToCart({ product }: { product: Product }) {
       id: "ritual",
       title: "The 90-Day Barrier Ritual",
       content:
-        "Apply daily after showering. Dense, cold-pressed seed oils take 2–3 minutes to absorb steadily into the skin—forming a physical 24-hour moisture seal against dry Highveld air and hard tap water.",
+        "Apply daily within 3 minutes of a warm shower. Dense, cold-pressed seed oils take 2–3 minutes to sink in—forming a physical 24-hour moisture seal against dry Highveld air and hard tap water.",
     },
     {
       id: "delivery",
       title: "Shipping & Checkout",
       content:
-        "Door-to-door courier delivery nationwide via The Courier Guy in 2–4 business days. Orders over R500 ship free. Checkout securely via Paystack or WhatsApp.",
+        "Door-to-door courier delivery across all 9 provinces via The Courier Guy in 2–4 business days (3–5 days regional). Live rates are calculated at checkout (economy from around R142). Pay via Paystack or WhatsApp.",
     },
   ];
 
@@ -198,16 +198,11 @@ export function AddToCart({ product }: { product: Product }) {
         </div>
 
         {/* Single Quiet Delivery Cue */}
-        <p
-          className={`m-0 pt-1 text-xs ${
-            qualifiesFreeDelivery
-              ? "text-[#244e1d] font-medium"
-              : "text-black/75"
-          }`}
-        >
-          {qualifiesFreeDelivery
-            ? "Complimentary nationwide delivery unlocked."
-            : "Orders over R500 qualify for complimentary nationwide delivery."}
+        <p className="m-0 pt-1 text-xs text-black/75">
+          Door-to-door courier delivery via The Courier Guy calculated live at checkout (economy from ~R142).{" "}
+          <Link href="/shipping" className="underline underline-offset-4 hover:text-green">
+            Shipping details
+          </Link>
         </p>
       </div>
 
@@ -215,11 +210,13 @@ export function AddToCart({ product }: { product: Product }) {
       <div className="mt-8 border-t border-black">
         {detailRows.map((row) => {
           const isOpen = openSection === row.id;
+          const panelId = `pdp-detail-panel-${row.id}`;
           return (
             <div key={row.id} className="border-b border-black">
               <button
                 type="button"
                 aria-expanded={isOpen}
+                aria-controls={panelId}
                 onClick={() => toggleSection(row.id)}
                 className="w-full py-4 flex items-center justify-between gap-4 text-left cursor-pointer group"
               >
@@ -230,11 +227,14 @@ export function AddToCart({ product }: { product: Product }) {
                   {isOpen ? <Minus size={14} /> : <Plus size={14} />}
                 </span>
               </button>
-              {isOpen && (
-                <div className="pb-4 pr-6 text-[13px] leading-relaxed text-black/80">
-                  {row.content}
-                </div>
-              )}
+              {/* Always rendered (hidden when closed) so content is in SSR HTML. */}
+              <div
+                id={panelId}
+                hidden={!isOpen}
+                className="pb-4 pr-6 text-[13px] leading-relaxed text-black/80"
+              >
+                {row.content}
+              </div>
             </div>
           );
         })}
