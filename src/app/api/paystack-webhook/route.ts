@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPaystackWebhookSignature } from "@/lib/domain/payments/paystack";
-import { markOrderAsPaid, markOrderPaymentFailed, getOrderByNumber } from "@/lib/domain/orders/service";
+import {
+  markOrderPaymentFailed,
+  verifyAndSettleOrderPayment,
+} from "@/lib/domain/orders/service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,68 +24,69 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Parse incoming webhook payload
-    const event = JSON.parse(rawBody);
+    let event: {
+      event?: string;
+      data?: {
+        reference?: string;
+        status?: string;
+        amount?: number;
+        currency?: string;
+        channel?: string;
+        gateway_response?: string;
+        metadata?: {
+          orderNumber?: string;
+        };
+      };
+    };
+
+    try {
+      event = JSON.parse(rawBody);
+    } catch {
+      console.warn("[Paystack Webhook] Malformed JSON payload.");
+      return new NextResponse("Invalid JSON payload", { status: 400 });
+    }
+
     console.log(`[💳 PAYSTACK WEBHOOK] Authenticated HMAC-SHA512 event: ${event.event}`);
 
     // 4. Handle event types
     switch (event.event) {
       case "charge.success": {
         const data = event.data;
-        const reference = data?.reference;
-        const orderNumber = data?.metadata?.orderNumber || reference;
-        const status = data?.status;
+        const reference = typeof data?.reference === "string" ? data.reference.trim() : "";
+        const orderNumber =
+          typeof data?.metadata?.orderNumber === "string" &&
+          data.metadata.orderNumber.trim()
+            ? data.metadata.orderNumber.trim()
+            : reference;
+        const status = typeof data?.status === "string" ? data.status : "";
         const amountInCents = Number(data?.amount);
-        const amountInRands = amountInCents / 100;
-        const channel = data?.channel ? `Paystack (${data.channel.toUpperCase()})` : "Paystack";
+        const amountInRands = Number.isFinite(amountInCents) ? amountInCents / 100 : 0;
+        const currency = typeof data?.currency === "string" ? data.currency : "";
 
         console.log(`[💳 PAYSTACK WEBHOOK] Charge Success Received:`);
         console.log(`   ├─ Order: ${orderNumber}`);
         console.log(`   ├─ Reference: ${reference}`);
-        console.log(`   ├─ Amount: R${amountInRands.toFixed(2)} (${amountInCents} cents)`);
-        console.log(`   └─ Channel: ${channel}`);
+        console.log(`   ├─ Amount: R${amountInRands.toFixed(2)} (${amountInCents} cents ${currency || "UNKNOWN"})`);
+        console.log(`   └─ Channel: ${data?.channel || "Paystack"}`);
 
-        // Check if order exists in DB and strictly enforce expected order total & currency
-        const dbOrder = orderNumber
-          ? await getOrderByNumber(orderNumber).catch(() => null)
-          : null;
-        const paidCurrency = String(data?.currency || "ZAR").toUpperCase();
+        const settlement = await verifyAndSettleOrderPayment({
+          orderNumber,
+          paymentReference: reference,
+          status,
+          amountInCents,
+          currency,
+          channel: data?.channel,
+          gatewayResponse: data?.gateway_response,
+        });
 
-        let isAmountExact = false;
-        if (dbOrder) {
-          const expectedCents = Math.round(Number(dbOrder.total) * 100);
-          const expectedCurrency = (dbOrder.currency || "ZAR").toUpperCase();
-          isAmountExact =
-            paidCurrency === expectedCurrency && amountInCents >= expectedCents;
-        } else if (amountInCents === 40000 && paidCurrency === "ZAR") {
-          isAmountExact = true;
-        }
-
-        // Verification Logic: check that transaction was 'successful' and amount matched DB order total
-        if (status === "success" && isAmountExact) {
-          // Explicit requirement: log 'Payment Verified' to the console
+        if (settlement.settled) {
           console.log("Payment Verified");
-          console.log(`[Paystack Webhook] Payment Verified: R${amountInRands.toFixed(2)} received for Order ${orderNumber} (Reference: ${reference})`);
-
-          // Mark order as paid in the database if order exists
-          try {
-            if (dbOrder) {
-              await markOrderAsPaid(orderNumber, {
-                paymentId: reference,
-                paymentMethod: channel,
-              });
-              console.log(`[Paystack Webhook] Order ${orderNumber} marked as PAID. (Zoho Books/Inventory sync triggered via markOrderAsPaid).`);
-            } else {
-              console.log(`[Paystack Webhook] Standalone payment reference ${orderNumber} verified (no local DB order required).`);
-            }
-          } catch (dbErr) {
-            console.error(`[Paystack Webhook] Error updating order ${orderNumber} in database:`, dbErr);
-          }
+          console.log(
+            `[Paystack Webhook] Payment Verified: R${amountInRands.toFixed(2)} received for Order ${settlement.orderNumber} (Reference: ${reference}${settlement.alreadyPaid ? ", already paid" : ""})`
+          );
         } else {
-          const expectedInfo = dbOrder
-            ? `${Math.round(Number(dbOrder.total) * 100)} cents (${dbOrder.currency || "ZAR"})`
-            : "40000 cents / R400";
           console.warn(
-            `[Paystack Webhook] Verification condition not met: status=${status}, amountInCents=${amountInCents}, currency=${paidCurrency} (Expected ${expectedInfo})`
+            `[Paystack Webhook] Settlement rejected (${settlement.code}): ${settlement.reason}`
           );
         }
 
@@ -91,15 +95,21 @@ export async function POST(req: NextRequest) {
 
       case "charge.failed": {
         const data = event.data;
-        const reference = data?.reference;
-        const orderNumber = data?.metadata?.orderNumber || reference;
+        const reference = typeof data?.reference === "string" ? data.reference.trim() : "";
+        const orderNumber =
+          typeof data?.metadata?.orderNumber === "string" &&
+          data.metadata.orderNumber.trim()
+            ? data.metadata.orderNumber.trim()
+            : reference;
         const reason = data?.gateway_response || "Payment failed";
 
-        console.log(`[Paystack Webhook] Processing failed charge for order: ${orderNumber}`);
-        try {
-          await markOrderPaymentFailed(orderNumber, reason);
-        } catch (dbErr) {
-          console.error(`[Paystack Webhook] Failed to record payment failure for ${orderNumber}:`, dbErr);
+        if (orderNumber) {
+          console.log(`[Paystack Webhook] Processing failed charge for order: ${orderNumber}`);
+          try {
+            await markOrderPaymentFailed(orderNumber, reason);
+          } catch (dbErr) {
+            console.error(`[Paystack Webhook] Failed to record payment failure for ${orderNumber}:`, dbErr);
+          }
         }
         break;
       }

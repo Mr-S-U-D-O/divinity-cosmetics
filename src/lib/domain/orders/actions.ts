@@ -7,8 +7,8 @@ import {
   createOrder,
   getOrderByNumber,
   updateOrderStatus,
-  markOrderAsPaid,
   markOrderPaymentFailed,
+  verifyAndSettleOrderPayment,
 } from "./service";
 import { OrderStatus } from "@prisma/client";
 import {
@@ -185,58 +185,58 @@ export async function initiateCheckoutWithPaystackAction(
  */
 export async function verifyPaymentAction(reference: string) {
   try {
-    if (!reference) {
+    const cleanReference = typeof reference === "string" ? reference.trim() : "";
+    if (!cleanReference) {
       return { success: false, error: "No transaction reference provided." };
     }
 
-    const existingOrder = await getOrderByNumber(reference.trim());
+    const existingOrder = await getOrderByNumber(cleanReference);
     if (!existingOrder) {
       return { success: false, error: "Order not found for payment reference." };
     }
 
-    const verification = await verifyPaystackTransaction(reference);
+    const verification = await verifyPaystackTransaction(cleanReference);
+    const metaOrderNumber =
+      typeof verification.metadata?.orderNumber === "string" &&
+      verification.metadata.orderNumber.trim()
+        ? verification.metadata.orderNumber.trim()
+        : existingOrder.orderNumber;
 
-    if (verification.isSuccessful) {
-      const expectedCents = Math.round(Number(existingOrder.total) * 100);
-      const expectedCurrency = (existingOrder.currency || "ZAR").toUpperCase();
-      const paidCurrency = (verification.currency || "ZAR").toUpperCase();
-      const paidCents = Math.round(Number(verification.amountInCents));
+    const settlement = await verifyAndSettleOrderPayment({
+      orderNumber: metaOrderNumber,
+      paymentReference: verification.reference || cleanReference,
+      status: verification.isSuccessful ? "success" : verification.status,
+      amountInCents: verification.amountInCents,
+      currency: verification.currency,
+      channel: verification.channel,
+      gatewayResponse: verification.gatewayResponse,
+    });
 
-      if (paidCurrency !== expectedCurrency || paidCents < expectedCents) {
-        const reason = `Payment mismatch: expected ${expectedCurrency} ${expectedCents} cents, received ${paidCurrency} ${paidCents} cents.`;
-        console.error(`[💳 PAYSTACK VERIFY SECURITY] ${reason} (Order ${existingOrder.orderNumber})`);
-        await markOrderPaymentFailed(existingOrder.orderNumber, reason);
-        return {
-          success: false,
-          error: "Payment amount did not match the order total. Please contact support.",
-        };
-      }
-
-      const order = await markOrderAsPaid(existingOrder.orderNumber, {
-        paymentId: verification.reference,
-        paymentMethod: verification.channel
-          ? `Paystack (${verification.channel.toUpperCase()})`
-          : "Paystack",
-      });
-
+    if (settlement.settled) {
       return {
         success: true,
-        orderNumber: order.orderNumber,
-        orderId: order.id,
-      };
-    } else {
-      await markOrderPaymentFailed(
-        reference,
-        verification.gatewayResponse || verification.status
-      );
-
-      return {
-        success: false,
-        error:
-          verification.gatewayResponse ||
-          "Payment could not be verified or was cancelled.",
+        orderNumber: settlement.orderNumber,
+        orderId: settlement.orderId,
       };
     }
+
+    if (
+      settlement.code === "AMOUNT_MISMATCH" ||
+      settlement.code === "CURRENCY_MISMATCH" ||
+      settlement.code === "REFERENCE_MISMATCH"
+    ) {
+      return {
+        success: false,
+        error: "Payment amount did not match the order total. Please contact support.",
+      };
+    }
+
+    return {
+      success: false,
+      error:
+        verification.gatewayResponse ||
+        "Payment could not be verified or was cancelled.",
+    };
   } catch (error: unknown) {
     console.error("Error in verifyPaymentAction:", error);
     return {

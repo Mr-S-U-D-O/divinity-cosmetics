@@ -343,25 +343,39 @@ export async function markOrderAsPaid(
   console.log(`[💳 PAYMENT VERIFIED] Processing paid order: ${orderNumber} (Ref: ${paymentDetails.paymentId})`);
 
   const paidOrder = await prisma.$transaction(async (tx) => {
-    const existingOrder = await tx.order.findUnique({
+    // Atomic conditional claim prevents double stock deduction / double Zoho sync
+    // if webhook and /checkout/verify execute concurrently under READ COMMITTED.
+    const claim = await tx.order.updateMany({
+      where: {
+        orderNumber,
+        paymentStatus: { not: "PAID" },
+      },
+      data: {
+        paymentStatus: "PAID",
+        status: "PROCESSING",
+        paymentId: paymentDetails.paymentId,
+        paymentMethod: paymentDetails.paymentMethod || "Paystack",
+      },
+    });
+
+    const order = await tx.order.findUnique({
       where: { orderNumber },
       include: { items: true },
     });
 
-    if (!existingOrder) {
+    if (!order) {
       throw new Error(`Order with number ${orderNumber} not found.`);
     }
 
-    // Idempotency: if already paid, return early
-    if (existingOrder.paymentStatus === "PAID") {
+    if (claim.count === 0) {
       console.log(`[💳 PAYMENT IDEMPOTENCY] Order ${orderNumber} is already PAID. Skipping duplicate processing.`);
       wasAlreadyPaid = true;
-      return existingOrder;
+      return order;
     }
 
-    // Safely decrement inventory stock for tracked products
-    console.log(`[💾 DATABASE] Deducting inventory stock for ${existingOrder.items.length} items...`);
-    for (const item of existingOrder.items) {
+    // Safely decrement inventory stock for tracked products (executed exactly once)
+    console.log(`[💾 DATABASE] Deducting inventory stock for ${order.items.length} items...`);
+    for (const item of order.items) {
       const product = await tx.product.findUnique({
         where: { id: item.productId },
         select: { id: true, name: true, trackInventory: true, stock: true },
@@ -381,21 +395,8 @@ export async function markOrderAsPaid(
       }
     }
 
-    const updated = await tx.order.update({
-      where: { orderNumber },
-      data: {
-        paymentStatus: "PAID",
-        status: "PROCESSING",
-        paymentId: paymentDetails.paymentId,
-        paymentMethod: paymentDetails.paymentMethod || "Paystack",
-      },
-      include: {
-        items: true,
-      },
-    });
-
     console.log(`[💾 DATABASE] Order ${orderNumber} transitioned to PAID / PROCESSING.`);
-    return updated;
+    return order;
   });
 
   // Phase 1 Automation: Push verified paid order to Zoho Books & Zoho Inventory
@@ -414,6 +415,187 @@ export async function markOrderAsPaid(
   }
 
   return paidOrder;
+}
+
+export interface SettlementAmountCheckInput {
+  orderTotal: number | Prisma.Decimal;
+  orderCurrency?: string | null;
+  paidAmountInCents: number;
+  paidCurrency?: string | null;
+}
+
+export type SettlementAmountCheckResult =
+  | { valid: true; expectedCents: number; expectedCurrency: string }
+  | {
+      valid: false;
+      code: "CURRENCY_MISMATCH" | "AMOUNT_MISMATCH";
+      reason: string;
+    };
+
+/**
+ * Pure validator enforcing exact integer-cent equality (orderTotal * 100 === paidAmountInCents)
+ * and explicit currency equality with zero fallback defaults on the gateway payload.
+ */
+export function validateOrderSettlementAmount(
+  input: SettlementAmountCheckInput
+): SettlementAmountCheckResult {
+  const expectedCurrency = (input.orderCurrency || "ZAR").trim().toUpperCase();
+  const paidCurrency =
+    typeof input.paidCurrency === "string"
+      ? input.paidCurrency.trim().toUpperCase()
+      : "";
+
+  if (!paidCurrency || paidCurrency !== expectedCurrency) {
+    return {
+      valid: false,
+      code: "CURRENCY_MISMATCH",
+      reason: `Currency mismatch: expected ${expectedCurrency}, received ${paidCurrency || "MISSING"}.`,
+    };
+  }
+
+  const expectedCents = Math.round(Number(input.orderTotal) * 100);
+  const paidCents = Number(input.paidAmountInCents);
+
+  if (
+    !Number.isInteger(expectedCents) ||
+    expectedCents <= 0 ||
+    !Number.isInteger(paidCents) ||
+    paidCents !== expectedCents
+  ) {
+    return {
+      valid: false,
+      code: "AMOUNT_MISMATCH",
+      reason: `Amount mismatch: expected exactly ${expectedCents} cents (${expectedCurrency}), received ${paidCents} cents (${paidCurrency}).`,
+    };
+  }
+
+  return { valid: true, expectedCents, expectedCurrency };
+}
+
+export interface VerifyAndSettlePaymentInput {
+  orderNumber: string;
+  paymentReference: string;
+  status: string;
+  amountInCents: number;
+  currency?: string | null;
+  channel?: string | null;
+  gatewayResponse?: string | null;
+}
+
+export type VerifyAndSettlePaymentResult =
+  | {
+      settled: true;
+      alreadyPaid: boolean;
+      orderNumber: string;
+      orderId: string;
+    }
+  | {
+      settled: false;
+      code:
+        | "INVALID_INPUT"
+        | "ORDER_NOT_FOUND"
+        | "REFERENCE_MISMATCH"
+        | "PAYMENT_FAILED"
+        | "CURRENCY_MISMATCH"
+        | "AMOUNT_MISMATCH";
+      reason: string;
+    };
+
+/**
+ * Canonical payment settlement gate shared by both the Paystack webhook and
+ * verifyPaymentAction. Guarantees exact integer-cent and ZAR currency matching.
+ */
+export async function verifyAndSettleOrderPayment(
+  input: VerifyAndSettlePaymentInput
+): Promise<VerifyAndSettlePaymentResult> {
+  const cleanOrderNumber =
+    typeof input.orderNumber === "string" ? input.orderNumber.trim() : "";
+  const cleanReference =
+    typeof input.paymentReference === "string"
+      ? input.paymentReference.trim()
+      : "";
+
+  if (!cleanOrderNumber || !cleanReference) {
+    return {
+      settled: false,
+      code: "INVALID_INPUT",
+      reason: "Missing order number or Paystack payment reference.",
+    };
+  }
+
+  const existingOrder = await prisma.order.findUnique({
+    where: { orderNumber: cleanOrderNumber },
+  });
+
+  if (!existingOrder) {
+    return {
+      settled: false,
+      code: "ORDER_NOT_FOUND",
+      reason: `No order found for orderNumber=${cleanOrderNumber}.`,
+    };
+  }
+
+  if (cleanReference !== existingOrder.orderNumber) {
+    const reason = `Payment reference mismatch: expected ${existingOrder.orderNumber}, received ${cleanReference}.`;
+    await markOrderPaymentFailed(existingOrder.orderNumber, reason);
+    return {
+      settled: false,
+      code: "REFERENCE_MISMATCH",
+      reason,
+    };
+  }
+
+  if (input.status !== "success") {
+    const reason = input.gatewayResponse || `Paystack status was "${input.status}".`;
+    await markOrderPaymentFailed(existingOrder.orderNumber, reason);
+    return {
+      settled: false,
+      code: "PAYMENT_FAILED",
+      reason,
+    };
+  }
+
+  const amountCheck = validateOrderSettlementAmount({
+    orderTotal: existingOrder.total,
+    orderCurrency: existingOrder.currency,
+    paidAmountInCents: input.amountInCents,
+    paidCurrency: input.currency,
+  });
+
+  if (!amountCheck.valid) {
+    console.error(
+      `[💳 PAYSTACK SETTLEMENT SECURITY] ${amountCheck.reason} (Order ${existingOrder.orderNumber}, Ref ${cleanReference})`
+    );
+    await markOrderPaymentFailed(existingOrder.orderNumber, amountCheck.reason);
+    return {
+      settled: false,
+      code: amountCheck.code,
+      reason: amountCheck.reason,
+    };
+  }
+
+  if (existingOrder.paymentStatus === "PAID") {
+    return {
+      settled: true,
+      alreadyPaid: true,
+      orderNumber: existingOrder.orderNumber,
+      orderId: existingOrder.id,
+    };
+  }
+
+  const paidOrder = await markOrderAsPaid(existingOrder.orderNumber, {
+    paymentId: cleanReference,
+    paymentMethod: input.channel
+      ? `Paystack (${input.channel.toUpperCase()})`
+      : "Paystack",
+  });
+
+  return {
+    settled: true,
+    alreadyPaid: false,
+    orderNumber: paidOrder.orderNumber,
+    orderId: paidOrder.id,
+  };
 }
 
 
