@@ -223,36 +223,90 @@ function SuccessContent() {
   const { user } = useUser();
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("order") || "";
+  const urlReceiptToken = searchParams.get("token") || "";
 
   const [order, setOrder] = useState<OrderData | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(orderNumber));
   const [copied, setCopied] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [manualOrderInput, setManualOrderInput] = useState(orderNumber);
+  const [verifyEmail, setVerifyEmail] = useState("");
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [receiptToken] = useState(() => urlReceiptToken);
 
   useEffect(() => {
     if (!orderNumber) {
-      setIsLoading(false);
       return;
     }
 
     let isMounted = true;
-    getOrderDetailsAction(orderNumber)
+    getOrderDetailsAction(orderNumber, {
+      receiptToken: receiptToken || undefined,
+    })
       .then((res) => {
-        if (isMounted) {
-          if (res.success && res.order) {
-            setOrder(res.order as OrderData);
+        if (!isMounted) return;
+        if (res.success && res.order) {
+          setOrder(res.order as OrderData);
+          setAuthError(null);
+          if (
+            typeof window !== "undefined" &&
+            window.location.search.includes("token=")
+          ) {
+            window.history.replaceState(
+              null,
+              "",
+              `/checkout/success?order=${encodeURIComponent(orderNumber)}`
+            );
           }
-          setIsLoading(false);
+        } else {
+          setOrder(null);
+          setAuthError(
+            res.error ||
+              "Please enter the email address used at checkout (or sign in) to view this order receipt."
+          );
         }
+        setIsLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load order receipt:", err);
-        if (isMounted) setIsLoading(false);
+        if (isMounted) {
+          setAuthError("Unable to verify receipt access right now. Please try again.");
+          setIsLoading(false);
+        }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [orderNumber]);
+  }, [orderNumber, receiptToken]);
+
+  const handleGuestEmailUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetOrder = (orderNumber || manualOrderInput).trim();
+    const cleanEmail = verifyEmail.trim();
+    if (!targetOrder || !cleanEmail) return;
+
+    setIsVerifyingEmail(true);
+    setAuthError(null);
+    try {
+      const res = await getOrderDetailsAction(targetOrder, {
+        receiptToken: receiptToken || undefined,
+        email: cleanEmail,
+      });
+      if (res.success && res.order) {
+        setOrder(res.order as OrderData);
+      } else {
+        setAuthError(
+          res.error ||
+            "We could not verify that email address for this order. Please double-check and try again."
+        );
+      }
+    } catch {
+      setAuthError("Unable to verify your receipt right now. Please try again.");
+    } finally {
+      setIsVerifyingEmail(false);
+    }
+  };
 
   const handleCopyOrder = () => {
     const textToCopy = order?.orderNumber || orderNumber;
@@ -269,12 +323,94 @@ function SuccessContent() {
     }
   };
 
-  const customerName = order?.firstName || user?.firstName || "there";
-  const displayOrderNumber = order?.orderNumber || orderNumber;
-
   if (isLoading) {
     return <OrderSuccessSkeleton />;
   }
+
+  if (!order) {
+    return (
+      <div className="max-w-lg w-full mx-auto bg-white border border-black rounded-3xl p-7 sm:p-10 shadow-sm space-y-6">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 text-green border border-black mx-auto">
+            <ShieldCheck size={28} weight="bold" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 tracking-tight">
+            Verify Your Order Receipt
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+            To protect your personal delivery details, please enter the email address used at checkout or sign in to your account.
+          </p>
+        </div>
+
+        <form onSubmit={handleGuestEmailUnlock} className="space-y-4">
+          {!orderNumber && (
+            <div className="space-y-1.5">
+              <label
+                htmlFor="receipt-order-number"
+                className="block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-700"
+              >
+                Order Reference
+              </label>
+              <input
+                id="receipt-order-number"
+                type="text"
+                required
+                value={manualOrderInput}
+                onChange={(e) => setManualOrderInput(e.target.value)}
+                placeholder="e.g. DIV-20261125-A3F9C102"
+                className="w-full h-11 rounded-full border border-black bg-[#faf9f6] px-4 text-sm text-black outline-none focus:border-green"
+              />
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label
+              htmlFor="receipt-checkout-email"
+              className="block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-700"
+            >
+              Checkout Email Address
+            </label>
+            <input
+              id="receipt-checkout-email"
+              type="email"
+              required
+              value={verifyEmail}
+              onChange={(e) => setVerifyEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full h-11 rounded-full border border-black bg-[#faf9f6] px-4 text-sm text-black outline-none focus:border-green"
+            />
+          </div>
+
+          {authError && (
+            <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded-2xl px-4 py-2.5">
+              {authError}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isVerifyingEmail}
+            className="btn-primary w-full justify-center"
+          >
+            {isVerifyingEmail ? "Verifying..." : "View Order Receipt"}
+          </button>
+        </form>
+
+        <div className="pt-4 border-t border-black/15 flex flex-wrap items-center justify-center gap-3 text-xs">
+          <Link href="/sign-in" className="font-semibold text-black underline underline-offset-4 hover:text-green">
+            Sign in with Clerk
+          </Link>
+          <span className="text-stone-300">•</span>
+          <Link href="/order-status" className="font-semibold text-black underline underline-offset-4 hover:text-green">
+            Track an Order
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const customerName = order.firstName || user?.firstName || "there";
+  const displayOrderNumber = order.orderNumber || orderNumber;
 
   return (
     <div className="max-w-5xl w-full mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">

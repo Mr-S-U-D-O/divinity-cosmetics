@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { Prisma, OrderStatus } from "@prisma/client";
 import { syncPaidOrderToZoho } from "@/lib/domain/zoho/service";
@@ -221,10 +222,10 @@ export async function createOrder(data: CreateOrderInput) {
     serverSubtotal + serverShippingCost - serverDiscountAmount
   );
 
-  // 7. Generate a unique order number: DIV-YYYYMMDD-XXXX
+  // 7. Generate a high-entropy unique order number: DIV-YYYYMMDD-XXXXXXXX
   const date = new Date();
   const datePart = date.toISOString().slice(0, 10).replace(/-/g, "");
-  const randomPart = Math.floor(1000 + Math.random() * 9000);
+  const randomPart = crypto.randomBytes(4).toString("hex").toUpperCase();
   const orderNumber = `DIV-${datePart}-${randomPart}`;
 
   console.log(`[💾 DATABASE] Initializing new order: ${orderNumber}`);

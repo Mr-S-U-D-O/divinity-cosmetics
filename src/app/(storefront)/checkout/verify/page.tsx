@@ -67,9 +67,13 @@ function VerifyContent() {
           setStatus("success");
           clearCart();
 
+          const successUrl = result.receiptToken
+            ? `/checkout/success?order=${encodeURIComponent(result.orderNumber)}&token=${encodeURIComponent(result.receiptToken)}`
+            : `/checkout/success?order=${encodeURIComponent(result.orderNumber)}`;
+
           // Smoothly redirect to the success receipt page
           setTimeout(() => {
-            router.push(`/checkout/success?order=${result.orderNumber}`);
+            router.push(successUrl);
           }, 1500);
         } else {
           setStatus("failed");

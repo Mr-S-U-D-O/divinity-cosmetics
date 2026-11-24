@@ -1,16 +1,19 @@
 "use server"
 
-import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import {
   createOrder,
   getOrderByNumber,
-  updateOrderStatus,
-  markOrderPaymentFailed,
   verifyAndSettleOrderPayment,
 } from "./service";
-import { OrderStatus } from "@prisma/client";
+import {
+  RECEIPT_COOKIE_NAME,
+  RECEIPT_TOKEN_TTL_SECONDS,
+  signOrderReceiptToken,
+  verifyOrderReceiptToken,
+} from "./receipt-token";
 import {
   initializePaystackTransaction,
   verifyPaystackTransaction,
@@ -213,10 +216,26 @@ export async function verifyPaymentAction(reference: string) {
     });
 
     if (settlement.settled) {
+      const receiptToken = signOrderReceiptToken(settlement.orderNumber);
+
+      try {
+        const cookieStore = await cookies();
+        cookieStore.set(RECEIPT_COOKIE_NAME, receiptToken, {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+          maxAge: RECEIPT_TOKEN_TTL_SECONDS,
+        });
+      } catch {
+        // Fallback to returning receiptToken for URL handoff if cookie mutation is unavailable
+      }
+
       return {
         success: true,
         orderNumber: settlement.orderNumber,
         orderId: settlement.orderId,
+        receiptToken,
       };
     }
 
@@ -249,32 +268,90 @@ export async function verifyPaymentAction(reference: string) {
   }
 }
 
-export async function updateOrderStatusAction(id: string, status: OrderStatus) {
+async function isClerkUserAuthorizedForOrder(order: {
+  userId: string | null;
+  email: string;
+}): Promise<boolean> {
   try {
-    await updateOrderStatus(id, status);
+    const clerkUser = await currentUser();
+    if (!clerkUser) return false;
 
-    // TODO [ZOHO INTEGRATION - Zoho Inventory / Zoho Desk]:
-    // Order status changes and shipping dispatch will be handled via Zoho Inventory webhooks.
+    if (order.userId && order.userId === clerkUser.id) {
+      return true;
+    }
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    return { success: false, error: "Failed to update status." };
+    const clerkEmails = clerkUser.emailAddresses.map((e) =>
+      e.emailAddress.trim().toLowerCase()
+    );
+    return clerkEmails.includes(order.email.trim().toLowerCase());
+  } catch {
+    return false;
   }
 }
 
+export interface OrderReceiptAuthOptions {
+  receiptToken?: string;
+  email?: string;
+}
+
 /**
- * Retrieves public, verified receipt details for an order by order number.
+ * Retrieves verified receipt details for a PAID order.
+ * Enforces POPIA privacy protection by requiring EITHER:
+ *  - A matching signed-in Clerk user (`userId` or verified email), OR
+ *  - A valid HMAC-signed receipt token (via HttpOnly cookie or redirect handoff), OR
+ *  - A matching checkout email address (for returning guests).
  */
-export async function getOrderDetailsAction(orderNumber: string) {
+export async function getOrderDetailsAction(
+  orderNumber: string,
+  authOptions?: OrderReceiptAuthOptions
+) {
   try {
-    if (!orderNumber) {
-      return { success: false, error: "Order number is required." };
+    const cleanOrderNumber = (orderNumber || "").trim();
+    if (!cleanOrderNumber) {
+      return {
+        success: false,
+        requiresVerification: true,
+        error: "Order number is required.",
+      };
     }
 
-    const order = await getOrderByNumber(orderNumber.trim());
-    if (!order) {
-      return { success: false, error: "Order not found." };
+    const order = await getOrderByNumber(cleanOrderNumber);
+
+    let cookieToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      cookieToken = cookieStore.get(RECEIPT_COOKIE_NAME)?.value;
+    } catch {
+      cookieToken = undefined;
+    }
+
+    const cleanEmail = (authOptions?.email || "").trim().toLowerCase();
+
+    let authorized = false;
+    if (order && order.paymentStatus === "PAID") {
+      if (await isClerkUserAuthorizedForOrder(order)) {
+        authorized = true;
+      } else if (
+        verifyOrderReceiptToken(authOptions?.receiptToken, order.orderNumber) ||
+        verifyOrderReceiptToken(cookieToken, order.orderNumber)
+      ) {
+        authorized = true;
+      } else if (
+        cleanEmail.length > 0 &&
+        order.email.trim().toLowerCase() === cleanEmail
+      ) {
+        authorized = true;
+      }
+    }
+
+    if (!order || order.paymentStatus !== "PAID" || !authorized) {
+      // Uniform error message prevents order-number existence enumeration
+      return {
+        success: false,
+        requiresVerification: true,
+        error:
+          "Please enter the email address used at checkout (or sign in) to view this order receipt.",
+      };
     }
 
     return {
@@ -398,23 +475,7 @@ export async function lookupOrderTrackingAction(
     }
 
     // Check Clerk ownership first
-    let authorizedByClerk = false;
-    try {
-      const clerkUser = await currentUser();
-      if (clerkUser) {
-        const clerkEmails = clerkUser.emailAddresses.map((e) =>
-          e.emailAddress.trim().toLowerCase()
-        );
-        if (
-          (order.userId && order.userId === clerkUser.id) ||
-          clerkEmails.includes(order.email.trim().toLowerCase())
-        ) {
-          authorizedByClerk = true;
-        }
-      }
-    } catch {
-      // Guest lookup continues with email verification
-    }
+    const authorizedByClerk = await isClerkUserAuthorizedForOrder(order);
 
     if (!authorizedByClerk) {
       if (!cleanEmail) {
