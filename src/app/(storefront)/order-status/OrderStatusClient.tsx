@@ -231,6 +231,7 @@ export function OrderStatusClient() {
               id="track-order-number"
               type="text"
               required
+              maxLength={40}
               value={orderInput}
               onChange={(e) => setOrderInput(e.target.value)}
               placeholder="e.g. DIV-20261120-7959"
@@ -248,6 +249,7 @@ export function OrderStatusClient() {
             <input
               id="track-order-email"
               type="email"
+              maxLength={160}
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               placeholder="you@example.com"

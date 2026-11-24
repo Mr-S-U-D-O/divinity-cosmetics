@@ -355,6 +355,7 @@ function SuccessContent() {
                 id="receipt-order-number"
                 type="text"
                 required
+                maxLength={40}
                 value={manualOrderInput}
                 onChange={(e) => setManualOrderInput(e.target.value)}
                 placeholder="e.g. DIV-20261125-A3F9C102"
@@ -374,6 +375,7 @@ function SuccessContent() {
               id="receipt-checkout-email"
               type="email"
               required
+              maxLength={160}
               value={verifyEmail}
               onChange={(e) => setVerifyEmail(e.target.value)}
               placeholder="you@example.com"

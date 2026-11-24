@@ -123,9 +123,26 @@ function mergeAndSortTrackingEvents(
  */
 export async function POST(req: NextRequest) {
   try {
-    // 1. Optional shared secret verification if SHIPLOGIC_WEBHOOK_SECRET is configured
+    // 1. Mandatory shared secret verification (fail closed in production or live mode)
     const expectedSecret = process.env.SHIPLOGIC_WEBHOOK_SECRET?.trim();
-    if (expectedSecret) {
+    const requireSecret =
+      process.env.NODE_ENV === "production" ||
+      Boolean(process.env.COURIER_GUY_API_KEY?.trim());
+
+    if (!expectedSecret) {
+      if (requireSecret) {
+        console.error(
+          "[Shiplogic Webhook] SHIPLOGIC_WEBHOOK_SECRET is not configured. Rejecting request."
+        );
+        return NextResponse.json(
+          { status: "unauthorized", message: "Webhook secret is not configured." },
+          { status: 401 }
+        );
+      }
+      console.warn(
+        "[Shiplogic Webhook] SHIPLOGIC_WEBHOOK_SECRET not set in local dev; allowing local test request."
+      );
+    } else {
       const provided =
         req.headers.get("x-shiplogic-secret")?.trim() ||
         req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() ||

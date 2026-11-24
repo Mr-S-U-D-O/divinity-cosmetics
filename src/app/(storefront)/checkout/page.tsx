@@ -38,6 +38,7 @@ export default function CheckoutPage() {
     province: "Gauteng",
     postalCode: "",
     notes: "",
+    website: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,6 +196,7 @@ export default function CheckoutPage() {
         shippingServiceCode: selectedOption.code,
         shippingQuoteToken: selectedOption.quoteToken,
         customerNotes: formData.notes.trim() || undefined,
+        website: formData.website,
         items: items.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -380,6 +382,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        maxLength={80}
                         type="text"
                         placeholder="e.g. Naledi"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -395,6 +398,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        maxLength={80}
                         type="text"
                         placeholder="e.g. Dlamini"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -410,6 +414,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        maxLength={160}
                         type="email"
                         placeholder="e.g. naledi@example.com"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -425,6 +430,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
+                        maxLength={30}
                         type="tel"
                         placeholder="e.g. 082 123 4567"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -455,6 +461,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="streetAddress"
                         value={formData.streetAddress}
                         onChange={handleChange}
+                        maxLength={200}
                         type="text"
                         placeholder="Building / Complex, Unit Number, Street Name"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -470,6 +477,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="suburb"
                         value={formData.suburb}
                         onChange={handleChange}
+                        maxLength={100}
                         type="text"
                         placeholder="e.g. Sandton / Rosebank"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -485,6 +493,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
+                        maxLength={100}
                         type="text"
                         placeholder="e.g. Johannesburg / Durban"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -523,6 +532,7 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                         name="postalCode"
                         value={formData.postalCode}
                         onChange={handleChange}
+                        maxLength={16}
                         type="text"
                         placeholder="e.g. 2196"
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
@@ -536,10 +546,25 @@ Hi Divinity Team! I would like to complete this order via EFT or direct assistan
                       <textarea
                         name="notes"
                         rows={2}
+                        maxLength={500}
                         value={formData.notes}
                         onChange={handleChange}
                         placeholder="Gate code, reception drop-off instructions, or custom requests..."
                         className="w-full border-2 border-black p-3 rounded-xl bg-gray-50/50 text-xs font-medium focus:outline-none focus:border-green focus:bg-white transition-all"
+                      />
+                    </div>
+
+                    {/* Hidden spam-trap honeypot */}
+                    <div className="hidden" aria-hidden="true">
+                      <label htmlFor="checkout-website">Website</label>
+                      <input
+                        id="checkout-website"
+                        type="text"
+                        name="website"
+                        value={formData.website}
+                        onChange={handleChange}
+                        tabIndex={-1}
+                        autoComplete="off"
                       />
                     </div>
                   </div>

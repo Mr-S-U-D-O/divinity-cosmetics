@@ -12,6 +12,22 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://clerk.shopdivinitycosmetics.co.za https://challenges.cloudflare.com https://js.paystack.co",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://*.clerk.com https://*.clerk.accounts.dev",
+      "font-src 'self' data:",
+      "media-src 'self'",
+      "connect-src 'self' https://*.clerk.accounts.dev https://clerk.shopdivinitycosmetics.co.za https://api.clerk.com https://challenges.cloudflare.com https://api.paystack.co",
+      "frame-src 'self' https://*.clerk.accounts.dev https://clerk.shopdivinitycosmetics.co.za https://challenges.cloudflare.com https://checkout.paystack.com",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://checkout.paystack.com",
+      "frame-ancestors 'self'",
+    ].join("; ");
+
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -19,6 +35,14 @@ const nextConfig: NextConfig = {
       {
         key: "Permissions-Policy",
         value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=31536000; includeSubDomains",
+      },
+      {
+        key: "Content-Security-Policy",
+        value: cspDirectives,
       },
     ];
 

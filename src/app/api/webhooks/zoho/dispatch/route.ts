@@ -3,6 +3,7 @@ import { timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { createCourierGuyShipment } from "@/lib/domain/shipping/courierguy";
 import { sendCustomerDispatchNotification } from "@/lib/domain/shipping/notifications";
+import { signWaybillLabelToken } from "@/lib/domain/shipping/label-token";
 import { postZohoSalesOrderComment } from "@/lib/domain/zoho/service";
 import { siteConfig } from "@/lib/config/site";
 
@@ -220,14 +221,15 @@ export async function POST(req: NextRequest) {
 
     console.log(`[💾 DATABASE] Order ${order.orderNumber} updated: status=SHIPPED, waybill=${waybillNumber}`);
 
-    // 8. Zoho Write-Back: Post Waybill & On-Demand A4 Print Link Comment onto the Zoho Sales Order
+    // 8. Zoho Write-Back: Post Waybill & Scoped Per-Order A4 Print Link Comment onto the Zoho Sales Order
     // Wrapped in try/catch so a Zoho comment failure never rolls back or fails the booked waybill.
     const baseSiteUrl = (
       process.env.NEXT_PUBLIC_APP_URL?.trim() || siteConfig.url
     ).replace(/\/+$/, "");
+    const labelToken = signWaybillLabelToken(order.orderNumber);
     const printableLabelUrl = `${baseSiteUrl}/api/shipping/label/${encodeURIComponent(
       order.orderNumber
-    )}?token=${encodeURIComponent(webhookSecret)}`;
+    )}?token=${encodeURIComponent(labelToken)}`;
 
     const targetZohoSalesOrderId =
       updatedOrder.zohoSalesOrderId || rawSalesOrderId || null;

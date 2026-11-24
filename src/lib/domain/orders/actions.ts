@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import {
   createOrder,
@@ -21,13 +22,67 @@ import {
 import { fetchShiplogicRates, ShippingRateOption, GetRatesParams } from "@/lib/domain/shipping/rates";
 import { computeParcelWeightKg } from "@/lib/domain/shipping/quote";
 import { fetchZohoItemStock } from "@/lib/domain/zoho/service";
+import {
+  checkRateLimit,
+  getClientIpFromHeaders,
+} from "@/lib/security/rate-limit";
+
+const checkoutInputSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address.").max(160),
+  firstName: z.string().trim().min(1, "First name is required.").max(80),
+  lastName: z.string().trim().min(1, "Last name is required.").max(80),
+  phone: z.string().trim().max(30).optional().nullable(),
+  shippingAddress: z.object({
+    streetAddress: z.string().trim().min(1, "Street address is required.").max(200),
+    suburb: z.string().trim().max(100).optional(),
+    city: z.string().trim().min(1, "City is required.").max(100),
+    province: z.string().trim().min(1, "Province is required.").max(60),
+    postalCode: z.string().trim().min(2, "Postal code is required.").max(16),
+    country: z.string().trim().max(60).optional(),
+  }),
+  shippingMethod: z.string().trim().max(120).optional(),
+  shippingServiceCode: z.string().trim().max(16).optional(),
+  shippingQuoteToken: z.string().trim().max(1024).optional(),
+  referralCode: z.string().trim().max(64).optional().nullable(),
+  customerNotes: z.string().trim().max(500).optional().nullable(),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().trim().min(1).max(100),
+        quantity: z.number().int().min(1).max(100),
+        name: z.string().trim().max(200).optional(),
+      })
+    )
+    .min(1, "Order must contain at least one item.")
+    .max(50),
+  website: z.string().max(200).optional(), // Hidden honeypot trap
+});
+
+const receiptAuthInputSchema = z.object({
+  orderNumber: z.string().trim().min(1).max(40),
+  receiptToken: z.string().trim().max(1024).optional(),
+  email: z.string().trim().max(160).optional(),
+});
+
+const trackingLookupInputSchema = z.object({
+  orderNumber: z.string().trim().min(1).max(40),
+  email: z.string().trim().max(160).optional(),
+});
+
+const shippingRatesInputSchema = z.object({
+  suburb: z.string().trim().max(100).optional(),
+  city: z.string().trim().max(100).optional(),
+  province: z.string().trim().max(60).optional(),
+  postalCode: z.string().trim().max(16).optional(),
+  itemCount: z.number().int().min(1).max(100).optional(),
+});
 
 /**
  * Creates an order in PENDING status and initializes a Paystack transaction.
  * Returns the Paystack authorization URL for client redirection.
  */
 export async function initiateCheckoutWithPaystackAction(
-  data: Parameters<typeof createOrder>[0],
+  data: Parameters<typeof createOrder>[0] & { website?: string },
   originUrl?: string
 ) {
   try {
@@ -38,6 +93,37 @@ export async function initiateCheckoutWithPaystackAction(
           "Paystack Secret Key is not configured. Please add PAYSTACK_SECRET_KEY to your .env file.",
       };
     }
+
+    const clientIp = await getClientIpFromHeaders();
+    const rateLimit = await checkRateLimit(`rl:checkout:${clientIp}`, {
+      limit: 15,
+      windowMs: 5 * 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return {
+        success: false,
+        error: `Too many checkout attempts. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+
+    const parsed = checkoutInputSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ||
+          "Please check your checkout details and try again.",
+      };
+    }
+
+    if (parsed.data.website && parsed.data.website.length > 0) {
+      return {
+        success: false,
+        error: "Unable to process checkout request.",
+      };
+    }
+
+    const validData = parsed.data;
 
     // 0. Strict Pre-Checkout Live Stock Gate (Zoho Inventory Single Source of Truth)
     // Performs a live, uncached stock check against Zoho Inventory BEFORE creating any order or Paystack session.
@@ -114,18 +200,18 @@ export async function initiateCheckoutWithPaystackAction(
 
     const order = await createOrder({
       userId: sessionUserId ?? null,
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phone: data.phone,
-      shippingAddress: data.shippingAddress,
-      shippingMethod: data.shippingMethod,
-      shippingServiceCode: data.shippingServiceCode,
-      shippingQuoteToken: data.shippingQuoteToken,
-      referralCode: data.referralCode,
-      customerNotes: data.customerNotes,
+      email: validData.email,
+      firstName: validData.firstName,
+      lastName: validData.lastName,
+      phone: validData.phone,
+      shippingAddress: validData.shippingAddress,
+      shippingMethod: validData.shippingMethod,
+      shippingServiceCode: validData.shippingServiceCode,
+      shippingQuoteToken: validData.shippingQuoteToken,
+      referralCode: validData.referralCode,
+      customerNotes: validData.customerNotes,
       currency: "ZAR",
-      items: data.items.map((item) => ({
+      items: validData.items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
         name: item.name,
@@ -306,13 +392,36 @@ export async function getOrderDetailsAction(
   authOptions?: OrderReceiptAuthOptions
 ) {
   try {
-    const cleanOrderNumber = (orderNumber || "").trim();
-    if (!cleanOrderNumber) {
+    const parsedInput = receiptAuthInputSchema.safeParse({
+      orderNumber,
+      receiptToken: authOptions?.receiptToken,
+      email: authOptions?.email,
+    });
+
+    if (!parsedInput.success) {
       return {
         success: false,
         requiresVerification: true,
-        error: "Order number is required.",
+        error: "Please enter a valid order reference.",
       };
+    }
+
+    const cleanOrderNumber = parsedInput.data.orderNumber;
+    const cleanEmail = (parsedInput.data.email || "").toLowerCase();
+
+    if (cleanEmail.length > 0) {
+      const clientIp = await getClientIpFromHeaders();
+      const rateLimit = await checkRateLimit(
+        `rl:receipt-email:${clientIp}:${cleanOrderNumber}`,
+        { limit: 10, windowMs: 5 * 60 * 1000 }
+      );
+      if (!rateLimit.allowed) {
+        return {
+          success: false,
+          requiresVerification: true,
+          error: `Too many verification attempts. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+        };
+      }
     }
 
     const order = await getOrderByNumber(cleanOrderNumber);
@@ -325,14 +434,12 @@ export async function getOrderDetailsAction(
       cookieToken = undefined;
     }
 
-    const cleanEmail = (authOptions?.email || "").trim().toLowerCase();
-
     let authorized = false;
     if (order && order.paymentStatus === "PAID") {
       if (await isClerkUserAuthorizedForOrder(order)) {
         authorized = true;
       } else if (
-        verifyOrderReceiptToken(authOptions?.receiptToken, order.orderNumber) ||
+        verifyOrderReceiptToken(parsedInput.data.receiptToken, order.orderNumber) ||
         verifyOrderReceiptToken(cookieToken, order.orderNumber)
       ) {
         authorized = true;
@@ -459,12 +566,31 @@ export async function lookupOrderTrackingAction(
   email?: string
 ) {
   try {
-    const cleanOrderNumber = (orderNumber || "").trim();
-    const cleanEmail = (email || "").trim().toLowerCase();
-
-    if (!cleanOrderNumber) {
-      return { success: false, error: "Please enter your order number (e.g. DIV-20261120-7959)." };
+    const clientIp = await getClientIpFromHeaders();
+    const rateLimit = await checkRateLimit(`rl:tracking:${clientIp}`, {
+      limit: 15,
+      windowMs: 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return {
+        success: false,
+        error: `Too many tracking requests. Please wait ${rateLimit.retryAfterSeconds} seconds before trying again.`,
+      };
     }
+
+    const parsedInput = trackingLookupInputSchema.safeParse({
+      orderNumber,
+      email,
+    });
+    if (!parsedInput.success) {
+      return {
+        success: false,
+        error: "Please enter a valid order number (e.g. DIV-20261120-7959).",
+      };
+    }
+
+    const cleanOrderNumber = parsedInput.data.orderNumber;
+    const cleanEmail = (parsedInput.data.email || "").toLowerCase();
 
     const order = await getOrderByNumber(cleanOrderNumber);
     if (!order) {
@@ -554,18 +680,35 @@ export async function getShippingRatesAction(params: GetRatesParams): Promise<{
   error?: string;
 }> {
   try {
-    const safeItemCount =
-      typeof params.itemCount === "number" &&
-      Number.isInteger(params.itemCount) &&
-      params.itemCount > 0
-        ? params.itemCount
-        : 1;
+    const clientIp = await getClientIpFromHeaders();
+    const rateLimit = await checkRateLimit(`rl:rates:${clientIp}`, {
+      limit: 30,
+      windowMs: 60 * 1000,
+    });
+    if (!rateLimit.allowed) {
+      return {
+        success: false,
+        rates: [],
+        error: `Rate limit reached. Please wait ${rateLimit.retryAfterSeconds} seconds before refreshing shipping rates.`,
+      };
+    }
+
+    const parsed = shippingRatesInputSchema.safeParse(params);
+    if (!parsed.success) {
+      return {
+        success: false,
+        rates: [],
+        error: "Invalid shipping destination parameters.",
+      };
+    }
+
+    const safeItemCount = parsed.data.itemCount ?? 1;
 
     const rates = await fetchShiplogicRates({
-      suburb: params.suburb,
-      city: params.city,
-      province: params.province,
-      postalCode: params.postalCode,
+      suburb: parsed.data.suburb,
+      city: parsed.data.city,
+      province: parsed.data.province,
+      postalCode: parsed.data.postalCode,
       itemCount: safeItemCount,
       weightInKg: computeParcelWeightKg(safeItemCount),
     });

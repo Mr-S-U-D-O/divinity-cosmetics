@@ -1,50 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { fetchShipmentLabelUrl } from "@/lib/domain/shipping/courierguy";
-
-function secretsMatch(provided: string, expected: string): boolean {
-  const a = Buffer.from(provided, "utf8");
-  const b = Buffer.from(expected, "utf8");
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
+import { verifyWaybillLabelToken } from "@/lib/domain/shipping/label-token";
 
 /**
  * On-Demand A4 Waybill PDF Route for Wright Crossing Warehouse Staff.
  *
  * Usage (from Zoho Sales Order Comment):
- *   GET /api/shipping/label/DIV-YYYYMMDD-XXXX?token=<ZOHO_WEBHOOK_SECRET>
+ *   GET /api/shipping/label/DIV-YYYYMMDD-XXXXXXXX?token=<per-order HMAC token>
  *
- * Fetches a fresh 24-hour signed S3 A4 PDF URL from Shiplogic (`/v3/shipments/label?id=...`),
- * updates `Order.labelUrl` in Prisma, and returns a 302 redirect directly to the PDF.
+ * Verifies the order-scoped HMAC-SHA256 token, fetches a fresh 24-hour signed S3 A4 PDF URL
+ * from Shiplogic (`/v3/shipments/label?id=...`), updates `Order.labelUrl` in Prisma,
+ * and returns a non-cached 302 redirect directly to the PDF.
  */
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ orderNumber: string }> }
 ) {
   try {
-    const expectedSecret = process.env.ZOHO_WEBHOOK_SECRET?.trim();
-    const providedToken = req.nextUrl.searchParams.get("token")?.trim();
-
-    if (
-      !expectedSecret ||
-      !providedToken ||
-      !secretsMatch(providedToken, expectedSecret)
-    ) {
-      return NextResponse.json(
-        { status: "unauthorized", message: "Invalid or missing print token." },
-        { status: 401 }
-      );
-    }
-
     const { orderNumber } = await context.params;
     const cleanOrderNumber = decodeURIComponent(orderNumber || "").trim();
 
-    if (!cleanOrderNumber) {
+    if (!cleanOrderNumber || cleanOrderNumber.length > 64) {
       return NextResponse.json(
-        { status: "bad_request", message: "Order number is required." },
+        { status: "bad_request", message: "A valid order number is required." },
         { status: 400 }
+      );
+    }
+
+    const providedToken = req.nextUrl.searchParams.get("token")?.trim();
+
+    if (!providedToken || !verifyWaybillLabelToken(providedToken, cleanOrderNumber)) {
+      return NextResponse.json(
+        { status: "unauthorized", message: "Invalid or missing print token." },
+        { status: 401 }
       );
     }
 
@@ -105,7 +94,9 @@ export async function GET(
         );
       });
 
-    return NextResponse.redirect(freshLabelUrl, { status: 302 });
+    const res = NextResponse.redirect(freshLabelUrl, { status: 302 });
+    res.headers.set("Cache-Control", "no-store, private");
+    return res;
   } catch (error) {
     console.error("[A4 Waybill Route Error]:", error);
     return NextResponse.json(

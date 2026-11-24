@@ -79,6 +79,7 @@ export function ResellerForm() {
     businessName: "",
     primaryChannel: "",
     reason: "",
+    website: "",
   });
 
   // Handle loading and unauthenticated states
@@ -193,6 +194,7 @@ export function ResellerForm() {
           name="phoneNumber"
           value={formData.phoneNumber}
           onChange={handleInputChange}
+          maxLength={25}
           placeholder="+27 82 000 0000"
           required
           className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors" 
@@ -207,6 +209,7 @@ export function ResellerForm() {
           name="businessName"
           value={formData.businessName}
           onChange={handleInputChange}
+          maxLength={120}
           placeholder="e.g. Aura Wellness Spa or @aurawellness"
           required
           className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors" 
@@ -245,11 +248,26 @@ export function ResellerForm() {
           name="reason"
           value={formData.reason}
           onChange={handleInputChange}
+          maxLength={1500}
           placeholder="Tell us a bit about your clientele and why Divinity is a good fit..."
           required
           rows={4}
           className="w-full bg-white border border-black text-black rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green focus:ring-1 focus:ring-green transition-colors resize-none"
         ></textarea>
+      </div>
+
+      {/* Hidden spam-trap honeypot */}
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="reseller-website">Website</label>
+        <input
+          id="reseller-website"
+          type="text"
+          name="website"
+          value={formData.website}
+          onChange={handleInputChange}
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
       <div className="pt-4 mt-2">
