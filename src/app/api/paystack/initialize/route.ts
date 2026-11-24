@@ -1,30 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializePaystackTransaction } from "@/lib/domain/payments/paystack";
+import { getOrderByNumber } from "@/lib/domain/orders/service";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const email = body.email || "customer@example.com";
-    
-    // Amount in cents: default to 40000 cents (ZAR 400.00)
-    const amountInCents = body.amount 
-      ? Math.round(Number(body.amount) > 1000 ? Number(body.amount) : Number(body.amount) * 100) 
-      : 40000;
+    const orderNumber =
+      typeof body.orderNumber === "string"
+        ? body.orderNumber.trim()
+        : typeof body.reference === "string"
+        ? body.reference.trim()
+        : "";
 
-    const reference = body.orderNumber || body.reference || `DIV-${Date.now().toString().slice(-8)}`;
+    if (!orderNumber) {
+      return NextResponse.json(
+        { status: false, message: "A valid orderNumber is required." },
+        { status: 400 }
+      );
+    }
 
-    const origin = req.nextUrl.origin || "http://localhost:3000";
-    const callbackUrl = `${origin}/checkout/verify?reference=${reference}`;
+    const order = await getOrderByNumber(orderNumber);
+    if (!order) {
+      return NextResponse.json(
+        { status: false, message: "Order not found." },
+        { status: 404 }
+      );
+    }
+
+    if (order.paymentStatus === "PAID") {
+      return NextResponse.json(
+        { status: false, message: "Order is already paid." },
+        { status: 409 }
+      );
+    }
+
+    // Never trust client-supplied amounts — use authoritative DB order total
+    const amountInCents = Math.round(Number(order.total) * 100);
+    if (!Number.isFinite(amountInCents) || amountInCents <= 0) {
+      return NextResponse.json(
+        { status: false, message: "Invalid order total." },
+        { status: 400 }
+      );
+    }
+
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "") ||
+      req.nextUrl.origin ||
+      "http://localhost:3000";
+    const callbackUrl = `${origin}/checkout/verify?reference=${encodeURIComponent(order.orderNumber)}`;
 
     const result = await initializePaystackTransaction({
-      email,
+      email: order.email,
       amountInCents,
-      currency: "ZAR",
-      reference,
+      currency: order.currency || "ZAR",
+      reference: order.orderNumber,
       callbackUrl,
       metadata: {
-        orderNumber: reference,
-        customFields: body.metadata || {},
+        orderId: order.id,
+        orderNumber: order.orderNumber,
       },
     });
 
@@ -36,7 +69,7 @@ export async function POST(req: NextRequest) {
         access_code: result.accessCode,
         reference: result.reference,
         amount: amountInCents,
-        currency: "ZAR",
+        currency: order.currency || "ZAR",
       },
     });
   } catch (error: unknown) {

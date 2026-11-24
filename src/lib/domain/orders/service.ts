@@ -1,8 +1,17 @@
-import { prisma } from "@/lib/prisma"
-import { Prisma, OrderStatus } from "@prisma/client"
-import { syncPaidOrderToZoho } from "@/lib/domain/zoho/service"
+import { prisma } from "@/lib/prisma";
+import { Prisma, OrderStatus } from "@prisma/client";
+import { syncPaidOrderToZoho } from "@/lib/domain/zoho/service";
+import { siteConfig } from "@/lib/config/site";
+import { resolveServiceLevelCode } from "@/lib/domain/shipping/courierguy";
+import { fetchShiplogicRates } from "@/lib/domain/shipping/rates";
+import {
+  computeParcelWeightKg,
+  normalizeDestinationParams,
+  parseOrderShippingAddress,
+  verifyShippingQuoteToken,
+} from "@/lib/domain/shipping/quote";
 
-export const STANDARD_SHIPPING_COST = 100.0;
+export const STANDARD_SHIPPING_COST = siteConfig.standardShippingCost;
 
 export interface CreateOrderItemInput {
   productId: string;
@@ -20,15 +29,88 @@ export interface CreateOrderInput {
   phone?: string | null;
   shippingAddress: any;
   shippingMethod?: string;
+  shippingServiceCode?: string;
+  shippingQuoteToken?: string;
   referralCode?: string | null;
   customerNotes?: string | null;
   currency?: string;
   items: CreateOrderItemInput[];
   // Optional client fields (ignored by server in favor of server calculation)
+  /** @deprecated Ignored by server — shipping is strictly verified/recalculated server-side. */
   shippingCost?: number;
   subtotal?: number;
   discountAmount?: number;
   total?: number;
+}
+
+export async function resolveAuthoritativeShipping(params: {
+  shippingAddress: ReturnType<typeof parseOrderShippingAddress>;
+  shippingMethod?: string;
+  shippingServiceCode?: string;
+  shippingQuoteToken?: string;
+  totalItemCount: number;
+}): Promise<{
+  shippingCost: number;
+  shippingMethod: string;
+  serviceLevelCode: string;
+  source: "signed_quote" | "server_recalculated";
+}> {
+  const weightInKg = computeParcelWeightKg(params.totalItemCount);
+  const destination = normalizeDestinationParams(params.shippingAddress);
+  const requestedCode = (
+    params.shippingServiceCode?.trim() ||
+    resolveServiceLevelCode(params.shippingMethod, "ECO")
+  ).toUpperCase();
+
+  // 1. Fast path: verify stateless HMAC-signed quote token matching destination, weight, and service code
+  if (params.shippingQuoteToken) {
+    const verifiedQuote = verifyShippingQuoteToken(params.shippingQuoteToken, {
+      serviceLevelCode: requestedCode,
+      destination,
+      weightInKg,
+    });
+
+    if (verifiedQuote) {
+      return {
+        shippingCost: verifiedQuote.rate,
+        shippingMethod: `${verifiedQuote.name} (${verifiedQuote.code})`,
+        serviceLevelCode: verifiedQuote.code,
+        source: "signed_quote",
+      };
+    }
+  }
+
+  // 2. Authoritative fallback: recalculate live/regional rates strictly on the server
+  const serverRates = await fetchShiplogicRates({
+    suburb: destination.suburb,
+    city: destination.city,
+    province: destination.province,
+    postalCode: destination.postalCode,
+    weightInKg,
+  });
+
+  const matchedOption = serverRates.find(
+    (opt) => opt.code.toUpperCase() === requestedCode
+  );
+
+  if (!matchedOption) {
+    throw new Error(
+      `The selected shipping option (${requestedCode}) is not available for ${destination.province} (${destination.postalCode}). Please select an available delivery option.`
+    );
+  }
+
+  if (!Number.isFinite(matchedOption.rate) || matchedOption.rate <= 0) {
+    throw new Error(
+      `Unable to verify a valid shipping rate for ${requestedCode}. Please try again.`
+    );
+  }
+
+  return {
+    shippingCost: Math.round(matchedOption.rate * 100) / 100,
+    shippingMethod: `${matchedOption.name} (${matchedOption.code})`,
+    serviceLevelCode: matchedOption.code.toUpperCase(),
+    source: "server_recalculated",
+  };
 }
 
 export async function createOrder(data: CreateOrderInput) {
@@ -47,6 +129,9 @@ export async function createOrder(data: CreateOrderInput) {
       throw new Error(`Invalid quantity (${item.quantity}) for product.`);
     }
   }
+
+  // Validate delivery address early before touching DB/payment
+  const parsedShippingAddress = parseOrderShippingAddress(data.shippingAddress);
 
   // 2. Fetch authoritative products directly from the database
   const productIds = Array.from(new Set(data.items.map((i) => i.productId)));
@@ -98,12 +183,21 @@ export async function createOrder(data: CreateOrderInput) {
     });
   }
 
-  // 4. Server-authoritative shipping cost
-  // Respects dynamic shipping options selected from The Courier Guy / Shiplogic
-  const serverShippingCost =
-    typeof data.shippingCost === "number" && data.shippingCost >= 0
-      ? Number(data.shippingCost)
-      : STANDARD_SHIPPING_COST;
+  // 4. Server-authoritative shipping cost & service level verification
+  // Client-supplied shippingCost is always ignored.
+  const totalItemCount = verifiedOrderItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  const authoritativeShipping = await resolveAuthoritativeShipping({
+    shippingAddress: parsedShippingAddress,
+    shippingMethod: data.shippingMethod,
+    shippingServiceCode: data.shippingServiceCode,
+    shippingQuoteToken: data.shippingQuoteToken,
+    totalItemCount,
+  });
+  const serverShippingCost = authoritativeShipping.shippingCost;
+  const serverShippingMethod = authoritativeShipping.shippingMethod;
 
   // 5. Server-authoritative referral verification
   let serverDiscountAmount = 0;
@@ -137,7 +231,9 @@ export async function createOrder(data: CreateOrderInput) {
   console.log(`   ├─ Customer: ${data.firstName} ${data.lastName} (${data.email})`);
   console.log(`   ├─ Items (${verifiedOrderItems.length}): ${verifiedOrderItems.map((i) => `${i.quantity}x ${i.name}`).join(", ")}`);
   console.log(`   ├─ Subtotal: R${serverSubtotal.toFixed(2)}`);
-  console.log(`   ├─ Shipping: R${serverShippingCost.toFixed(2)} [${data.shippingMethod || "Standard"}]`);
+  console.log(
+    `   ├─ Shipping: R${serverShippingCost.toFixed(2)} [${serverShippingMethod}] (${authoritativeShipping.source})`
+  );
   console.log(`   └─ Authoritative Total: R${serverTotal.toFixed(2)}`);
 
   // 8. Ensure user exists in DB if userId is provided
@@ -169,8 +265,8 @@ export async function createOrder(data: CreateOrderInput) {
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone || null,
-      shippingAddress: data.shippingAddress,
-      shippingMethod: data.shippingMethod || "Standard",
+      shippingAddress: parsedShippingAddress,
+      shippingMethod: serverShippingMethod,
       shippingCost: new Prisma.Decimal(serverShippingCost),
       subtotal: new Prisma.Decimal(serverSubtotal),
       discountAmount: new Prisma.Decimal(serverDiscountAmount),

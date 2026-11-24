@@ -41,26 +41,30 @@ export async function POST(req: NextRequest) {
         console.log(`   ├─ Amount: R${amountInRands.toFixed(2)} (${amountInCents} cents)`);
         console.log(`   └─ Channel: ${channel}`);
 
-        // Check if order exists in DB to verify expected amount
+        // Check if order exists in DB and strictly enforce expected order total & currency
+        const dbOrder = orderNumber
+          ? await getOrderByNumber(orderNumber).catch(() => null)
+          : null;
+        const paidCurrency = String(data?.currency || "ZAR").toUpperCase();
+
         let isAmountExact = false;
-        if (amountInCents === 40000 || amountInRands === 400) {
+        if (dbOrder) {
+          const expectedCents = Math.round(Number(dbOrder.total) * 100);
+          const expectedCurrency = (dbOrder.currency || "ZAR").toUpperCase();
+          isAmountExact =
+            paidCurrency === expectedCurrency && amountInCents >= expectedCents;
+        } else if (amountInCents === 40000 && paidCurrency === "ZAR") {
           isAmountExact = true;
-        } else if (orderNumber) {
-          const dbOrder = await getOrderByNumber(orderNumber).catch(() => null);
-          if (dbOrder && Number(dbOrder.total) === amountInRands) {
-            isAmountExact = true;
-          }
         }
 
-        // Verification Logic: check that transaction was 'successful' and amount was exactly R400 (or order amount)
-        if (status === "success" && (isAmountExact || amountInCents === 40000)) {
+        // Verification Logic: check that transaction was 'successful' and amount matched DB order total
+        if (status === "success" && isAmountExact) {
           // Explicit requirement: log 'Payment Verified' to the console
           console.log("Payment Verified");
           console.log(`[Paystack Webhook] Payment Verified: R${amountInRands.toFixed(2)} received for Order ${orderNumber} (Reference: ${reference})`);
 
           // Mark order as paid in the database if order exists
           try {
-            const dbOrder = await getOrderByNumber(orderNumber).catch(() => null);
             if (dbOrder) {
               await markOrderAsPaid(orderNumber, {
                 paymentId: reference,
@@ -74,8 +78,11 @@ export async function POST(req: NextRequest) {
             console.error(`[Paystack Webhook] Error updating order ${orderNumber} in database:`, dbErr);
           }
         } else {
+          const expectedInfo = dbOrder
+            ? `${Math.round(Number(dbOrder.total) * 100)} cents (${dbOrder.currency || "ZAR"})`
+            : "40000 cents / R400";
           console.warn(
-            `[Paystack Webhook] Verification condition not met: status=${status}, amountInCents=${amountInCents} (Expected 40000 cents / R400)`
+            `[Paystack Webhook] Verification condition not met: status=${status}, amountInCents=${amountInCents}, currency=${paidCurrency} (Expected ${expectedInfo})`
           );
         }
 

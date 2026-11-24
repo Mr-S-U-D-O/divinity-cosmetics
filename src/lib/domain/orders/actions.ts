@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import {
   createOrder,
@@ -16,22 +16,8 @@ import {
   verifyPaystackTransaction,
 } from "@/lib/domain/payments/paystack";
 import { fetchShiplogicRates, ShippingRateOption, GetRatesParams } from "@/lib/domain/shipping/rates";
+import { computeParcelWeightKg } from "@/lib/domain/shipping/quote";
 import { fetchZohoItemStock } from "@/lib/domain/zoho/service";
-
-export async function placeOrderAction(data: Parameters<typeof createOrder>[0]) {
-  try {
-    const order = await createOrder(data);
-
-    // TODO [ZOHO INTEGRATION - Zoho Inventory & Zoho CRM]:
-    // Connect Zoho Inventory API to push new sales orders for inventory allocation,
-    // order fulfillment, and Zoho CRM contact synchronization.
-
-    return { success: true, orderNumber: order.orderNumber };
-  } catch (error) {
-    console.error("Error creating order:", error);
-    return { success: false, error: "Failed to place order. Please try again." };
-  }
-}
 
 /**
  * Creates an order in PENDING status and initializes a Paystack transaction.
@@ -120,10 +106,27 @@ export async function initiateCheckoutWithPaystackAction(
       }
     }
 
-    // 1. Create order in database (server strictly recalculates prices from DB)
+    // 1. Create order in database (server strictly recalculates prices, shipping, and auth userId)
+    const { userId: sessionUserId } = await auth().catch(() => ({ userId: null }));
+
     const order = await createOrder({
-      ...data,
+      userId: sessionUserId ?? null,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      shippingAddress: data.shippingAddress,
+      shippingMethod: data.shippingMethod,
+      shippingServiceCode: data.shippingServiceCode,
+      shippingQuoteToken: data.shippingQuoteToken,
+      referralCode: data.referralCode,
+      customerNotes: data.customerNotes,
       currency: "ZAR",
+      items: data.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        name: item.name,
+      })),
     });
 
     // 2. Determine base URL for callback
@@ -186,10 +189,30 @@ export async function verifyPaymentAction(reference: string) {
       return { success: false, error: "No transaction reference provided." };
     }
 
+    const existingOrder = await getOrderByNumber(reference.trim());
+    if (!existingOrder) {
+      return { success: false, error: "Order not found for payment reference." };
+    }
+
     const verification = await verifyPaystackTransaction(reference);
 
     if (verification.isSuccessful) {
-      const order = await markOrderAsPaid(reference, {
+      const expectedCents = Math.round(Number(existingOrder.total) * 100);
+      const expectedCurrency = (existingOrder.currency || "ZAR").toUpperCase();
+      const paidCurrency = (verification.currency || "ZAR").toUpperCase();
+      const paidCents = Math.round(Number(verification.amountInCents));
+
+      if (paidCurrency !== expectedCurrency || paidCents < expectedCents) {
+        const reason = `Payment mismatch: expected ${expectedCurrency} ${expectedCents} cents, received ${paidCurrency} ${paidCents} cents.`;
+        console.error(`[💳 PAYSTACK VERIFY SECURITY] ${reason} (Order ${existingOrder.orderNumber})`);
+        await markOrderPaymentFailed(existingOrder.orderNumber, reason);
+        return {
+          success: false,
+          error: "Payment amount did not match the order total. Please contact support.",
+        };
+      }
+
+      const order = await markOrderAsPaid(existingOrder.orderNumber, {
         paymentId: verification.reference,
         paymentMethod: verification.channel
           ? `Paystack (${verification.channel.toUpperCase()})`
@@ -461,6 +484,8 @@ export async function lookupOrderTrackingAction(
 
 /**
  * Server action to fetch dynamic shipping rate options from The Courier Guy / Shiplogic.
+ * Parcel weight is always derived server-side from itemCount, and each option
+ * includes an HMAC-signed quoteToken bound to destination, service code, and weight.
  */
 export async function getShippingRatesAction(params: GetRatesParams): Promise<{
   success: boolean;
@@ -468,7 +493,21 @@ export async function getShippingRatesAction(params: GetRatesParams): Promise<{
   error?: string;
 }> {
   try {
-    const rates = await fetchShiplogicRates(params);
+    const safeItemCount =
+      typeof params.itemCount === "number" &&
+      Number.isInteger(params.itemCount) &&
+      params.itemCount > 0
+        ? params.itemCount
+        : 1;
+
+    const rates = await fetchShiplogicRates({
+      suburb: params.suburb,
+      city: params.city,
+      province: params.province,
+      postalCode: params.postalCode,
+      itemCount: safeItemCount,
+      weightInKg: computeParcelWeightKg(safeItemCount),
+    });
     return { success: true, rates };
   } catch (error: unknown) {
     console.error("Error fetching shipping rates:", error);

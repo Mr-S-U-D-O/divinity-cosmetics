@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { computeParcelWeightKg } from "./quote";
 import {
   CourierGuyConfig,
   CreateShipmentResult,
@@ -160,7 +161,7 @@ function mapCustomerDeliveryAddress(rawAddress: unknown): ShiplogicAddress {
  */
 function buildParcelsForOrder(order: OrderWithItems): ShiplogicParcel[] {
   const totalItemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalWeight = Math.max(0.5, Math.round(totalItemCount * 0.5 * 10) / 10);
+  const totalWeight = computeParcelWeightKg(totalItemCount);
 
   return [
     {

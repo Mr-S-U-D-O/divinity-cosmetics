@@ -85,6 +85,7 @@ export default function CheckoutPage() {
     shippingRates.find((r) => r.isCheapest) ||
     shippingRates[0];
 
+  const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const shippingCost = selectedOption ? selectedOption.rate : 142.0;
   const finalTotal = cartTotal + shippingCost;
 
@@ -101,10 +102,11 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  // Fetch live rates from Shiplogic when delivery location is input
+  // Fetch live rates from Shiplogic when delivery location or item count changes
   useEffect(() => {
     if (!formData.suburb.trim() && !formData.postalCode.trim()) return;
 
+    let isActive = true;
     const timer = setTimeout(async () => {
       setIsLoadingRates(true);
       console.log(
@@ -116,7 +118,7 @@ export default function CheckoutPage() {
           city: formData.city.trim(),
           province: formData.province,
           postalCode: formData.postalCode.trim(),
-          weight: "1.0kg",
+          itemCount: totalItemCount,
         }
       );
 
@@ -126,8 +128,10 @@ export default function CheckoutPage() {
           postalCode: formData.postalCode.trim(),
           city: formData.city.trim(),
           province: formData.province,
-          weightInKg: 1.0, // Parcel weight of 1kg as per spec
+          itemCount: totalItemCount,
         });
+
+        if (!isActive) return;
 
         if (res.success && res.rates && res.rates.length > 0) {
           console.log(
@@ -137,21 +141,27 @@ export default function CheckoutPage() {
             res.rates
           );
           setShippingRates(res.rates);
-          const stillExists = res.rates.some((r) => r.code === selectedRateCode);
-          if (!stillExists) {
-            const cheapest = res.rates.find((r) => r.isCheapest) || res.rates[0];
-            setSelectedRateCode(cheapest.code);
-          }
+          const cheapest = res.rates.find((r) => r.isCheapest) || res.rates[0];
+          setSelectedRateCode((prev) =>
+            res.rates.some((r) => r.code === prev) ? prev : cheapest.code
+          );
         }
       } catch (err) {
-        console.warn("[🚚 COURIER RATES ERROR]:", err);
+        if (isActive) {
+          console.warn("[🚚 COURIER RATES ERROR]:", err);
+        }
       } finally {
-        setIsLoadingRates(false);
+        if (isActive) {
+          setIsLoadingRates(false);
+        }
       }
     }, 500);
 
-    return () => clearTimeout(timer);
-  }, [formData.suburb, formData.postalCode, formData.city, formData.province, selectedRateCode]);
+    return () => {
+      isActive = false;
+      clearTimeout(timer);
+    };
+  }, [formData.suburb, formData.postalCode, formData.city, formData.province, totalItemCount]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -169,7 +179,6 @@ export default function CheckoutPage() {
 
     try {
       const orderData = {
-        userId: user?.id || null,
         email: formData.email.trim(),
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
@@ -183,15 +192,13 @@ export default function CheckoutPage() {
           country: "South Africa",
         },
         shippingMethod: `${selectedOption.name} (${selectedOption.code})`,
-        shippingCost,
-        subtotal: cartTotal,
-        total: finalTotal,
+        shippingServiceCode: selectedOption.code,
+        shippingQuoteToken: selectedOption.quoteToken,
         customerNotes: formData.notes.trim() || undefined,
         items: items.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
           name: item.product.name,
-          price: item.product.basePrice,
         })),
       };
 

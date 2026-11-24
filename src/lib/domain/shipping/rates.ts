@@ -1,4 +1,10 @@
 import { getCourierGuyConfig, getShiplogicAuthHeader } from "./courierguy";
+import {
+  computeParcelWeightKg,
+  normalizeDestinationParams,
+  NormalizedDestination,
+  signShippingQuote,
+} from "./quote";
 
 export interface ShippingRateOption {
   code: string;
@@ -8,6 +14,7 @@ export interface ShippingRateOption {
   currency: string;
   estimatedDelivery: string;
   isCheapest?: boolean;
+  quoteToken?: string;
 }
 
 export interface GetRatesParams {
@@ -15,7 +22,26 @@ export interface GetRatesParams {
   city?: string;
   province?: string;
   postalCode?: string;
+  itemCount?: number;
   weightInKg?: number;
+}
+
+function attachQuoteTokens(
+  options: ShippingRateOption[],
+  destination: NormalizedDestination,
+  weightInKg: number
+): ShippingRateOption[] {
+  return options.map((option) => ({
+    ...option,
+    quoteToken: signShippingQuote({
+      code: option.code,
+      name: option.name,
+      rate: option.rate,
+      currency: option.currency,
+      destination,
+      weightInKg,
+    }),
+  }));
 }
 
 /**
@@ -70,18 +96,22 @@ export async function fetchShiplogicRates(
   params: GetRatesParams
 ): Promise<ShippingRateOption[]> {
   const config = getCourierGuyConfig();
-  const weight = typeof params.weightInKg === "number" && params.weightInKg > 0 ? params.weightInKg : 1.0;
-  const province = params.province || "Gauteng";
-  const city = params.city || (province.includes("Gauteng") ? "Johannesburg" : "Cape Town");
-  const suburb = params.suburb || "Rosebank";
-  const postalCode = params.postalCode || (province.includes("Gauteng") ? "2196" : "8001");
+  const weight =
+    typeof params.weightInKg === "number" &&
+    Number.isFinite(params.weightInKg) &&
+    params.weightInKg > 0
+      ? Math.round(params.weightInKg * 10) / 10
+      : computeParcelWeightKg(params.itemCount ?? 2);
+
+  const destination = normalizeDestinationParams(params);
+  const { province, city, suburb, postalCode } = destination;
 
   console.log(`[🚚 COURIER RATES] Requesting rates for destination: ${suburb}, ${city}, ${province} (${postalCode}) | Weight: ${weight}kg`);
 
-  // If no API key is set, immediately return fallback rates
+  // If no API key is set, immediately return signed fallback rates
   if (!config?.apiKey) {
     console.log("[🚚 COURIER RATES] No Shiplogic API key configured in .env.local; returning standard South African courier rates.");
-    return getFallbackRates(province);
+    return attachQuoteTokens(getFallbackRates(province), destination, weight);
   }
 
   const payload = {
@@ -144,38 +174,45 @@ export async function fetchShiplogicRates(
     }
 
     if (liveRates && liveRates.length > 0) {
-      const parsedOptions: ShippingRateOption[] = liveRates.map((item) => {
-        const rateAmount = Number(item.total || item.rate || 0);
-        const code = item.service_level?.code || "ECO";
-        const name = item.service_level?.name || "Standard Courier";
-        const description = item.service_level?.description || "Door-to-door courier delivery";
-        const transit = item.transit_time
-          ? `${item.transit_time.min}–${item.transit_time.max} ${item.transit_time.unit?.replace("_", " ")}`
-          : "2–4 Business Days";
+      const parsedOptions: ShippingRateOption[] = liveRates
+        .map((item) => {
+          const rateAmount = Number(item.total ?? item.rate ?? 0);
+          if (!Number.isFinite(rateAmount) || rateAmount <= 0) {
+            return null;
+          }
+          const code = String(item.service_level?.code || "ECO").trim().toUpperCase();
+          const name = String(item.service_level?.name || "Standard Courier").trim();
+          const description = String(
+            item.service_level?.description || "Door-to-door courier delivery"
+          ).trim();
+          const transit = item.transit_time
+            ? `${item.transit_time.min}–${item.transit_time.max} ${item.transit_time.unit?.replace("_", " ")}`
+            : "2–4 Business Days";
 
-        return {
-          code,
-          name,
-          description,
-          rate: Math.round(rateAmount * 100) / 100,
-          currency: item.currency || "ZAR",
-          estimatedDelivery: transit,
-        };
-      });
+          return {
+            code,
+            name,
+            description,
+            rate: Math.round(rateAmount * 100) / 100,
+            currency: String(item.currency || "ZAR").trim().toUpperCase(),
+            estimatedDelivery: transit,
+          };
+        })
+        .filter((opt): opt is ShippingRateOption => opt !== null);
 
-      // Sort from cheapest to most expensive
-      parsedOptions.sort((a, b) => a.rate - b.rate);
       if (parsedOptions.length > 0) {
+        // Sort from cheapest to most expensive
+        parsedOptions.sort((a, b) => a.rate - b.rate);
         parsedOptions[0].isCheapest = true;
-      }
 
-      console.log(
-        `[🚚 COURIER RATES] Retrieved ${parsedOptions.length} live rates from Shiplogic:`
-      );
-      parsedOptions.forEach((opt) =>
-        console.log(`   └─ ${opt.name} (${opt.code}): R${opt.rate.toFixed(2)} [${opt.estimatedDelivery}]`)
-      );
-      return parsedOptions;
+        console.log(
+          `[🚚 COURIER RATES] Retrieved ${parsedOptions.length} live rates from Shiplogic:`
+        );
+        parsedOptions.forEach((opt) =>
+          console.log(`   └─ ${opt.name} (${opt.code}): R${opt.rate.toFixed(2)} [${opt.estimatedDelivery}]`)
+        );
+        return attachQuoteTokens(parsedOptions, destination, weight);
+      }
     }
   } catch (error) {
     console.warn("[🚚 COURIER RATES] Live Shiplogic rates query encountered an error:", error);
@@ -186,6 +223,6 @@ export async function fetchShiplogicRates(
   fallback.forEach((opt) =>
     console.log(`   └─ ${opt.name} (${opt.code}): R${opt.rate.toFixed(2)} [${opt.estimatedDelivery}]`)
   );
-  return fallback;
+  return attachQuoteTokens(fallback, destination, weight);
 }
 
